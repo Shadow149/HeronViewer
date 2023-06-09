@@ -10,10 +10,12 @@ void Histogram::init()
 	if (!data) {
 		return;
 	}
-	for (int n = 0; n < 4; n++) {
-		for (int i = 0; i < width * height * 4; i += 4) {
-			int val = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-			hist[n][val] += 1;
+	for (int n = 1; n < 4; n++) {
+		for (int i = n-1; i < width * height * 4; i += 4) {
+			//int val = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+			//hist[n][val] += 1;
+			//Console::log(std::to_string(n) + " - " + std::to_string(data[i]));
+			hist[n][data[i]] += 1;
 		}
 	}
 	for (int i = 0; i < 256; i++) {
@@ -64,7 +66,7 @@ void Histogram::render()
 		ImPlot::SetupAxes("x", "y");
 		for (int n = 3; n >= 1; n--) {
 			ImPlot::SetNextLineStyle(channel_colors[n]);
-			ImPlot::PlotLine(tab_names[n], hist_x, hist_edit[n], 256);
+			ImPlot::PlotLine(tab_names[n], hist_x, hist[n], 256);
 		}
 		ImPlot::EndPlot();
 	}

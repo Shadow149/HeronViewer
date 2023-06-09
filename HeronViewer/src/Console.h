@@ -11,7 +11,6 @@
 // TODO make singleton
 class Console : public Module
 {
-private:
 public:
 	static int line_pos;
 	static std::string log_str;
@@ -20,5 +19,7 @@ public:
 	void render();
 	void cleanup();
 	static void log(std::string log);
+private:
+	ImFont* font;
 };
 

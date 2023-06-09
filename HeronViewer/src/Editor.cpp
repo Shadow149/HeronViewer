@@ -69,7 +69,7 @@ void Editor::render()
 		p_blur = blur;
 	}
 
-	sliderChanged |= ImGui::SliderFloat("Highlight threshold", &high_thresh, 0, 1);
+	sliderChanged |= ImGui::SliderFloat("Highlight threshold", &high_thresh, 0, 5);
 	sliderChanged |= ImGui::SliderFloat("Shadow threshold", &shad_thresh, 0, 2);
 	sliderChanged |= ImGui::SliderFloat("Highlight amount", &high_incr, -2, 2);
 	sliderChanged |= ImGui::SliderFloat("Shadow amount", &shad_incr, 0, 1);

@@ -8,11 +8,12 @@ void MainPanel::init()
 void MainPanel::render()
 {
 	ImGui::Begin("Main", &visible, ImGuiWindowFlags_MenuBar |
-		//ImGuiWindowFlags_NoMove |
-		//ImGuiWindowFlags_NoResize |
-		//ImGuiWindowFlags_NoScrollbar |
-		//ImGuiWindowFlags_NoDecoration |
-		ImGuiWindowFlags_NoTitleBar
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoScrollbar |
+		ImGuiWindowFlags_NoDecoration |
+		ImGuiWindowFlags_NoTitleBar |
+		ImGuiTabBarFlags_NoTooltip
 	);
 
 	ImGui::GetStyle().CellPadding = ImVec2(0, 0);
@@ -88,6 +89,10 @@ void MainPanel::render()
 				((Heron*)hWindow)->unloadImage();
 			}
 			ImGui::EndMenu();
+		}
+
+		if (ImGui::MenuItem("Recompile Shader")) {
+			((Heron*)hWindow)->recompileShader();
 		}
 		
 		ImGui::EndMenuBar();

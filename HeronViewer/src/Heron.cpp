@@ -6,6 +6,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
+
 void Heron::processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
@@ -20,6 +21,13 @@ void Heron::processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE) {
 		b4 = false;
 	}
+}
+
+void Heron::drop_callback(GLFWwindow* window, int path_count, const char* paths[])
+{
+	const std::string path = paths[0];
+	const std::string fileName = path.substr(path.find_last_of("/\\") + 1);
+	loadImage(path, fileName);
 }
 
 void Heron::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -46,6 +54,11 @@ void Heron::setImagePath(std::string s) {
 	imgFilePath = s;
 }
 
+void Heron::recompileShader()
+{
+	image->recompileShader();
+}
+
 void Heron::loadImage(std::string filePath, std::string fileName) {
 	Console::log("Change Image : " + filePath);
 	imgFile = filePath;
@@ -68,11 +81,18 @@ void Heron::static_scroll_callback(GLFWwindow* window, double xoffset, double yo
 	that->scroll_callback(window, xoffset, yoffset);
 }
 
+void Heron::static_drop_callback(GLFWwindow* window, int path_count, const char* paths[])
+{
+	Heron* that = static_cast<Heron*>(glfwGetWindowUserPointer(window));
+	that->drop_callback(window, path_count, paths);
+}
+
 void Heron::initGlfw()
 {
 	glfwSetWindowUserPointer(window, this);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetScrollCallback(window, static_scroll_callback);
+	glfwSetDropCallback(window, static_drop_callback);
 }
 
 void Heron::initModules() {
@@ -117,7 +137,6 @@ void Heron::calcTime() {
 	Overlay::updateFps(1.0f / deltaTime);
 #endif
 	*frameTime = "Frame Time: " + std::to_string(deltaTime);
-	
 }
 
 void Heron::render()

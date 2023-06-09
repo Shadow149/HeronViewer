@@ -26,6 +26,7 @@ public:
 	void saveImage();
 
 	void setImagePath(std::string s);
+	void recompileShader();
 
 private:
 	glm::vec3 view_pos = glm::vec3(0);
@@ -51,7 +52,9 @@ private:
 
 	void processInput(GLFWwindow* window);
 	void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+	void drop_callback(GLFWwindow* window, int path_count, const char* paths[]);
 	static void static_scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+	static void static_drop_callback(GLFWwindow* window, int path_count, const char* paths[]);
 
 	void calcTime();
 	void initGlfw();

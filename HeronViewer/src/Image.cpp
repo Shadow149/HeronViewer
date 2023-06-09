@@ -25,7 +25,6 @@ void Image::unload()
 }
 
 void Image::getImage(const char* filename) {
-	std::cout << filename << std::endl;
 	Console::log("Loading Image... " + std::string(filename));
 
 	if (bitmap)
@@ -90,7 +89,9 @@ void Image::getImage(const char* filename) {
 
 
 	data = (unsigned char*)malloc(width * height * bpp * sizeof(unsigned char));
+	Console::log("memcpy image bits");
 	memcpy(data, FreeImage_GetBits(temp), static_cast<size_t>(width) * height * (bpp / 8));
+	Console::log("memcpy finished");
 
 
 	threadImageLoaded = true;
@@ -149,7 +150,10 @@ void Image::exportImage(const char* fileLoc) {
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	
+	float start = glfwGetTime();
+	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, export_data);
+	Console::log("glReadPixels time: " + std::to_string(glfwGetTime() - start));
+
 	renderer = std::thread(&Image::renderImage, this, fileLoc);
 
 	updatePreviewSize();
@@ -160,9 +164,10 @@ void Image::exportImage(const char* fileLoc) {
 void Image::renderImage(const char* fileLoc) {
 	rendering = true;
 	float start = glfwGetTime();
-	stbi_write_png(fileLoc, width, height, (bpp / 8), export_data, width * (bpp / 8));
+	//stbi_write_png(fileLoc, width, height, (bpp / 8), export_data, width * (bpp / 8));
+	stbi_write_jpg(fileLoc, width, height, (bpp / 8), export_data, 70);
 	free(export_data);
-	std::cout << glfwGetTime() - start << std::endl;
+	Console::log("stbi_write_jpg time: " + std::to_string(glfwGetTime() - start));
 	rendering = false;
 }
 
@@ -213,6 +218,12 @@ unsigned int Image::getWidth()
 bool Image::getChanged()
 {
 	return changed;
+}
+
+void Image::recompileShader()
+{
+	shader = Shader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.vs", "C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.fs");
+	Console::log("Shader Recompiled!");
 }
 
 void Image::init()

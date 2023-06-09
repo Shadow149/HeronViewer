@@ -59,30 +59,54 @@ void Window::initImGui()
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 	//ImGuiIO& io = ImGui::GetIO();
-	io.Fonts->AddFontFromFileTTF("OpenSans-Regular.ttf", 20);
 
-	ImGui::GetStyle().GrabRounding = 100.0f;
-	ImGui::GetStyle().FramePadding = ImVec2(10, 4);
-	ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0.145f, 0.145f, 0.145f, 1.00f);
+	io.Fonts->Clear();
+	io.Fonts->AddFontFromFileTTF("OpenSans-Regular.ttf", 16);
+	io.Fonts->AddFontFromFileTTF("OpenSans-Regular.ttf", 16);
+	io.Fonts->AddFontFromFileTTF("OpenSans-Regular.ttf", 32);
+	io.Fonts->AddFontFromFileTTF("OpenSans-Regular.ttf", 11);
+	io.Fonts->AddFontFromFileTTF("OpenSans-Regular.ttf", 11);
+	io.Fonts->Build();
 
-	ImGui::GetStyle().Colors[ImGuiCol_SliderGrab] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
-	ImGui::GetStyle().Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.504f, 0.504f, 0.504f, 1.00f);
 
-	ImGui::GetStyle().Colors[ImGuiCol_FrameBg] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
-	ImGui::GetStyle().Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
-	ImGui::GetStyle().Colors[ImGuiCol_FrameBgActive] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
+	ImGuiStyle* style = &ImGui::GetStyle();
 
-	ImGui::GetStyle().Colors[ImGuiCol_TitleBg] = ImVec4(0.091, 0.091, 0.091, 1);
-	ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = ImVec4(0.091, 0.091, 0.091, 1);
-	ImGui::GetStyle().Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.091, 0.091, 0.091, 1);
+	style->WindowPadding = ImVec2(15, 15);
+	style->WindowRounding = 5.0f;
+	style->FramePadding = ImVec2(5, 5);
+	style->FrameRounding = 4.0f;
+	style->ItemSpacing = ImVec2(12, 8);
+	style->ItemInnerSpacing = ImVec2(8, 6);
+	style->IndentSpacing = 25.0f;
+	style->ScrollbarSize = 15.0f;
+	style->ScrollbarRounding = 9.0f;
+	style->GrabMinSize = 5.0f;
+	style->GrabRounding = 3.0f;
 
-	ImGui::GetStyle().Colors[ImGuiCol_Button] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
-	ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
-	ImGui::GetStyle().Colors[ImGuiCol_ButtonActive] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
+	style->GrabRounding = 100.0f;
+	style->FramePadding = ImVec2(10, 4);
+	style->Colors[ImGuiCol_WindowBg] = ImVec4(0.145f, 0.145f, 0.145f, 1.00f);
 
-	ImGui::GetStyle().Colors[ImGuiCol_Tab] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
-	ImGui::GetStyle().Colors[ImGuiCol_TabHovered] = ImVec4(0.504f, 0.504f, 0.504f, 1.00f);
-	ImGui::GetStyle().Colors[ImGuiCol_TabActive] = ImVec4(0.504f, 0.504f, 0.504f, 1.00f);
+	style->Colors[ImGuiCol_SliderGrab] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
+	style->Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.504f, 0.504f, 0.504f, 1.00f);
+
+	style->Colors[ImGuiCol_FrameBg] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
+	style->Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
+	style->Colors[ImGuiCol_FrameBgActive] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
+
+	style->Colors[ImGuiCol_TitleBg] = ImVec4(0.091, 0.091, 0.091, 1);
+	style->Colors[ImGuiCol_TitleBgActive] = ImVec4(0.091, 0.091, 0.091, 1);
+	style->Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.091, 0.091, 0.091, 1);
+
+	style->Colors[ImGuiCol_Button] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
+	style->Colors[ImGuiCol_ButtonHovered] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
+	style->Colors[ImGuiCol_ButtonActive] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
+
+	style->Colors[ImGuiCol_Tab] = ImVec4(0.404f, 0.404f, 0.404f, 1.00f);
+	style->Colors[ImGuiCol_TabHovered] = ImVec4(0.504f, 0.504f, 0.504f, 1.00f);
+	style->Colors[ImGuiCol_TabActive] = ImVec4(0.504f, 0.504f, 0.504f, 1.00f);
+
+
 }
 
 void Window::ImGuiRenderInit() {

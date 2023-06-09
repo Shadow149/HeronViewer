@@ -123,6 +123,7 @@ public:
 	unsigned int getHeight();
 	unsigned int getWidth();
 	bool getChanged();
+	void recompileShader();
 
 	Image(std::string n, Histogram** hist, bool v = true) : Module(n, v) {
 		this->hist = hist;

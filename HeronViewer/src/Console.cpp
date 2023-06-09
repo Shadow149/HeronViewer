@@ -5,7 +5,7 @@ int Console::line_pos;
 
 void Console::init()
 {
-
+	font = ImGui::GetIO().Fonts->AddFontFromFileTTF("SourceCodePro-Regular.ttf", 14);
 }
 
 void Console::render()
@@ -13,7 +13,9 @@ void Console::render()
 	if (!visible) { return; }
 	ImGui::SetNextWindowBgAlpha(0.50f); // Transparent background
 	ImGui::Begin(name.c_str(), &visible);
-	ImGui::Text(Console::log_str.c_str());
+	ImGui::PushFont(font);
+	ImGui::TextWrapped(Console::log_str.c_str());
+	ImGui::PopFont();
 	ImGui::End();
 }
 

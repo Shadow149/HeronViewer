@@ -57,6 +57,15 @@ vec3 kelvin_table[19] = {
     vec3(204,219,255)
 };
 
+float rand( vec2 p )
+{
+    vec2 K1 = vec2(
+        23.14069263277926, // e^pi (Gelfond's constant)
+         2.665144142690225 // 2^sqrt(2) (Gelfond–Schneider constant)
+    );
+    return fract( cos( dot(p,K1) ) * 12345.6789 );
+}
+
 
 /*
 vec4 edit(vec4 v) {
@@ -358,7 +367,7 @@ void main()
 	
 
 	vec4 result = clamp_pix(edit_channels(convolution(sharp_kernel33)));
-	result = clamp_pix(highlight_recover(result));
+	//result = clamp_pix(highlight_recover(result));
 	result = clamp_pix(apply_wb(result));
 	result = clamp_pix(apply_sat(result));
 
@@ -374,6 +383,12 @@ void main()
 			result = vec4(1.0, 0, 1.0, 1);
 		}
 	} 
+
+	float r = rand(gl_FragCoord.xy);
+	r = (r * 4) - 2; // rescale to -2 to 2
+	float var = pow((high_thresh),2);
+	float noise = min((1/sqrt(2*var*3.14)) * pow(2.77, -(pow(r,2))/(2*var)),1);
+	result += noise;
 	
 	FragColor = result;
 	//FragColor = edit_channels(pix);
