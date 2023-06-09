@@ -385,10 +385,15 @@ void main()
 	} 
 
 	float r = rand(gl_FragCoord.xy);
-	r = (r * 4) - 2; // rescale to -2 to 2
+	r = -1 + (r * 2); // rescale to -1 to 1
+	//r = -0.5;
 	float var = pow((high_thresh),2);
-	float noise = min((1/sqrt(2*var*3.14)) * pow(2.77, -(pow(r,2))/(2*var)),1);
+	//float noise = -pow(2.77, -(pow(r,2))/(2*var)) + 1;
+	float noise = ((1.0/(1.0 + pow(2.71,-(r/var)))) - 0.5)*2.0;
 	result += noise;
+	//noise = min(noise,0);
+	//noise = noise + 1;
+	//result = vec4(noise,noise,noise,1);
 	
 	FragColor = result;
 	//FragColor = edit_channels(pix);
