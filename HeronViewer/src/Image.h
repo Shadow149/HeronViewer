@@ -37,6 +37,7 @@ private:
 	glm::mat4 projection = glm::mat4(1.0f);
 
 	float zoom = 0.0f;
+	float scale_factor = 1.0f;
 
 	GLuint FramebufferName = 0, small_framebuffer = 1;
 	GLuint renderedTexture, small_framebuffer_tex;
@@ -131,7 +132,7 @@ public:
 	//~Image() { imageLoader.join(); }
 	void init();
 	void renderToFrameBuffer();
-	void glrender(bool* clip, bool* b4);
+	void glrender(bool* clip, bool* b4, bool* black_bckgrd);
 	void render();
 	void cleanup();
 	void bindImage();

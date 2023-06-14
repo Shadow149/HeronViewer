@@ -69,11 +69,11 @@ void Editor::render()
 		p_blur = blur;
 	}
 
-	sliderChanged |= ImGui::SliderFloat("Highlight threshold", &high_thresh, 0, 5);
-	sliderChanged |= ImGui::SliderFloat("Shadow threshold", &shad_thresh, 0, 2);
-	sliderChanged |= ImGui::SliderFloat("Highlight amount", &high_incr, -2, 2);
-	sliderChanged |= ImGui::SliderFloat("Shadow amount", &shad_incr, 0, 1);
-	sliderChanged |= ImGui::SliderFloat("Shadow variance", &shad_var, 0, 1);
+	sliderChanged |= ImGui::SliderFloat("Noise", &high_thresh, 0, 5);
+	sliderChanged |= ImGui::SliderFloat("Blue/Orange", &shad_thresh, -1, 1);
+	sliderChanged |= ImGui::SliderFloat("Green/Purple", &high_incr, -1, 1);
+	sliderChanged |= ImGui::SliderFloat("Blue", &shad_incr, -1, 1);
+	sliderChanged |= ImGui::SliderFloat("Red", &shad_var, -1, 1);
 	sliderChanged |= ImGui::SliderFloat("Variance mult", &var_mult, 0, 10);
 
 	if (ImGui::Button("Reset")) {
@@ -252,12 +252,12 @@ void Editor::reset()
 	p_sharp = SHARP_DEFAULT;
 	p_blur = BLUR_DEFAULT;
 
-	high_thresh = 1;
+	high_thresh = 0;
 	shad_thresh = 0;
-	high_incr = 1;
-	shad_incr = 1;
+	high_incr = 0;
+	shad_incr = 0;
 
-	shad_var = 0.07;
+	shad_var = 0;
 	var_mult = 2;
 
 	bw = false;

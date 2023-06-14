@@ -81,12 +81,12 @@ private:
 	float p_sharp = SHARP_DEFAULT;
 	float p_blur = BLUR_DEFAULT;
 
-	float high_thresh = 1;
+	float high_thresh = 0;
 	float shad_thresh = 0;
 	float high_incr = 0;
-	float shad_incr = 1;
+	float shad_incr = 0;
 
-	float shad_var = 0.07;
+	float shad_var = 0;
 	float var_mult = 2;
 
 	bool bw = false;

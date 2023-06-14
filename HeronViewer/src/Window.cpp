@@ -7,7 +7,7 @@ Window::Window(int w, int h) {
 
 int Window::init() {
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
@@ -36,6 +36,12 @@ int Window::init() {
 	glfwSwapInterval(1);
 
 	Console::log("OpenGL init complete!");
+
+	Console::log("=== CONTEXT INFO ===");
+	Console::log("VERSION: " + std::string((char*)(glGetString(GL_VERSION))));
+	Console::log("VENDOR: " + std::string((char*)(glGetString(GL_VENDOR))));
+	Console::log("RENDERER: " + std::string((char*)(glGetString(GL_RENDERER))));
+	Console::log("===");
 
 	return 1;
 }

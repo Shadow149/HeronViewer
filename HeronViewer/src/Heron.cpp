@@ -1,4 +1,7 @@
 #include "Heron.h"
+
+#include <stb/stb_image.h>
+
 #include "FileDialog.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -9,17 +12,24 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void Heron::processInput(GLFWwindow* window)
 {
-	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
-		clip = true;
-	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_RELEASE) {
 		clip = false;
 	}
-	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
-		b4 = true;
-	}
 	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE) {
 		b4 = false;
+	}
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !key_pressed) {
+		black_bckgrd = !black_bckgrd;
+		key_pressed = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE && key_pressed) {
+		key_pressed = false;
+	}
+	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
+		clip = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
+		b4 = true;
 	}
 }
 
@@ -89,10 +99,16 @@ void Heron::static_drop_callback(GLFWwindow* window, int path_count, const char*
 
 void Heron::initGlfw()
 {
+	GLFWimage images[1];
+	images[0].pixels = stbi_load("heron.jpg", &images[0].width, &images[0].height, 0, 4); //rgba channels 
+	glfwSetWindowIcon(window, 1, images);
+	stbi_image_free(images[0].pixels);
+
 	glfwSetWindowUserPointer(window, this);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetScrollCallback(window, static_scroll_callback);
 	glfwSetDropCallback(window, static_drop_callback);
+
 }
 
 void Heron::initModules() {
@@ -155,7 +171,7 @@ void Heron::render()
 		processInput(window);
 
 		float start = glfwGetTime();
-		image->glrender(&clip, &b4);
+		image->glrender(&clip, &b4, &black_bckgrd);
 		*renderTime = "Gl Render Time: " + std::to_string(glfwGetTime() - start);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);

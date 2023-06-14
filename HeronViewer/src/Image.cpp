@@ -165,7 +165,7 @@ void Image::renderImage(const char* fileLoc) {
 	rendering = true;
 	float start = glfwGetTime();
 	//stbi_write_png(fileLoc, width, height, (bpp / 8), export_data, width * (bpp / 8));
-	stbi_write_jpg(fileLoc, width, height, (bpp / 8), export_data, 70);
+	stbi_write_jpg(fileLoc, width, height, (bpp / 8), export_data, 100);
 	free(export_data);
 	Console::log("stbi_write_jpg time: " + std::to_string(glfwGetTime() - start));
 	rendering = false;
@@ -350,7 +350,7 @@ void Image::renderToFrameBuffer() {
 	glViewport(0, 0, previewSize.x, previewSize.y);
 }
 
-void Image::glrender(bool* clip, bool* b4) {
+void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	if (!visible) { return; }
 
 	if (threadImageLoaded) { 
@@ -376,7 +376,10 @@ void Image::glrender(bool* clip, bool* b4) {
 	float start = glfwGetTime();
 	renderToFrameBuffer();
 	*shaderLoadTime = "Framebuffer render time: " + std::to_string(glfwGetTime() - start);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	if (*black_bckgrd)
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	else
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	// bind Texture
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -413,7 +416,11 @@ void Image::glrender(bool* clip, bool* b4) {
 	shader.setFloat("var_mult", var_mult);
 
 	shader.setFloat("texelWidth", 1.0f / width);
-	shader.setFloat("texelHeight", 1.0f / width);
+	shader.setFloat("texelHeight", 1.0f / height);
+
+	shader.setFloat("width", width);
+	shader.setFloat("height", height);
+	shader.setFloat("scale_factor", scale_factor);
 
  
 	glBindVertexArray(VAO);
@@ -483,6 +490,7 @@ void Image::calcCurveHist(float v, int chr, float* red, float* green, float* blu
 void Image::scale(glm::vec3 s)
 {
 	if (!mouseInWindow) { return; }
+	scale_factor = s.x;
 	model = glm::scale(model, s);
 }
 

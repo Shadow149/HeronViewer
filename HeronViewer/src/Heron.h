@@ -47,8 +47,10 @@ private:
 	std::string* renderTime;
 	std::string* imGuiRenderTime;
 
+	bool key_pressed = false;
 	bool clip = false;
 	bool b4 = false;
+	bool black_bckgrd = false;
 
 	void processInput(GLFWwindow* window);
 	void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);

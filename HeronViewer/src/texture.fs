@@ -35,6 +35,10 @@ uniform float shad_incr;
 uniform float shad_var;
 uniform float var_mult;
 
+uniform float width;
+uniform float height;
+uniform float scale_factor;
+
 vec3 kelvin_table[19] = {
     vec3(255,56,0),
     vec3(255,109,0),
@@ -211,6 +215,16 @@ vec3 xyz2rgb(vec3 v) {
 	return m*v;
 }
 
+vec3 rgb2yiq(vec3 v) {
+	mat3 m = mat3(vec3(0.299,0.5959,0.2115),vec3(0.587,-0.2746,-0.5227),vec3(0.114,-0.3213,0.3112));
+	return m*v;
+}
+
+vec3 yiq2rgb(vec3 v) {
+	mat3 m = mat3(vec3(1,1,1),vec3(0.956,-0.272,-1.106),vec3(0.619,-0.647,1.703));
+	return m*v;
+}
+
 vec3 xyY2xyz(vec3 v) {
 	// v = xyY
 	vec3 r = vec3(0);
@@ -354,6 +368,7 @@ void main()
 	vec4 pix = texture(texture1, TexCoord) * texture(texture1, TexCoord);	
 	//vec4 pix = expose(texture(texture1, TexCoord));	
 	//FragColor = edit(convolution(sharp_kernel));
+
 	
 	
 	if (b4) {
@@ -371,6 +386,16 @@ void main()
 	result = clamp_pix(apply_wb(result));
 	result = clamp_pix(apply_sat(result));
 
+	vec3 yiq = rgb2yiq(result.xyz);
+	yiq.y *= ((shad_thresh) * 2 + 1);
+	yiq.z *= ((high_incr) * 2 + 1);
+	result = vec4(yiq2rgb(yiq),1);
+
+	vec3 xyz = rgb2xyz(result.xyz);
+	xyz.y *= ((shad_incr) + 1);
+	xyz.z *= ((shad_var) + 1);
+	result = vec4(xyz2rgb(xyz),1);
+
 	if (bw) {
 		result = vec4(vec3(calcLum(result)), 1);
 	}
@@ -384,16 +409,18 @@ void main()
 		}
 	} 
 
-	float r = rand(gl_FragCoord.xy);
+	float r = rand(vec2(floor(TexCoord.x * width), floor(TexCoord.y * height)));
 	r = -1 + (r * 2); // rescale to -1 to 1
 	//r = -0.5;
-	float var = pow((high_thresh),2);
+	float var = pow((5-high_thresh),2);
 	//float noise = -pow(2.77, -(pow(r,2))/(2*var)) + 1;
 	float noise = ((1.0/(1.0 + pow(2.71,-(r/var)))) - 0.5)*2.0;
 	result += noise;
 	//noise = min(noise,0);
 	//noise = noise + 1;
 	//result = vec4(noise,noise,noise,1);
+	//result = vec4(TexCoord.x,TexCoord.y,0,1);
+
 	
 	FragColor = result;
 	//FragColor = edit_channels(pix);
