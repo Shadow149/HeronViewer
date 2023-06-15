@@ -41,6 +41,8 @@ private:
 
 	float zoom = 0.0f;
 	float scale_factor = 1.0f;
+	int x = 0;
+	int y = 0;
 
 	GLuint FramebufferName = 0, small_framebuffer = 1;
 	GLuint renderedTexture, small_framebuffer_tex;

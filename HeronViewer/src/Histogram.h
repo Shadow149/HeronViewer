@@ -20,8 +20,10 @@ public:
 	void cleanup();
 private:
 	Image* img;
+	//
 	const ImPlotAxisFlags flags = ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoGridLines;
-	const ImPlotFlags plotFlags = ImPlotFlags_NoTitle | ImPlotFlags_NoFrame | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoMouseText | ImPlotFlags_NoInputs;
+	// ImPlotFlags_NoInputs
+	const ImPlotFlags plotFlags = ImPlotFlags_NoTitle | ImPlotFlags_NoFrame | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoMouseText;
 	
 	int hist[4][256];
 	int hist_edit[4][256];

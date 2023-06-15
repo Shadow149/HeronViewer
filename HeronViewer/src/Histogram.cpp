@@ -83,10 +83,14 @@ void Histogram::render()
 		//		//hist[n][data[i]] += 1;
 		//	}
 		//}
+		int cum = 0;
 		for(int i = 0; i < 256; i ++)
 		{
 			hist[0][i] = img->histogram[i];
+			cum += img->histogram[i];
 		}
+		Console::log("HIST CUM: " + std::to_string(cum));
+
 	}
 
 	ImGui::Begin(name.c_str());

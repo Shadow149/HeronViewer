@@ -78,6 +78,11 @@ void Image::getImage(const char* filename) {
 	height = FreeImage_GetHeight(temp);
 	bpp = FreeImage_GetBPP(temp);
 
+	x = width / 32;
+	Console::log("IMAGE DIMENSIONS SIZE: " + std::to_string(width) + " , " + std::to_string(height));
+	y = height / 32;
+	Console::log("COMPUTE DISPATCH SIZE: " + std::to_string(x) + " , " + std::to_string(y) + " = " + std::to_string(x * y) + " WORK GROUPS");
+
 	if (width > height) {
 		small_img_width = SMALL_IMG_MAX;
 		small_img_height = SMALL_IMG_MAX * ((float)height / width);
@@ -355,8 +360,8 @@ void Image::init()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 0, 0, 0, GL_RGBA, GL_FLOAT, NULL);
-	glBindImageTexture(0, comp_texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	glBindImageTexture(0, comp_texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGB);
 
 	glGenBuffers(1, &SSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
@@ -398,6 +403,8 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	float start = glfwGetTime();
 	renderToFrameBuffer();
 	*shaderLoadTime = "Framebuffer render time: " + std::to_string(glfwGetTime() - start);
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
+
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, comp_texture);
@@ -406,11 +413,15 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
 	glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+	std::fill_n(histogram, 256, 0);
 
 	computeShader.use();
-	glDispatchCompute(width / 20, height / 20, 1);
-	// make sure writing to image has finished before read
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	int x = width / 32;
+	int y = height / 32;
+	glDispatchCompute(x, y, 1);
+	//Console::log("COMPUTE DISPATCH " + std::to_string(x) + " / " + std::to_string(y) + " = " + std::to_string(x * y) + " WORK GROUPS");
+
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
 
 	if (*black_bckgrd)
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -421,6 +432,8 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	// bind Texture
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, comp_texture);
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, texture);
 	// render container
 	shader.use();
 	shader.setMat4("model", model);
@@ -455,16 +468,21 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	shader.setFloat("texelWidth", 1.0f / width);
 	shader.setFloat("texelHeight", 1.0f / height);
 
-	shader.setFloat("width", width);
-	shader.setFloat("height", height);
+	shader.setInt("width", width);
+	shader.setInt("height", height);
 	shader.setFloat("scale_factor", scale_factor);
 
  
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
-	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 256 * sizeof(int), (GLvoid*)histogram);
+	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 256 * sizeof(unsigned), (GLvoid*)histogram);
+	glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
+
+
 	histogram_loaded = true;
 }
 
