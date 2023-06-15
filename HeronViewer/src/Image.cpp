@@ -113,6 +113,10 @@ void Image::bindImage() {
 	glBindTexture(GL_TEXTURE_2D, renderedTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, previewSize.x, previewSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);
+
+	glBindTexture(GL_TEXTURE_2D, comp_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+	glBindImageTexture(0, comp_texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 }
 
 void Image::exportImage(const char* fileLoc) {
@@ -223,6 +227,7 @@ bool Image::getChanged()
 void Image::recompileShader()
 {
 	shader = Shader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.vs", "C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.fs");
+	computeShader = ComputeShader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.comp");
 	Console::log("Shader Recompiled!");
 }
 
@@ -341,6 +346,22 @@ void Image::init()
 	shaderLoadTime = Overlay::registerMetric();
 	imageRender = Overlay::registerMetric();
 
+
+
+	glGenTextures(1, &comp_texture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, comp_texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 0, 0, 0, GL_RGBA, GL_FLOAT, NULL);
+	glBindImageTexture(0, comp_texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+
+	glGenBuffers(1, &SSBO);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, SSBO);
 	
 	
 }
@@ -361,6 +382,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		(*hist)->init();
 		threadImageLoaded = false;
 		imageLoaded = true;
+		histogram_loaded = true;
 		if (size.x > size.y)
 			model = glm::scale(glm::mat4(1.0f), glm::vec3((float)size.y / (previewSize.y + 200)));
 		else
@@ -376,14 +398,29 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	float start = glfwGetTime();
 	renderToFrameBuffer();
 	*shaderLoadTime = "Framebuffer render time: " + std::to_string(glfwGetTime() - start);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, comp_texture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
+	glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+
+	computeShader.use();
+	glDispatchCompute(width / 20, height / 20, 1);
+	// make sure writing to image has finished before read
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
 	if (*black_bckgrd)
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	else
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	// bind Texture
-	glBindTexture(GL_TEXTURE_2D, texture);
 
+	// bind Texture
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, comp_texture);
 	// render container
 	shader.use();
 	shader.setMat4("model", model);
@@ -425,6 +462,10 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
  
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
+	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 256 * sizeof(int), (GLvoid*)histogram);
+	histogram_loaded = true;
 }
 
 

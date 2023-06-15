@@ -68,20 +68,24 @@ void Histogram::render()
 
 		int width = img->getWidth();
 		int height = img->getHeight();
-		if (height == 1) return;
+		if (height == 1 || !img->histogram_loaded) return;
 		unsigned char* data = img->getData();
 		for (int n = 0; n < 4; n++) {
 			for (int i = 0; i < 256; i++) {
 				hist[n][i] = 0;
 			}
 		}
-		for (int n = 1; n < 4; n++) {
-			for (int i = n; i < width * height * 3; i += 3) {
-				//int val = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-				hist[3-n][data[i]] ++;
-				//Console::log(std::to_string(n) + " - " + std::to_string(data[i]));
-				//hist[n][data[i]] += 1;
-			}
+		//for (int n = 1; n < 4; n++) {
+		//	for (int i = n; i < width * height * 3; i += 3) {
+		//		//int val = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+		//		hist[3-n][data[i]] ++;
+		//		//Console::log(std::to_string(n) + " - " + std::to_string(data[i]));
+		//		//hist[n][data[i]] += 1;
+		//	}
+		//}
+		for(int i = 0; i < 256; i ++)
+		{
+			hist[0][i] = img->histogram[i];
 		}
 	}
 

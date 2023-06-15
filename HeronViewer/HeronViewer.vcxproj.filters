@@ -203,9 +203,13 @@
     <ClInclude Include="..\..\imgui\misc\cpp\imgui_stdlib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\shader_c.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\texture.fs" />
-    <None Include="src\texture.vs" />
+    <None Include="src\texture.frag" />
+    <None Include="src\texture.vert" />
+    <None Include="src\texture.comp" />
   </ItemGroup>
 </Project>

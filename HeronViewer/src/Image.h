@@ -11,6 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include<GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 
 #include"imgui.h"
 #include"imgui_impl_glfw.h"
@@ -21,6 +22,8 @@
 #include"stb_image_write.h"
 
 #include <thread>
+
+#include "shader_c.h"
 
 #define RENDER_WIDTH 1920
 #define SMALL_IMG_MAX 120
@@ -96,7 +99,8 @@ private:
 	int nextIndex = 0;
 	float* src;
 	
-	Shader shader = Shader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.vs", "C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.fs");
+	Shader shader = Shader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.vert", "C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.frag");
+	ComputeShader computeShader = ComputeShader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.comp");
 	Histogram** hist;
 
 	std::string* shaderLoadTime;
@@ -104,6 +108,10 @@ private:
 	std::string* exportStat;
 
 	std::thread renderer;
+
+	unsigned int comp_texture;
+	GLuint SSBO;
+
 
 	void renderImage(const char* fileLoc);
 	void updatePreviewSize();
@@ -115,6 +123,9 @@ public:
 	bool imageLoaded = false;
 	bool rendering = false;
 	std::thread imageLoader;
+
+	unsigned histogram[256];
+	bool histogram_loaded = false;
 	
 	void unload();
 	void getImage(const char* filename);
