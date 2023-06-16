@@ -16,13 +16,59 @@ layout(std430, binding=2) buffer hist {
     uint elements[];
 };
 
-float calcLum(vec4 v) {
-	return (0.2126 * v.x + 0.7152 * v.y + 0.0722 * v.z);
+uniform float[4] high;
+uniform float[4] mid;
+uniform float[4] low;
+uniform float[4] expo;
+uniform float[4] contrast;
+uniform float[4] whites;
+
+uniform float cdf[256];
+uniform bool histogram_loaded;
+
+shared uint local_bins[256];
+
+float calcLum(vec3 v) {
+    return dot(v, vec3(0.299, 0.587, 0.114));
 }
+float calcLum(vec4 v) {
+    return calcLum(v.xyz);
+}
+
+vec4 clamp_pix(vec4 v) {
+	if (calcLum(v) <= 0.0) {
+		return vec4(0.0, 0.0, 0.0, 1);
+	}
+	if (calcLum(v) >= 1.0) {
+		return vec4(1.0, 1.0, 1.0, 1);
+	}
+	return v;
+}
+
+float edit_channel(float v, int chr) {
+	vec4 result = vec4(0);
+	float t = pow(2,expo[chr]) * v * (1 + whites[chr]);
+	float val = (4 * pow((1-t),3) * t * (0.25 + low[chr] - contrast[chr])) + (6 * pow((1-t),2) * pow(t,2) * (0.5 + mid[chr])) + (4 * (1-t) * pow(t,3) * (0.75 + high[chr] + contrast[chr])) + (pow(t,4) * 1);
+	return val;
+}
+
+float edit_channel_lum(float v) {
+	return edit_channel(v, 0);
+}
+
+vec4 edit_channels(vec4 pix) {
+	vec3 res = vec3(edit_channel(pix[2], 1),edit_channel(pix[1], 2),edit_channel(pix[0], 3));
+	return vec4(edit_channel_lum(res[0]),edit_channel_lum(res[1]),edit_channel_lum(res[2]), 1);
+}
+
+vec4 pixelTransform(vec4 pix) {
+	vec4 result = clamp_pix(edit_channels(pix));
+    return result;
+}
+
 void main() {
     ivec2 texSize = textureSize(texture1, 0);
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);
-	
   
     // Ensure the current invocation is within the texture bounds
     if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y) {
@@ -30,17 +76,16 @@ void main() {
         texColor.x = pow(texColor.x,2.5);
         texColor.y = pow(texColor.y,2.5);
         texColor.z = pow(texColor.z,2.5);
-      
-        imageStore(imgOutput, pixelCoord, vec4(texColor.bgr,1.0));
 
-        // Convert color to grayscale
-        float grayscale = dot(texColor.bgr, vec3(0.299, 0.587, 0.114));
-      
-        // Convert grayscale value to histogram bin index
-        uint binIndex = uint(grayscale * 255.0);
-      
-        // Atomic increment to update the histogram bin value
-        atomicAdd(elements[binIndex], 1);
+        texColor = pixelTransform(texColor);
+
+        if (histogram_loaded) {
+            uint binIndex = uint(calcLum(texColor.bgr) * 255.0);
+            //texColor = vec4(vec3(cdf[binIndex]), 1.0);
+            texColor = vec4(texColor.rgb * cdf[binIndex], 1.0);
+        }
+
+        imageStore(imgOutput, pixelCoord, texColor);
     }
 
 }

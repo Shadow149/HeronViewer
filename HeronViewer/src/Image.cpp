@@ -22,9 +22,11 @@ void Image::unload()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);
 	imageLoaded = false;
+	histogram_loaded = false;
 }
 
 void Image::getImage(const char* filename) {
+	histogram_loaded = false;
 	Console::log("Loading Image... " + std::string(filename));
 
 	if (bitmap)
@@ -126,6 +128,7 @@ void Image::bindImage() {
 
 void Image::exportImage(const char* fileLoc) {
 	exporting = true;
+	Console::log("Exporting...");
 	
 	glGenBuffers(1, &pbo);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
@@ -232,7 +235,7 @@ bool Image::getChanged()
 void Image::recompileShader()
 {
 	shader = Shader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.vs", "C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.fs");
-	computeShader = ComputeShader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.comp");
+	process_compute_shader_ = ComputeShader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.comp");
 	Console::log("Shader Recompiled!");
 }
 
@@ -365,9 +368,13 @@ void Image::init()
 
 	glGenBuffers(1, &SSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * 4 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, SSBO);
-	
+
+	glGenBuffers(1, &SSBO_orig);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_orig);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, SSBO_orig);
 	
 }
 
@@ -387,11 +394,11 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		(*hist)->init();
 		threadImageLoaded = false;
 		imageLoaded = true;
-		histogram_loaded = true;
 		if (size.x > size.y)
 			model = glm::scale(glm::mat4(1.0f), glm::vec3((float)size.y / (previewSize.y + 200)));
 		else
 			model = glm::scale(glm::mat4(1.0f), glm::vec3((float)size.x / (previewSize.x + 200)));
+		std::fill_n(cdf, 256, 1.0f / 8.0f);
 	}
 
 	if (renderer.joinable() && !rendering) {
@@ -410,18 +417,56 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	glBindTexture(GL_TEXTURE_2D, comp_texture);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
-	glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
-	std::fill_n(histogram, 256, 0);
-
-	computeShader.use();
+	process_compute_shader_.use();
+	process_compute_shader_.setFloatArray("low", low, 4);
+	process_compute_shader_.setFloatArray("whites", whites, 4);
+	process_compute_shader_.setFloatArray("mid", mid, 4);
+	process_compute_shader_.setFloatArray("high", high, 4);
+	process_compute_shader_.setFloatArray("contrast", contrast, 4);
+	process_compute_shader_.setFloatArray("expo", exp, 4);
+	process_compute_shader_.setFloatArray("cdf", cdf, 256);
+	process_compute_shader_.setBool("histogram_loaded", histogram_loaded);
 	int x = width / 32;
 	int y = height / 32;
 	glDispatchCompute(x, y, 1);
 	//Console::log("COMPUTE DISPATCH " + std::to_string(x) + " / " + std::to_string(y) + " = " + std::to_string(x * y) + " WORK GROUPS");
 
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
+
+	if (getChanged() && imageLoaded) {
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * 4 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
+		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+		std::fill_n(histogram, 256 * 4, 0);
+
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_orig);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * 4 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
+		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+		std::fill_n(hist_orig, 256, 0);
+
+		hist_compute_shader_.use();
+		hist_compute_shader_.setBool("histogram_loaded", histogram_loaded);
+
+		glDispatchCompute(x, y, 1);
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
+
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
+		glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 256 * 4 * sizeof(unsigned), (GLvoid*)histogram);
+		glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
+		if (!histogram_loaded)
+		{
+			glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_orig);
+			glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 256 * sizeof(unsigned), (GLvoid*)hist_orig);
+			glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
+			float cum = 0;
+			for (int i = 0; i < 256; i++)
+			{
+				cum += (float)hist_orig[i] / float(width * height);
+				cdf[i] = cum;
+			}
+		}
+		histogram_loaded = true;
+	}
 
 	if (*black_bckgrd)
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -439,38 +484,38 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	shader.setMat4("model", model);
 	shader.setMat4("view", view);
 	shader.setMat4("projection", projection);
-	shader.setFloatArray("low", low, 4);
-	shader.setFloatArray("whites", whites, 4);
-	shader.setFloatArray("mid", mid, 4);
-	shader.setFloatArray("high", high, 4);
-	shader.setFloatArray("contrast", contrast, 4);
-	shader.setFloatArray("exp", exp, 4);
-	shader.setBool("bw", bw);
+	//shader.setFloatArray("low", low, 4);
+	//shader.setFloatArray("whites", whites, 4);
+	//shader.setFloatArray("mid", mid, 4);
+	//shader.setFloatArray("high", high, 4);
+	//shader.setFloatArray("contrast", contrast, 4);
+	//shader.setFloatArray("exp", exp, 4);
+	//shader.setBool("bw", bw);
 
-	shader.setFloat("sat", sat);
-	shader.setFloat("wb", wb);
+	//shader.setFloat("sat", sat);
+	//shader.setFloat("wb", wb);
 
-	//shader.setFloatArray("sharp_kernel", sharp_kernel, 25);
-	shader.setFloatArray("sharp_kernel33", sharp_kernel, 9);
+	////shader.setFloatArray("sharp_kernel", sharp_kernel, 25);
+	//shader.setFloatArray("sharp_kernel33", sharp_kernel, 9);
 
-	shader.setBool("clip", *clip);
-	shader.setBool("b4", *b4);
+	//shader.setBool("clip", *clip);
+	//shader.setBool("b4", *b4);
 
 
-	shader.setFloat("high_thresh", high_thresh);
-	shader.setFloat("shad_thresh", shad_thresh);
-	shader.setFloat("high_incr", high_incr);
-	shader.setFloat("shad_incr", shad_incr);
+	//shader.setFloat("high_thresh", high_thresh);
+	//shader.setFloat("shad_thresh", shad_thresh);
+	//shader.setFloat("high_incr", high_incr);
+	//shader.setFloat("shad_incr", shad_incr);
 
-	shader.setFloat("shad_var", shad_var);
-	shader.setFloat("var_mult", var_mult);
+	//shader.setFloat("shad_var", shad_var);
+	//shader.setFloat("var_mult", var_mult);
 
 	shader.setFloat("texelWidth", 1.0f / width);
 	shader.setFloat("texelHeight", 1.0f / height);
 
-	shader.setInt("width", width);
-	shader.setInt("height", height);
-	shader.setFloat("scale_factor", scale_factor);
+	//shader.setInt("width", width);
+	//shader.setInt("height", height);
+	//shader.setFloat("scale_factor", scale_factor);
 
  
 	glBindVertexArray(VAO);
@@ -478,12 +523,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
-	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 256 * sizeof(unsigned), (GLvoid*)histogram);
-	glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
-
-
-	histogram_loaded = true;
+	changed = false;
 }
 
 
@@ -497,7 +537,6 @@ void Image::render()
 	ImGui::Image((void*)(intptr_t)renderedTexture, previewSize);
 	ImGui::End();
 	*imageRender = "Image Render Time: " + std::to_string(glfwGetTime() - start);
-	changed = false;
 }
 
 void Image::cleanup()

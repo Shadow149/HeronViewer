@@ -211,5 +211,6 @@
     <None Include="src\texture.frag" />
     <None Include="src\texture.vert" />
     <None Include="src\texture.comp" />
+    <None Include="src\histogram.comp" />
   </ItemGroup>
 </Project>

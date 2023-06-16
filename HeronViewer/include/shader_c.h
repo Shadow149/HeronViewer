@@ -75,10 +75,27 @@ public:
     {
         glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
     }
+    void setIntArray(const std::string& name, int* value, int size) const
+    {
+        glUniform1iv(glGetUniformLocation(ID, name.c_str()), size, value);
+    }
+    // ------------------------------------------------------------------------
+    void setUInt(const std::string& name, int value) const
+    {
+        glUniform1ui(glGetUniformLocation(ID, name.c_str()), value);
+    }
+    void setUIntArray(const std::string& name, unsigned* value, int size) const
+    {
+        glUniform1uiv(glGetUniformLocation(ID, name.c_str()), size, value);
+    }
     // ------------------------------------------------------------------------
     void setFloat(const std::string& name, float value) const
     {
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+    }
+    void setFloatArray(const std::string& name, float* value, int size) const
+    {
+        glUniform1fv(glGetUniformLocation(ID, name.c_str()), size, value);
     }
     // ------------------------------------------------------------------------
     void setVec2(const std::string& name, const glm::vec2& value) const

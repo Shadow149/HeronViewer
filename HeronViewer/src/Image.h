@@ -102,7 +102,8 @@ private:
 	float* src;
 	
 	Shader shader = Shader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.vert", "C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.frag");
-	ComputeShader computeShader = ComputeShader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.comp");
+	ComputeShader process_compute_shader_ = ComputeShader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\texture.comp");
+	ComputeShader hist_compute_shader_ = ComputeShader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\histogram.comp");
 	Histogram** hist;
 
 	std::string* shaderLoadTime;
@@ -113,6 +114,7 @@ private:
 
 	unsigned int comp_texture;
 	GLuint SSBO;
+	GLuint SSBO_orig;
 
 
 	void renderImage(const char* fileLoc);
@@ -126,7 +128,9 @@ public:
 	bool rendering = false;
 	std::thread imageLoader;
 
-	unsigned histogram[256];
+	unsigned histogram[256*4];
+	unsigned hist_orig[256];
+	float cdf[256];
 	bool histogram_loaded = false;
 	
 	void unload();

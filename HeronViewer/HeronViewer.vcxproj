@@ -195,6 +195,7 @@
     <ClInclude Include="src\Status.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\histogram.comp" />
     <None Include="src\texture.comp" />
     <None Include="src\texture.frag" />
     <None Include="src\texture.vert" />

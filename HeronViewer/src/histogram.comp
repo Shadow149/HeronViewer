@@ -1,0 +1,101 @@
+#version 430 core
+
+layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+
+// ----------------------------------------------------------------------------
+//
+// uniforms
+//
+// ----------------------------------------------------------------------------
+
+layout(rgba32f, binding = 0) uniform image2D img;
+
+layout(binding=1) uniform readonly sampler2D texture1;
+	
+layout(std430, binding=2) buffer hist {
+    uint elements[];
+};
+
+layout(std430, binding=3) buffer hist_orig {
+    uint elements_orig[];
+};
+
+uniform bool histogram_loaded;
+
+shared uint local_bins[256];
+shared uint orig_local_bins[256];
+
+float calcLum(vec3 v) {
+    return dot(v, vec3(0.299, 0.587, 0.114));
+}
+float calcLum(vec4 v) {
+    return calcLum(v.xyz);
+}
+
+void main() {
+    ivec2 texSize = imageSize(img);
+    ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);
+
+    uint lid = gl_LocalInvocationID.x + gl_LocalInvocationID.y * 32;
+
+    if (lid < 256) {
+        local_bins[lid] = 0;
+        if (!histogram_loaded) {
+            orig_local_bins[lid] = 0;
+        }
+    }
+
+    barrier();
+    memoryBarrier();
+	
+  
+    // Ensure the current invocation is within the texture bounds
+    if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y) {
+        vec4 texColor = imageLoad(img, pixelCoord);
+
+        // Convert color to grayscale
+        float grayscale = calcLum(texColor);
+      
+        // Convert grayscale value to histogram bin index
+        // x 4 since we store hist values as L, R, G, B, ...
+        uint binIndex = uint(grayscale * 255.0);
+
+        //uint rIndex = uint(texColor.b * 255.0) * 4;
+        //uint gIndex = uint(texColor.g * 255.0) * 4;
+        //uint bIndex = uint(texColor.r * 255.0) * 4;
+
+      
+        // Atomic increment to update the histogram bin value
+        atomicAdd(local_bins[binIndex], 1);
+        
+        //atomicAdd(local_bins[rIndex+1], 1);
+        //atomicAdd(local_bins[gIndex+2], 1);
+        //atomicAdd(local_bins[bIndex+3], 1);
+
+        if (!histogram_loaded) {
+            texColor = texelFetch(texture1, pixelCoord, 0);
+            texColor.x = pow(texColor.x,2.5);
+            texColor.y = pow(texColor.y,2.5);
+            texColor.z = pow(texColor.z,2.5);
+      
+            // Convert color to grayscale
+            grayscale = calcLum(texColor.bgr);
+      
+            // Convert grayscale value to histogram bin index
+            binIndex = uint(grayscale * 255.0);
+      
+            // Atomic increment to update the histogram bin value
+            atomicAdd(orig_local_bins[binIndex], 1);
+        }
+    }
+
+    barrier();
+    memoryBarrier();
+
+    if (lid < 256) {
+       atomicAdd(elements[lid], local_bins[lid]);
+       if (!histogram_loaded) {
+           atomicAdd(elements_orig[lid], orig_local_bins[lid]);
+       }
+    }
+}
