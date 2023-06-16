@@ -80,6 +80,9 @@ void Image::getImage(const char* filename) {
 	height = FreeImage_GetHeight(temp);
 	bpp = FreeImage_GetBPP(temp);
 
+	Console::log("Bitmap (TEMP) bpp: " + std::to_string(bpp));
+
+
 	x = width / 32;
 	Console::log("IMAGE DIMENSIONS SIZE: " + std::to_string(width) + " , " + std::to_string(height));
 	y = height / 32;
@@ -361,10 +364,20 @@ void Image::init()
 	glBindTexture(GL_TEXTURE_2D, comp_texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 	glBindImageTexture(0, comp_texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGB);
+
+	glGenTextures(1, &vectorscope);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, vectorscope);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 255, 255, 0, GL_RGBA, GL_FLOAT, NULL);
+	glBindImageTexture(2, vectorscope, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 
 	glGenBuffers(1, &SSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
@@ -417,6 +430,8 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	glBindTexture(GL_TEXTURE_2D, comp_texture);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, vectorscope);
 	process_compute_shader_.use();
 	process_compute_shader_.setFloatArray("low", low, 4);
 	process_compute_shader_.setFloatArray("whites", whites, 4);
@@ -534,9 +549,14 @@ void Image::render()
 	ImGui::Begin(name.c_str(), &visible, 8 | 16);
 	size = ImGui::GetWindowSize();
 	updateMouseInWindow();
-	ImGui::Image((void*)(intptr_t)renderedTexture, previewSize);
+	ImGui::Image((ImTextureID)renderedTexture, previewSize);
 	ImGui::End();
 	*imageRender = "Image Render Time: " + std::to_string(glfwGetTime() - start);
+
+	ImGui::Begin("Vectorscope");
+	size = ImGui::GetWindowSize();
+	ImGui::Image((ImTextureID)vectorscope, ImVec2(255, 255));
+	ImGui::End();
 }
 
 void Image::cleanup()

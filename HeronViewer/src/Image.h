@@ -113,6 +113,7 @@ private:
 	std::thread renderer;
 
 	unsigned int comp_texture;
+	unsigned vectorscope;
 	GLuint SSBO;
 	GLuint SSBO_orig;
 
