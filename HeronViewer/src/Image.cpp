@@ -452,6 +452,20 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	process_compute_shader_.setFloatArray("high", high, 4);
 	process_compute_shader_.setFloatArray("contrast", contrast, 4);
 	process_compute_shader_.setFloatArray("expo", exp, 4);
+
+	process_compute_shader_.setBool("bw", bw);
+	process_compute_shader_.setFloat("sat", sat);
+	process_compute_shader_.setFloat("wb", wb);
+	process_compute_shader_.setBool("clip", *clip);
+	process_compute_shader_.setBool("b4", *b4);
+
+	process_compute_shader_.setFloat("high_thresh", high_thresh);
+	process_compute_shader_.setFloat("shad_thresh", shad_thresh);
+	process_compute_shader_.setFloat("high_incr", high_incr);
+	process_compute_shader_.setFloat("shad_incr", shad_incr);
+	process_compute_shader_.setFloat("shad_var", shad_var);
+	process_compute_shader_.setFloat("var_mult", var_mult);
+
 	process_compute_shader_.setFloatArray("cdf", cdf, 256);
 	process_compute_shader_.setBool("histogram_loaded", histogram_loaded);
 	int x = width / 32;
@@ -534,7 +548,6 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	//shader.setFloat("shad_thresh", shad_thresh);
 	//shader.setFloat("high_incr", high_incr);
 	//shader.setFloat("shad_incr", shad_incr);
-
 	//shader.setFloat("shad_var", shad_var);
 	//shader.setFloat("var_mult", var_mult);
 
