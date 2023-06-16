@@ -70,6 +70,7 @@ void Heron::recompileShader()
 }
 
 void Heron::loadImage(std::string filePath, std::string fileName) {
+	unloadImage();
 	Console::log("Change Image : " + filePath);
 	imgFile = filePath;
 	image->imageLoader = std::thread(&Image::getImage, image, imgFile.c_str());

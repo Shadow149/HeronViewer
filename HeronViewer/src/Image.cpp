@@ -377,7 +377,17 @@ void Image::init()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 255, 255, 0, GL_RGBA, GL_FLOAT, NULL);
-	glBindImageTexture(2, vectorscope, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+	glBindImageTexture(4, vectorscope, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+
+	glGenTextures(1, &waveform);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, waveform);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 512, 255, 0, GL_RGBA, GL_FLOAT, NULL);
+	glBindImageTexture(5, waveform, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 
 	glGenBuffers(1, &SSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
@@ -407,6 +417,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		(*hist)->init();
 		threadImageLoaded = false;
 		imageLoaded = true;
+		changed = true;
 		if (size.x > size.y)
 			model = glm::scale(glm::mat4(1.0f), glm::vec3((float)size.y / (previewSize.y + 200)));
 		else
@@ -432,6 +443,8 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, vectorscope);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, waveform);
 	process_compute_shader_.use();
 	process_compute_shader_.setFloatArray("low", low, 4);
 	process_compute_shader_.setFloatArray("whites", whites, 4);
@@ -483,7 +496,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		histogram_loaded = true;
 	}
 
-	if (*black_bckgrd)
+	if (!*black_bckgrd)
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	else
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -554,8 +567,11 @@ void Image::render()
 	*imageRender = "Image Render Time: " + std::to_string(glfwGetTime() - start);
 
 	ImGui::Begin("Vectorscope");
-	size = ImGui::GetWindowSize();
 	ImGui::Image((ImTextureID)vectorscope, ImVec2(255, 255));
+	ImGui::End();
+
+	ImGui::Begin("Waveform");
+	ImGui::Image((ImTextureID)waveform, ImVec2(512,255));
 	ImGui::End();
 }
 
