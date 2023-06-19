@@ -85,15 +85,14 @@ void Histogram::render()
 		//}
 		for(int i = 0; i < 256; i ++)
 		{
-			hist[0][i] = img->histogram[(i)];
-			//hist[1][i] = img->histogram[(i*4)+1];
-			//hist[2][i] = img->histogram[(i*4)+2];
-			//hist[3][i] = img->histogram[(i*4)+3];
+			hist[0][i] = img->histogram[(i*4)];
+			hist[1][i] = img->histogram[(i*4)+1];
+			hist[2][i] = img->histogram[(i*4)+2];
+			hist[3][i] = img->histogram[(i*4)+3];
 
 		}
 
 	}
-
 	ImGui::Begin(name.c_str());
 	ImVec2 size = ImGui::GetWindowSize();
 	ImPlot::GetStyle().PlotMinSize = ImVec2(0, 0);
@@ -101,8 +100,11 @@ void Histogram::render()
 	ImPlot::GetStyle().AntiAliasedLines = true;
 	if (ImPlot::BeginPlot("Hist plot", ImVec2(-1,-1), plotFlags)) {
 		ImPlot::SetupAxes("x", "y", flags, flags);
+		double foo = (double)(img->getHeight() * img->getWidth()) / 15.0;
+		// TODO ImPlotCond_Always doing unnecessary updates?
+		ImPlot::SetupAxesLimits(0, 255, 0, foo, ImPlotCond_Always);
 		for (int n = 3; n >= 0; n--) {
-			ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f);
+			ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.5f);
 			ImPlot::SetNextFillStyle(channel_colors[n]);
 			ImPlot::PlotShaded(tab_names[n], hist_x, hist[n], 256, -INFINITY);
 			ImPlot::PopStyleVar();

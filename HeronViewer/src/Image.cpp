@@ -537,7 +537,6 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		hist_compute_shader_.setBool("histogram_loaded", histogram_loaded);
 		hist_compute_shader_.setBool("bw", bw);
 		hist_compute_shader_.setFloat("var_mult", var_mult);
-		hist_compute_shader_.setFloatArray("cdf", cdf, 256);
 
 		glDispatchCompute(x, y, 1);
 
@@ -559,6 +558,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 			}
 		}
 		histogram_loaded = true;
+		changed = false;
 	}
 
 
@@ -586,7 +586,6 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 
-	changed = false;
 }
 
 

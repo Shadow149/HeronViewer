@@ -27,13 +27,12 @@ layout(rgba32f, binding = 5) uniform image2D waveform_texture;
 layout(r32i, binding = 6) uniform coherent iimage2D waveform_acc;
 layout(r32i, binding = 7) uniform coherent iimage2D vectorscope_acc;
 
-uniform float cdf[256];
 uniform bool histogram_loaded;
 uniform float var_mult;
 uniform bool bw;
 
 
-shared uint local_bins[256];
+shared uint local_bins[256*4];
 shared uint orig_local_bins[256];
 
 
@@ -74,7 +73,11 @@ void main() {
     uint lid = gl_LocalInvocationID.x + gl_LocalInvocationID.y * SIZE;
 
     if (lid < 256) {
-        local_bins[lid] = 0;
+        local_bins[lid*4] = 0;
+        local_bins[(lid*4)+1] = 0;
+        local_bins[(lid*4)+2] = 0;
+        local_bins[(lid*4)+3] = 0;
+
         if (!histogram_loaded) {
             orig_local_bins[lid] = 0;
         }
@@ -111,17 +114,17 @@ void main() {
         // x 4 since we store hist values as L, R, G, B, ...
         uint binIndex = uint(grayscale * 255.0);
 
-        //uint rIndex = uint(texColor.b * 255.0) * 4;
-        //uint gIndex = uint(texColor.g * 255.0) * 4;
-        //uint bIndex = uint(texColor.r * 255.0) * 4;
+        uint rIndex = uint(texColor.b * 255.0) * 4;
+        uint gIndex = uint(texColor.g * 255.0) * 4;
+        uint bIndex = uint(texColor.r * 255.0) * 4;
 
       
         // Atomic increment to update the histogram bin value
-        atomicAdd(local_bins[binIndex], 1);
+        atomicAdd(local_bins[binIndex*4], 1);
         
-        //atomicAdd(local_bins[rIndex+1], 1);
-        //atomicAdd(local_bins[gIndex+2], 1);
-        //atomicAdd(local_bins[bIndex+3], 1);
+        atomicAdd(local_bins[rIndex+1], 1);
+        atomicAdd(local_bins[gIndex+2], 1);
+        atomicAdd(local_bins[bIndex+3], 1);
 
         if (!histogram_loaded) {
             texColor = texelFetch(texture1, pixelCoord, 0);
@@ -163,7 +166,11 @@ void main() {
     memoryBarrier();
 
     if (lid < 256) {
-       atomicAdd(elements[lid], local_bins[lid]);
+       atomicAdd(elements[lid*4], local_bins[lid*4]);
+       atomicAdd(elements[(lid*4)+1], local_bins[(lid*4)+1]);
+       atomicAdd(elements[(lid*4)+2], local_bins[(lid*4)+2]);
+       atomicAdd(elements[(lid*4)+3], local_bins[(lid*4)+3]);
+
        if (!histogram_loaded) {
            atomicAdd(elements_orig[lid], orig_local_bins[lid]);
        }
