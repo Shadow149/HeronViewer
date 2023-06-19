@@ -30,6 +30,7 @@ layout(r32i, binding = 7) uniform coherent iimage2D vectorscope_acc;
 uniform float cdf[256];
 uniform bool histogram_loaded;
 uniform float var_mult;
+uniform bool bw;
 
 
 shared uint local_bins[256];
@@ -142,14 +143,17 @@ void main() {
         ivec2 c = ivec2(polar2cart(vec2(hsv.y,hsv.x * 3.1459 * 2)) * 128);
 
         c += ivec2(128,128);
-        //imageStore(vectorscope_texture, c, vec4(texColor.rgb,1));
+
+        if (!bw) {
+            ivec2 bar = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 255 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
+            imageAtomicExchange(vectorscope_acc, bar, 0);
+        }
+
         imageAtomicAdd(vectorscope_acc, c, 1);
 
 
         ivec2 foo = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 512 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
         imageAtomicExchange(waveform_acc, foo, 0);
-        ivec2 bar = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 255 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
-        imageAtomicExchange(vectorscope_acc, bar, 0);
 
         ivec2 cc = ivec2( int( min(float(pixelCoord.x)/float(texSize.x),1) * 511 ), int(254 - binIndex));
         imageAtomicAdd(waveform_acc, cc, 1);
@@ -169,7 +173,7 @@ void main() {
         int count = imageLoad(waveform_acc, pixelCoord).x;
         imageStore(waveform_texture, pixelCoord, vec4(vec3(count/(var_mult*70)),1));
     }
-    if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y) {
+    if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y && !bw) {
         vec4 texColor = imageLoad(img, pixelCoord);
         vec3 hsv = rgb2hsv(texColor.rgb);
         ivec2 c = ivec2(polar2cart(vec2(hsv.y,hsv.x * 3.1459 * 2)) * 128);
@@ -177,6 +181,5 @@ void main() {
         c += ivec2(128,128);
         int count = imageLoad(vectorscope_acc, c).x;
         imageStore(vectorscope_texture, c, vec4(texColor.rgb * min(1,count/(var_mult*120)),1));
-        //imageAtomicAdd(vectorscope_acc, c, 1);
     }
 }

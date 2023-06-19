@@ -101,11 +101,10 @@ void Image::getImage(const char* filename) {
 	Console::log("COMPUTE DISPATCH SIZE: " + std::to_string(x) + " , " + std::to_string(y) + " = " + std::to_string(x * y) + " WORK GROUPS");
 
 
-	data = (unsigned char*)malloc(width * height * (bpp/8) * sizeof(unsigned char));
+	data = (unsigned char*)malloc(width * height * bpp * sizeof(unsigned char));
 	Console::log("memcpy image bits");
 	memcpy(data, FreeImage_GetBits(temp), width * height * (bpp / 8));
 	Console::log("memcpy finished");
-
 
 	threadImageLoaded = true;
 	Console::log("Image Loaded!");
@@ -174,13 +173,14 @@ void Image::exportImage(const char* fileLoc) {
 	GLenum error = 0;
 
 
-	export_data = (GLubyte*)malloc(width * height * 4 * sizeof(GLfloat));
-	memset(export_data, 0, width * height * 4);
+	export_data = (GLubyte*)malloc(width * height * (bpp / 8) * sizeof(GLfloat));
+	memset(export_data, 0, width * height * (bpp / 8));
+	glGenBuffers(1, &pbo);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
-	glBufferData(GL_PIXEL_PACK_BUFFER, width * height * 4 * sizeof(GLfloat), nullptr, GL_STREAM_READ);
+	glBufferData(GL_PIXEL_PACK_BUFFER, width * height * (bpp / 8) * sizeof(GLfloat), 0, GL_STREAM_READ);
 	//glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 
-	glFinish();
+	//glFinish();
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, comp_texture);
@@ -191,7 +191,7 @@ void Image::exportImage(const char* fileLoc) {
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 	Console::log("glGetTexImage time: " + std::to_string(glfwGetTime() - start));
 	const auto* d = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-	std::memcpy(export_data, d, sizeof(GLfloat) * width * height * 4);
+	std::memcpy(export_data, d, sizeof(GLfloat) * width * height * (bpp / 8));
 	//glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 	//glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 	//glBindTexture(GL_TEXTURE_2D, 0);
@@ -429,7 +429,7 @@ void Image::init()
 	glBindImageTexture(6, waveform_acc, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 
 	glGenTextures(1, &vectorscope_acc);
-	glActiveTexture(GL_TEXTURE4);
+	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, vectorscope_acc);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -533,13 +533,9 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 		std::fill_n(hist_orig, 256, 0);
 
-
-		//std::vector<GLint> emptyData(512 * 255, 0);
-		//glBindTexture(GL_TEXTURE_2D, waveform_acc);
-		//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 512, 255, GL_RED, GL_INT, &emptyData[0]);
-
 		hist_compute_shader_.use();
 		hist_compute_shader_.setBool("histogram_loaded", histogram_loaded);
+		hist_compute_shader_.setBool("bw", bw);
 		hist_compute_shader_.setFloat("var_mult", var_mult);
 		hist_compute_shader_.setFloatArray("cdf", cdf, 256);
 
@@ -611,7 +607,7 @@ void Image::render()
 	ImGui::End();
 
 	ImGui::Begin("Waveform");
-	ImGui::Image((ImTextureID)waveform, ImVec2(255,255));
+	ImGui::Image((ImTextureID)waveform, ImVec2(512,255));
 	ImGui::End();
 }
 

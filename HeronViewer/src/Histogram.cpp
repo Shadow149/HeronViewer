@@ -99,15 +99,14 @@ void Histogram::render()
 	ImPlot::GetStyle().PlotMinSize = ImVec2(0, 0);
 	ImPlot::GetStyle().PlotDefaultSize = ImVec2(-1, size.y - 30);
 	ImPlot::GetStyle().AntiAliasedLines = true;
-	//if (ImPlot::BeginPlot("Hist plot", ImVec2(-1,-1), plotFlags)) {
 	if (ImPlot::BeginPlot("Hist plot", ImVec2(-1,-1), plotFlags)) {
-		//ImPlot::SetupAxes("x", "y", flags, flags);
 		ImPlot::SetupAxes("x", "y", flags, flags);
-		for (int n = 3; n >= 1; n--) {
-			ImPlot::SetNextLineStyle(channel_colors[n]);
-			ImPlot::PlotLine(tab_names[n], hist_x, hist[n], 256);
+		for (int n = 3; n >= 0; n--) {
+			ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f);
+			ImPlot::SetNextFillStyle(channel_colors[n]);
+			ImPlot::PlotShaded(tab_names[n], hist_x, hist[n], 256, -INFINITY);
+			ImPlot::PopStyleVar();
 		}
-		ImPlot::PlotLine(tab_names[0], hist_x, hist[0], 256);
 		ImPlot::EndPlot();
 	}
 	ImGui::End();
