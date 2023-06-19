@@ -428,6 +428,16 @@ void Image::init()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 512, 255, 0, GL_RED_INTEGER, GL_INT, NULL);
 	glBindImageTexture(6, waveform_acc, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 
+	glGenTextures(1, &vectorscope_acc);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, vectorscope_acc);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 255, 255, 0, GL_RED_INTEGER, GL_INT, NULL);
+	glBindImageTexture(7, vectorscope_acc, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+
 	glGenBuffers(1, &SSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * 4 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
@@ -473,7 +483,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	float start = glfwGetTime();
 	renderToFrameBuffer();
 	*shaderLoadTime = "Framebuffer render time: " + std::to_string(glfwGetTime() - start);
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
 
 	glActiveTexture(GL_TEXTURE0);
@@ -510,7 +520,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	glDispatchCompute(x, y, 1);
 	//Console::log("COMPUTE DISPATCH " + std::to_string(x) + " / " + std::to_string(y) + " = " + std::to_string(x * y) + " WORK GROUPS");
 
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
 	if (getChanged() && imageLoaded) {
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
@@ -523,12 +533,18 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 		std::fill_n(hist_orig, 256, 0);
 
+
+		//std::vector<GLint> emptyData(512 * 255, 0);
+		//glBindTexture(GL_TEXTURE_2D, waveform_acc);
+		//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 512, 255, GL_RED, GL_INT, &emptyData[0]);
+
 		hist_compute_shader_.use();
 		hist_compute_shader_.setBool("histogram_loaded", histogram_loaded);
 		hist_compute_shader_.setFloat("var_mult", var_mult);
 		hist_compute_shader_.setFloatArray("cdf", cdf, 256);
 
 		glDispatchCompute(x, y, 1);
+
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
@@ -548,6 +564,9 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		}
 		histogram_loaded = true;
 	}
+
+
+	glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
 	if (!*black_bckgrd)
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -578,6 +597,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 void Image::render()
 {
 	if (!visible) { return; }
+
 	float start = glfwGetTime();
 	ImGui::Begin(name.c_str(), &visible, 8 | 16);
 	size = ImGui::GetWindowSize();
@@ -591,7 +611,7 @@ void Image::render()
 	ImGui::End();
 
 	ImGui::Begin("Waveform");
-	ImGui::Image((ImTextureID)waveform, ImVec2(512,255));
+	ImGui::Image((ImTextureID)waveform, ImVec2(255,255));
 	ImGui::End();
 }
 

@@ -114,6 +114,7 @@ private:
 
 	unsigned int comp_texture;
 	unsigned vectorscope;
+	unsigned vectorscope_acc;
 	unsigned waveform;
 	unsigned waveform_acc;
 	GLuint SSBO;

@@ -25,6 +25,7 @@ layout(std430, binding=3) buffer hist_orig {
 layout(rgba32f, binding = 4) uniform image2D vectorscope_texture;
 layout(rgba32f, binding = 5) uniform image2D waveform_texture;
 layout(r32i, binding = 6) uniform coherent iimage2D waveform_acc;
+layout(r32i, binding = 7) uniform coherent iimage2D vectorscope_acc;
 
 uniform float cdf[256];
 uniform bool histogram_loaded;
@@ -90,6 +91,8 @@ void main() {
         //imageAtomicAnd(waveform_acc, pixelCoord, 0);
         
         //imageAtomicExchange(waveform_acc, pixelCoord, 0);
+        
+        //imageStore(waveform_acc, cc, ivec4(ivec3(0),1));
     }
 
     barrier();
@@ -139,10 +142,16 @@ void main() {
         ivec2 c = ivec2(polar2cart(vec2(hsv.y,hsv.x * 3.1459 * 2)) * 128);
 
         c += ivec2(128,128);
-        imageStore(vectorscope_texture, c, vec4(texColor.rgb,1));
+        //imageStore(vectorscope_texture, c, vec4(texColor.rgb,1));
+        imageAtomicAdd(vectorscope_acc, c, 1);
+
+
+        ivec2 foo = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 512 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
+        imageAtomicExchange(waveform_acc, foo, 0);
+        ivec2 bar = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 255 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
+        imageAtomicExchange(vectorscope_acc, bar, 0);
 
         ivec2 cc = ivec2( int( min(float(pixelCoord.x)/float(texSize.x),1) * 511 ), int(254 - binIndex));
-        //imageStore(waveform_texture, cc, vec4(texColor.rgb,1));
         imageAtomicAdd(waveform_acc, cc, 1);
     }
 
@@ -155,18 +164,19 @@ void main() {
            atomicAdd(elements_orig[lid], orig_local_bins[lid]);
        }
     }
-    
-    if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y) {
-        //vec4 texColor = imageLoad(img, pixelCoord);
-        //uint binIndex = uint(calcLum(texColor) * 255.0);
-        //ivec2 cc = ivec2(int((pixelCoord.x/float(texSize.x)) * 512), int(255 - binIndex));
-        //if (histogram_loaded) {
-        //    imageStore(waveform_texture, cc, vec4(vec3(float( elements[uint(cdf[binIndex] * 255)] * var_mult ) ),1));
-        //}
-    }
 
     if (pixelCoord.x < 512 && pixelCoord.y < 255) {
         int count = imageLoad(waveform_acc, pixelCoord).x;
         imageStore(waveform_texture, pixelCoord, vec4(vec3(count/(var_mult*70)),1));
+    }
+    if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y) {
+        vec4 texColor = imageLoad(img, pixelCoord);
+        vec3 hsv = rgb2hsv(texColor.rgb);
+        ivec2 c = ivec2(polar2cart(vec2(hsv.y,hsv.x * 3.1459 * 2)) * 128);
+
+        c += ivec2(128,128);
+        int count = imageLoad(vectorscope_acc, c).x;
+        imageStore(vectorscope_texture, c, vec4(texColor.rgb * min(1,count/(var_mult*120)),1));
+        //imageAtomicAdd(vectorscope_acc, c, 1);
     }
 }
