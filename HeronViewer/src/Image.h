@@ -26,7 +26,7 @@
 #include "shader_c.h"
 
 #define RENDER_WIDTH 1920
-#define SMALL_IMG_MAX 120
+#define SMALL_IMG_MAX 3000
 
 class Histogram;
 
@@ -115,6 +115,7 @@ private:
 	unsigned int comp_texture;
 	unsigned vectorscope;
 	unsigned waveform;
+	unsigned waveform_acc;
 	GLuint SSBO;
 	GLuint SSBO_orig;
 

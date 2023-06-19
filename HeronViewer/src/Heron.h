@@ -19,6 +19,7 @@ public:
 	Heron(int w, int h) : Window(w, h) {};
 	std::string getFileDialogKey();
 	std::vector<Module*> getModules();
+	void onWindowLoad();
 	void render();
 	void unloadImage();
 	void loadImage(std::string filePath, std::string fileName);

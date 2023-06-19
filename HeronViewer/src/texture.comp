@@ -20,6 +20,8 @@ uniform float[4] expo;
 uniform float[4] contrast;
 uniform float[4] whites;
 
+uniform float[9] sharp_kernel;
+
 uniform float cdf[256];
 uniform bool histogram_loaded;
 
@@ -168,6 +170,25 @@ vec4 apply_wb(vec4 v) {
 }
 
 
+vec4 get_corrected_pixel(ivec2 coord) {
+	vec4 texColor = texelFetch(texture1, coord, 0);
+    texColor.x = pow(texColor.x,2.5);
+    texColor.y = pow(texColor.y,2.5);
+    texColor.z = pow(texColor.z,2.5);
+	return texColor;
+}
+
+vec4 convolution3x3(ivec2 origin, float kernel[9]) {
+	vec4 result = vec4(0);
+	for (int i = -1; i <= 1; i ++) {
+		for (int j = -1; j <= 1; j ++) {
+			result += kernel[((3+1)*i) + (j+1)] * get_corrected_pixel(origin + ivec2(i,j));
+		}
+	}
+	return result;
+}
+
+
 float edit_channel(float v, int chr) {
 	vec4 result = vec4(0);
 	float t = pow(2,expo[chr]) * v * (1 + whites[chr]);
@@ -195,6 +216,7 @@ vec4 pixelTransform(vec4 pix, ivec2 coord, ivec2 tex_size) {
 		return result;
 	}
 	
+	//result = clamp_pix(convolution3x3(coord, sharp_kernel));
 	result = clamp_pix(edit_channels(pix));
 	result = clamp_pix(apply_wb(result));
 	result = clamp_pix(apply_sat(result));
@@ -238,10 +260,7 @@ void main() {
 
     // Ensure the current invocation is within the texture bounds
     if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y) {
-        vec4 texColor = texelFetch(texture1, pixelCoord, 0);
-        texColor.x = pow(texColor.x,2.5);
-        texColor.y = pow(texColor.y,2.5);
-        texColor.z = pow(texColor.z,2.5);
+        vec4 texColor = get_corrected_pixel(pixelCoord);
 
         texColor = pixelTransform(texColor, pixelCoord, texSize);
 

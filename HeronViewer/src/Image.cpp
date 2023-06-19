@@ -62,19 +62,20 @@ void Image::getImage(const char* filename) {
 		return;
 	}
 
-	int bitmap_bpp = FreeImage_GetBPP(bitmap);
+	const unsigned bitmap_bpp = FreeImage_GetBPP(bitmap);
 	Console::log("Bitmap bpp: " + std::to_string(bitmap_bpp));
 
 	FreeImage_FlipVertical(bitmap);
 	//temp = FreeImage_ConvertTo32Bits(bitmap);
 	temp = bitmap;
 
-	if (bitmap_bpp > 32)
-		temp = FreeImage_ConvertTo32Bits(bitmap);
-	else
-		temp = FreeImage_ConvertTo24Bits(bitmap);
+	//if (bitmap_bpp > 32)
+	//	temp = FreeImage_ConvertTo32Bits(bitmap);
+	//else
+	//	temp = FreeImage_ConvertTo24Bits(bitmap);
+	temp = FreeImage_ConvertTo24Bits(bitmap);
 
-	FreeImage_AdjustGamma(temp, 2.2f);
+	FreeImage_AdjustGamma(temp, 2.5);
 
 	width = FreeImage_GetWidth(temp);
 	height = FreeImage_GetHeight(temp);
@@ -82,25 +83,27 @@ void Image::getImage(const char* filename) {
 
 	Console::log("Bitmap (TEMP) bpp: " + std::to_string(bpp));
 
+	if (width > height && width > SMALL_IMG_MAX) {
+		small_img_width = SMALL_IMG_MAX;
+		small_img_height = SMALL_IMG_MAX * ((float)height / width);
+	}
+	else if (height > SMALL_IMG_MAX) {
+		small_img_width = SMALL_IMG_MAX * ((float)width / height);
+		small_img_height = SMALL_IMG_MAX;
+	}
+	width = small_img_width;
+	height = small_img_height;
+	temp = FreeImage_Rescale(temp, small_img_width, small_img_height);
 
 	x = width / 32;
 	Console::log("IMAGE DIMENSIONS SIZE: " + std::to_string(width) + " , " + std::to_string(height));
 	y = height / 32;
 	Console::log("COMPUTE DISPATCH SIZE: " + std::to_string(x) + " , " + std::to_string(y) + " = " + std::to_string(x * y) + " WORK GROUPS");
 
-	if (width > height) {
-		small_img_width = SMALL_IMG_MAX;
-		small_img_height = SMALL_IMG_MAX * ((float)height / width);
-	}
-	else {
-		small_img_width = SMALL_IMG_MAX * ((float)width / height);
-		small_img_height = SMALL_IMG_MAX;
-	}
 
-
-	data = (unsigned char*)malloc(width * height * bpp * sizeof(unsigned char));
+	data = (unsigned char*)malloc(width * height * (bpp/8) * sizeof(unsigned char));
 	Console::log("memcpy image bits");
-	memcpy(data, FreeImage_GetBits(temp), static_cast<size_t>(width) * height * (bpp / 8));
+	memcpy(data, FreeImage_GetBits(temp), width * height * (bpp / 8));
 	Console::log("memcpy finished");
 
 
@@ -110,11 +113,13 @@ void Image::getImage(const char* filename) {
 
 void Image::bindImage() {
 	updatePreviewSize();
-	glBindTexture(GL_TEXTURE_2D, texture); 
+	glBindTexture(GL_TEXTURE_2D, texture);
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
 		glGenerateMipmap(GL_TEXTURE_2D);
+
 	}
 	else
 	{
@@ -127,12 +132,13 @@ void Image::bindImage() {
 	glBindTexture(GL_TEXTURE_2D, comp_texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
 	glBindImageTexture(0, comp_texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+	//glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void Image::exportImage(const char* fileLoc) {
 	exporting = true;
 	Console::log("Exporting...");
-	
+	/*
 	glGenBuffers(1, &pbo);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 	glBufferData(GL_PIXEL_PACK_BUFFER, width * height * (bpp / 8) * sizeof(unsigned char), 0, GL_DYNAMIC_READ);
@@ -163,13 +169,37 @@ void Image::exportImage(const char* fileLoc) {
 	shader.setMat4("view", view);
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	*/
 
+	GLenum error = 0;
+
+
+	export_data = (GLubyte*)malloc(width * height * 4 * sizeof(GLfloat));
+	memset(export_data, 0, width * height * 4);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+	glBufferData(GL_PIXEL_PACK_BUFFER, width * height * 4 * sizeof(GLfloat), nullptr, GL_STREAM_READ);
+	//glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+	glFinish();
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, comp_texture);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	float start = glfwGetTime();
-	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, export_data);
-	Console::log("glReadPixels time: " + std::to_string(glfwGetTime() - start));
+	const double start = glfwGetTime();
+	//glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, export_data);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	Console::log("glGetTexImage time: " + std::to_string(glfwGetTime() - start));
+	const auto* d = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+	std::memcpy(export_data, d, sizeof(GLfloat) * width * height * 4);
+	//glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+	//glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 
 	renderer = std::thread(&Image::renderImage, this, fileLoc);
+
+	GLubyte foo = export_data[2000];
+	foo = export_data[2010];
 
 	updatePreviewSize();
 
@@ -358,7 +388,6 @@ void Image::init()
 	imageRender = Overlay::registerMetric();
 
 
-
 	glGenTextures(1, &comp_texture);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, comp_texture);
@@ -366,28 +395,38 @@ void Image::init()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-	glBindImageTexture(0, comp_texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 0, 0, 0, GL_RGBA, GL_FLOAT, NULL);
+	glBindImageTexture(0, comp_texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 
 	glGenTextures(1, &vectorscope);
-	glActiveTexture(GL_TEXTURE1);
+	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, vectorscope);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 255, 255, 0, GL_RGBA, GL_FLOAT, NULL);
 	glBindImageTexture(4, vectorscope, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 
 	glGenTextures(1, &waveform);
-	glActiveTexture(GL_TEXTURE1);
+	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, waveform);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 512, 255, 0, GL_RGBA, GL_FLOAT, NULL);
+	glBindImageTexture(5, waveform, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+
+	glGenTextures(1, &waveform_acc);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, waveform_acc);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 512, 255, 0, GL_RGBA, GL_FLOAT, NULL);
-	glBindImageTexture(5, waveform, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 512, 255, 0, GL_RED_INTEGER, GL_INT, NULL);
+	glBindImageTexture(6, waveform_acc, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 
 	glGenBuffers(1, &SSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
@@ -398,7 +437,7 @@ void Image::init()
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_orig);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, SSBO_orig);
-	
+
 }
 
 void Image::renderToFrameBuffer() {
@@ -441,10 +480,6 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	glBindTexture(GL_TEXTURE_2D, comp_texture);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, vectorscope);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, waveform);
 	process_compute_shader_.use();
 	process_compute_shader_.setFloatArray("low", low, 4);
 	process_compute_shader_.setFloatArray("whites", whites, 4);
@@ -466,6 +501,8 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	process_compute_shader_.setFloat("shad_var", shad_var);
 	process_compute_shader_.setFloat("var_mult", var_mult);
 
+	process_compute_shader_.setFloatArray("sharp_kernel", sharp_kernel, 9);
+
 	process_compute_shader_.setFloatArray("cdf", cdf, 256);
 	process_compute_shader_.setBool("histogram_loaded", histogram_loaded);
 	int x = width / 32;
@@ -482,12 +519,14 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		std::fill_n(histogram, 256 * 4, 0);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_orig);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * 4 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
 		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 		std::fill_n(hist_orig, 256, 0);
 
 		hist_compute_shader_.use();
 		hist_compute_shader_.setBool("histogram_loaded", histogram_loaded);
+		hist_compute_shader_.setFloat("var_mult", var_mult);
+		hist_compute_shader_.setFloatArray("cdf", cdf, 256);
 
 		glDispatchCompute(x, y, 1);
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
@@ -519,49 +558,17 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	// bind Texture
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, comp_texture);
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, texture);
-	// render container
 	shader.use();
 	shader.setMat4("model", model);
 	shader.setMat4("view", view);
 	shader.setMat4("projection", projection);
-	//shader.setFloatArray("low", low, 4);
-	//shader.setFloatArray("whites", whites, 4);
-	//shader.setFloatArray("mid", mid, 4);
-	//shader.setFloatArray("high", high, 4);
-	//shader.setFloatArray("contrast", contrast, 4);
-	//shader.setFloatArray("exp", exp, 4);
-	//shader.setBool("bw", bw);
-
-	//shader.setFloat("sat", sat);
-	//shader.setFloat("wb", wb);
-
-	////shader.setFloatArray("sharp_kernel", sharp_kernel, 25);
-	//shader.setFloatArray("sharp_kernel33", sharp_kernel, 9);
-
-	//shader.setBool("clip", *clip);
-	//shader.setBool("b4", *b4);
-
-
-	//shader.setFloat("high_thresh", high_thresh);
-	//shader.setFloat("shad_thresh", shad_thresh);
-	//shader.setFloat("high_incr", high_incr);
-	//shader.setFloat("shad_incr", shad_incr);
-	//shader.setFloat("shad_var", shad_var);
-	//shader.setFloat("var_mult", var_mult);
 
 	shader.setFloat("texelWidth", 1.0f / width);
 	shader.setFloat("texelHeight", 1.0f / height);
 
-	//shader.setInt("width", width);
-	//shader.setInt("height", height);
-	//shader.setFloat("scale_factor", scale_factor);
-
  
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 
 	changed = false;
@@ -577,7 +584,7 @@ void Image::render()
 	updateMouseInWindow();
 	ImGui::Image((ImTextureID)renderedTexture, previewSize);
 	ImGui::End();
-	*imageRender = "Image Render Time: " + std::to_string(glfwGetTime() - start);
+	*imageRender = "ImGui Window Render Time: " + std::to_string(glfwGetTime() - start);
 
 	ImGui::Begin("Vectorscope");
 	ImGui::Image((ImTextureID)vectorscope, ImVec2(255, 255));

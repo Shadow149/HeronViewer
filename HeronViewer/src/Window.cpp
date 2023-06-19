@@ -43,6 +43,11 @@ int Window::init() {
 	Console::log("RENDERER: " + std::string((char*)(glGetString(GL_RENDERER))));
 	Console::log("===");
 
+	Console::log("MAX WORK GROUPS: " + std::to_string(GL_MAX_COMPUTE_WORK_GROUP_COUNT));
+	Console::log("MAX WORK GROUP SIZE: " + std::to_string(GL_MAX_COMPUTE_WORK_GROUP_SIZE));
+	Console::log("MAX INVS: " + std::to_string(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS));
+	Console::log("MAX SHARED MEMORY: " + std::to_string(GL_MAX_COMPUTE_SHARED_MEMORY_SIZE));
+
 	return 1;
 }
 
