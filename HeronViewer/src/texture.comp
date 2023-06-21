@@ -27,13 +27,11 @@ uniform bool histogram_loaded;
 
 shared uint local_bins[256];
 
-uniform float high_thresh;
-uniform float shad_thresh;
-uniform float high_incr;
-uniform float shad_incr;
-
-uniform float shad_var;
-uniform float var_mult;
+uniform float yiq_y;
+uniform float yiq_z;
+uniform float xyz_y;
+uniform float xyz_z;
+uniform float noise;
 
 uniform bool clip;
 uniform bool b4;
@@ -81,13 +79,14 @@ float calcLum(vec4 v) {
 }
 
 vec4 clamp_pix(vec4 v) {
-	if (calcLum(v) <= 0.0) {
-		return vec4(0.0, 0.0, 0.0, 1);
-	}
-	if (calcLum(v) >= 1.0) {
-		return vec4(1.0, 1.0, 1.0, 1);
-	}
-	return v;
+	//if (calcLum(v) <= 0.0) {
+	//	return vec4(0.0, 0.0, 0.0, 1);
+	//}
+	//if (calcLum(v) >= 1.0) {
+	//	return vec4(1.0, 1.0, 1.0, 1);
+	//}
+	//return v;
+	return vec4(clamp(v.x,0.0,1.0), clamp(v.y,0.0,1.0), clamp(v.z,0.0,1.0), 1);
 }
 
 vec3 rgb2hsv(vec3 c)
@@ -222,13 +221,13 @@ vec4 pixelTransform(vec4 pix, ivec2 coord, ivec2 tex_size) {
 	result = clamp_pix(apply_sat(result));
 
 	vec3 yiq = rgb2yiq(result.xyz);
-	yiq.y *= ((shad_thresh) * 2 + 1);
-	yiq.z *= ((high_incr) * 2 + 1);
+	yiq.y *= ((yiq_y) * 2 + 1);
+	yiq.z *= ((yiq_z) * 2 + 1);
 	result = vec4(yiq2rgb(yiq),1);
 
 	vec3 xyz = rgb2xyz(result.xyz);
-	xyz.y *= ((shad_incr) + 1);
-	xyz.z *= ((shad_var) + 1);
+	xyz.y *= ((xyz_y) + 1);
+	xyz.z *= ((xyz_z) + 1);
 	result = vec4(xyz2rgb(xyz),1);
 
 	if (bw) {
@@ -246,11 +245,11 @@ vec4 pixelTransform(vec4 pix, ivec2 coord, ivec2 tex_size) {
 
 	//float r = rand(vec2(floor(coord.x * tex_size.x), floor(coord.y * tex_size.y)));
 	//r = -1 + (r * 2); // rescale to -1 to 1
-	//float var = pow((5-high_thresh),2);
-	//float noise = ((1.0/(1.0 + pow(2.71,-(r/var)))) - 0.5)*2.0;
-	//result += noise;
+	//float var = pow((5-noise),2);
+	//float noise_ = ((1.0/(1.0 + pow(2.71,-(r/var)))) - 0.5)*2.0;
+	//result += noise_;
 
-
+	//result = vec4(-result.xyz + 1,0);
     return result;
 }
 

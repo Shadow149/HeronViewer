@@ -3,18 +3,18 @@
 void Editor::updateSharpenKernel() {
 	float a[9], b[9], c[9], d[9], e[9];
 	scalarMul(1.0f / 16.0f, blur_kernel33, a, 3);
-	scalarMul(blur, a, b, 3);
+	scalarMul(vals.blur, a, b, 3);
 	subMat(id33, b, c, 3);
-	scalarMul(sharp, c, d, 3);
+	scalarMul(vals.sharp, c, d, 3);
 	addMat(id33, d, e, 3);
 	normalMat(e, sharpen_kernel33, 3);
 }
 
 void Editor::toggleBwLabel() {
-	if (bw_label == BW_LABEL)
-		bw_label = COLOR_LABEL;
+	if (vals.bw_label == BW_LABEL)
+		vals.bw_label = COLOR_LABEL;
 	else
-		bw_label = BW_LABEL;
+		vals.bw_label = BW_LABEL;
 }
 
 void Editor::init()
@@ -34,24 +34,23 @@ void Editor::render()
 
 	ImGui::Begin(name.c_str());
 
-	if (sliderChanged |= ImGui::Button(bw ? COLOR_LABEL : BW_LABEL)) {
-		bw = !bw;
-		//toggleBwLabel();
+	if (sliderChanged |= ImGui::Button(vals.bw ? COLOR_LABEL : BW_LABEL)) {
+		vals.bw = !vals.bw;
 	}
 
-	sliderChanged |= ImGui::SliderFloat("White Balance", &wb, 1667, 25000);
+	sliderChanged |= ImGui::SliderFloat("White Balance", &vals.wb, 1667, 25000);
 
 	if (ImGui::BeginTabBar("MyTabBar"))
 	{
 		for (int n = 0; n < 4; n++)
 			if (ImGui::BeginTabItem(tab_names[n]))
 			{
-				sliderChanged |= ImGui::SliderFloat("Exposure", &(exp[n]), -2, 2);
-				sliderChanged |= ImGui::SliderFloat("Contrast", &(contrast[n]), -1, 1);
-				sliderChanged |= ImGui::SliderFloat("High", &(high[n]), -1, 1);
-				sliderChanged |= ImGui::SliderFloat("Mid", &(mid[n]), -1, 1);
-				sliderChanged |= ImGui::SliderFloat("Whites", &(whites[n]), -1, 1);
-				sliderChanged |= ImGui::SliderFloat("Low", &(low[n]), -1, 1);
+				sliderChanged |= ImGui::SliderFloat("Exposure", &(vals.expo[n]), -2, 2);
+				sliderChanged |= ImGui::SliderFloat("Contrast", &(vals.contrast[n]), -1, 1);
+				sliderChanged |= ImGui::SliderFloat("High", &(vals.high[n]), -1, 1);
+				sliderChanged |= ImGui::SliderFloat("Mid", &(vals.mid[n]), -1, 1);
+				sliderChanged |= ImGui::SliderFloat("Whites", &(vals.whites[n]), -1, 1);
+				sliderChanged |= ImGui::SliderFloat("Low", &(vals.low[n]), -1, 1);
 				ImGui::EndTabItem();
 			}
 		ImGui::EndTabBar();
@@ -59,22 +58,25 @@ void Editor::render()
 
 	ImGui::Separator();
 
-	sliderChanged |= ImGui::SliderFloat("Saturation", &sat, -1, 1);
+	sliderChanged |= ImGui::SliderFloat("Saturation", &vals.sat, -1, 1);
 
-	sliderChanged |= ImGui::SliderFloat("Sharpen: Blur", &blur, 0, 5);
-	sliderChanged |= ImGui::SliderFloat("Sharpen: Sharp", &sharp, 0, 5);
-	if (sharp != p_sharp || blur != p_blur) {
+	sliderChanged |= ImGui::SliderFloat("Sharpen: Blur", &vals.blur, 0, 5);
+	sliderChanged |= ImGui::SliderFloat("Sharpen: Sharp", &vals.sharp, 0, 5);
+	if (vals.sharp != vals.p_sharp || vals.blur != vals.p_blur) {
 		updateSharpenKernel();
-		p_sharp = sharp;
-		p_blur = blur;
+		vals.p_sharp = vals.sharp;
+		vals.p_blur = vals.blur;
 	}
 
-	sliderChanged |= ImGui::SliderFloat("Noise", &high_thresh, 0, 5);
-	sliderChanged |= ImGui::SliderFloat("Blue/Orange", &shad_thresh, -1, 1);
-	sliderChanged |= ImGui::SliderFloat("Green/Purple", &high_incr, -1, 1);
-	sliderChanged |= ImGui::SliderFloat("Blue", &shad_incr, -1, 1);
-	sliderChanged |= ImGui::SliderFloat("Red", &shad_var, -1, 1);
-	sliderChanged |= ImGui::SliderFloat("Variance mult", &var_mult, 0, 10);
+	sliderChanged |= ImGui::SliderFloat("Noise", &vals.noise, 0, 5);
+	sliderChanged |= ImGui::SliderFloat("Blue/Orange", &vals.yiq_y, -1, 1);
+	sliderChanged |= ImGui::SliderFloat("Green/Purple", &vals.yiq_z, -1, 1);
+	sliderChanged |= ImGui::SliderFloat("Yellow/Blue", &vals.xyz_y, -1, 1);
+	sliderChanged |= ImGui::SliderFloat("Purple/Green", &vals.xyz_z, -1, 1);
+
+	ImGui::Separator();
+
+	sliderChanged |= ImGui::SliderFloat("Scope Brightness", &vals.scope_brightness, 0, 10);
 
 	if (ImGui::Button("Reset")) {
 		reset();
@@ -124,7 +126,9 @@ void Editor::exportImage() {
 }
 
 void Editor::writeIni() {
-	iniWriting = true;
+	Console::log("WARNING: Editor::writeIni not implemented!");
+
+	/*iniWriting = true;
 	mINI::INIFile file(stripExtension(filePath) + ".ini");
 	mINI::INIStructure ini;
 	bool readSuc = file.read(ini);
@@ -166,53 +170,54 @@ void Editor::writeIni() {
 		Console::log("Ini updated");
 	}
 	Status::setStatus("Saved!");
-	iniWriting = false;
+	iniWriting = false;*/
 }
 
 void Editor::readIni() {
-	iniReading = true;
-	mINI::INIFile file(stripExtension(filePath) + ".ini");
-	mINI::INIStructure ini;
-	bool readSuc = file.read(ini);
-	if (!readSuc) {
-		Console::log("Ini doesn't exist, no settings to import...");
-		iniReading = false;
-		reset();
-		return;
-	}
-	else {
-		Console::log("Config setter ini read...");
-	}
-	try {
-		bw = std::stof(ini["sliders"]["bw"]);
+	Console::log("WARNING: Editor::readIni not implemented!");
+	//iniReading = true;
+	//mINI::INIFile file(stripExtension(filePath) + ".ini");
+	//mINI::INIStructure ini;
+	//bool readSuc = file.read(ini);
+	//if (!readSuc) {
+	//	Console::log("Ini doesn't exist, no settings to import...");
+	//	iniReading = false;
+	//	reset();
+	//	return;
+	//}
+	//else {
+	//	Console::log("Config setter ini read...");
+	//}
+	//try {
+	//	bw = std::stof(ini["sliders"]["bw"]);
 
-	} catch (...) {
-	}
+	//} catch (...) {
+	//}
 
-	wb = std::stof(ini["sliders"]["White Balance"]);
+	//wb = std::stof(ini["sliders"]["White Balance"]);
 
-	for (int n = 0; n < 4; n++) {
-		exp[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_exp"]);
-		contrast[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_contrast"]);
-		high[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_high"]);
-		mid[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_mid"]);
-		whites[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_whites"]);
-		low[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_low"]);
-	}
+	//for (int n = 0; n < 4; n++) {
+	//	exp[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_exp"]);
+	//	contrast[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_contrast"]);
+	//	high[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_high"]);
+	//	mid[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_mid"]);
+	//	whites[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_whites"]);
+	//	low[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_low"]);
+	//}
 
-	sat = std::stof(ini["sliders"]["sat"]);
-	blur = std::stof(ini["sliders"]["blur"]);
-	sharp = std::stof(ini["sliders"]["sharp"]);
-	high_thresh = std::stof(ini["sliders"]["high_thresh"]);
-	shad_thresh = std::stof(ini["sliders"]["shad_thresh"]);
-	high_incr = std::stof(ini["sliders"]["high_incr"]);
-	shad_incr = std::stof(ini["sliders"]["shad_incr"]);
-	shad_var = std::stof(ini["sliders"]["shad_var"]);
-	var_mult = std::stof(ini["sliders"]["var_mult"]);
-	
-	iniReading = false;
-	Status::setStatus("Read settings successfully!");
-	setChanges();
+	//sat = std::stof(ini["sliders"]["sat"]);
+	//blur = std::stof(ini["sliders"]["blur"]);
+	//sharp = std::stof(ini["sliders"]["sharp"]);
+	//high_thresh = std::stof(ini["sliders"]["high_thresh"]);
+	//shad_thresh = std::stof(ini["sliders"]["shad_thresh"]);
+	//high_incr = std::stof(ini["sliders"]["high_incr"]);
+	//shad_incr = std::stof(ini["sliders"]["shad_incr"]);
+	//shad_var = std::stof(ini["sliders"]["shad_var"]);
+	//var_mult = std::stof(ini["sliders"]["var_mult"]);
+	//
+	//iniReading = false;
+	//Status::setStatus("Read settings successfully!");
+	//setChanges();
 }
 
 
@@ -234,40 +239,48 @@ void Editor::cleanup()
 
 void Editor::reset()
 {
-	bw_label = BW_LABEL;
+	vals.bw_label = BW_LABEL;
 
-	memset(low, 0, 4 * sizeof(float));
-	memset(mid, 0, 4 * sizeof(float));
-	memset(high, 0, 4 * sizeof(float));
-	memset(exp, 0, 4 * sizeof(float));
-	memset(contrast, 0, 4 * sizeof(float));
-	memset(whites, 0, 4 * sizeof(float));
+	/// NEW
 
-	sat = SAT_DEFAULT;
-	wb = WB_DEFAULT;
+	vals.bw = false;
+	vals.inv = false;
 
-	sharp = SHARP_DEFAULT;
-	blur = BLUR_DEFAULT;
+	memset(vals.low, LOW_DEFAULT, 4 * sizeof(float));
+	memset(vals.mid, MID_DEFAULT, 4 * sizeof(float));
+	memset(vals.high, HIGH_DEFAULT, 4 * sizeof(float));
+	memset(vals.expo, EXP_DEFAULT, 4 * sizeof(float));
+	memset(vals.contrast, CONTRAST_DEFAULT, 4 * sizeof(float));
+	memset(vals.whites, WHITE_DEFAULT, 4 * sizeof(float));
 
-	p_sharp = SHARP_DEFAULT;
-	p_blur = BLUR_DEFAULT;
+	memset(vals.lift, LOW_DEFAULT, 4 * sizeof(float));
+	memset(vals.gamma, LOW_DEFAULT, 4 * sizeof(float));
+	memset(vals.gain, LOW_DEFAULT, 4 * sizeof(float));
 
-	high_thresh = 0;
-	shad_thresh = 0;
-	high_incr = 0;
-	shad_incr = 0;
+	vals.sat = SAT_DEFAULT;
+	vals.wb = WB_DEFAULT;
 
-	shad_var = 0;
-	var_mult = 2;
+	vals.noise = 0;
 
-	bw = false;
+	vals.sharp = SHARP_DEFAULT;
+	vals.p_sharp = SHARP_DEFAULT; // Prev sharp
+	vals.blur = BLUR_DEFAULT;
+	vals.p_blur = BLUR_DEFAULT; // Prev blur
+
+
+	vals.yiq_y = 0;
+	vals.yiq_z = 0;
+	vals.xyz_y = 0;
+	vals.xyz_z = 0;
+
+	vals.scope_brightness = 2;
 
 	setChanges();
 
 }
 
 void Editor::setChanges() {
-	img->setChanges(low, whites, mid, high, exp, contrast, sharpen_kernel33, bw, high_thresh, shad_thresh, high_incr, shad_incr, shad_var, var_mult, sat, wb);
+	img->setChanges(&vals);
 }
 
 void Editor::updateFile(std::string& fn, std::string& fp)

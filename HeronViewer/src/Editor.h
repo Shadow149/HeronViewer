@@ -9,6 +9,8 @@
 #define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 #include <experimental/filesystem>
 
+#include "SliderValues.h"
+
 
 #define LOW_DEFAULT 0.0f
 #define MID_DEFAULT 0.0f
@@ -31,6 +33,7 @@ class Editor : public Module
 public:
 	Editor(Image* i, std::string n, bool v = true) : Module(n, v) {
 		img = i;
+		reset();
 	};
 	void init();
 	void render();
@@ -61,11 +64,13 @@ private:
 
 	bool sliderChanged = false;
 
+	SliderValues vals = SliderValues();
+
 	/////////////////// slider values //////////////////////////////
 
-	const char* bw_label = BW_LABEL;
+	//const char* bw_label = BW_LABEL;
 
-	float low[4] = { LOW_DEFAULT, LOW_DEFAULT, LOW_DEFAULT, LOW_DEFAULT };
+	/*float low[4] = { LOW_DEFAULT, LOW_DEFAULT, LOW_DEFAULT, LOW_DEFAULT };
 	float mid[4] = { MID_DEFAULT, MID_DEFAULT, MID_DEFAULT, MID_DEFAULT };
 	float high[4] = { HIGH_DEFAULT, HIGH_DEFAULT, HIGH_DEFAULT, HIGH_DEFAULT };
 	float exp[4] = { EXP_DEFAULT, EXP_DEFAULT, EXP_DEFAULT, EXP_DEFAULT };
@@ -89,7 +94,7 @@ private:
 	float shad_var = 0;
 	float var_mult = 2;
 
-	bool bw = false;
+	bool bw = false;*/
 
 	////////////////////////////////////////////
 

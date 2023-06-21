@@ -100,7 +100,7 @@ void Histogram::render()
 	ImPlot::GetStyle().AntiAliasedLines = true;
 	if (ImPlot::BeginPlot("Hist plot", ImVec2(-1,-1), plotFlags)) {
 		ImPlot::SetupAxes("x", "y", flags, flags);
-		double foo = (double)(img->getHeight() * img->getWidth()) / 15.0;
+		double foo = (double)(img->getHeight() * img->getWidth()) / 20.0;
 		// TODO ImPlotCond_Always doing unnecessary updates?
 		ImPlot::SetupAxesLimits(0, 255, 0, foo, ImPlotCond_Always);
 		for (int n = 3; n >= 0; n--) {

@@ -24,6 +24,7 @@
 #include <thread>
 
 #include "shader_c.h"
+#include "SliderValues.h"
 
 #define RENDER_WIDTH 1920
 #define SMALL_IMG_MAX 3000
@@ -59,37 +60,8 @@ private:
 	FIBITMAP* bitmap;
 	FIBITMAP* scaled;
 
-	/*
-	float low = LOW_DEFAULT;
-	float mid = MID_DEFAULT;
-	float high = HIGH_DEFAULT;
-	float gamma = GAMMA_DEFAULT;
-	float A = A_DEFAULT;
-	float contrast = CONTRAST_DEFAULT;
-	*/
-
-	float* low;
-	float* mid;
-	float* high;
-	float* contrast;
-	float* exp;
-	float* whites;
-
-	float sat;
-	float wb;
-
-	float* sharp_kernel;
-	bool bw = false;
-	//float* sharp_kernel33;
+	SliderValues* m_pVals;
 	bool changed = false;
-
-	float high_thresh = 1;
-	float shad_thresh = 0;
-	float high_incr = 1;
-	float shad_incr = 1;
-
-	float shad_var = 0.07;
-	float var_mult = 2;
 
 	unsigned int texture;
 	unsigned int texture1;
@@ -139,8 +111,7 @@ public:
 	
 	void unload();
 	void getImage(const char* filename);
-	void setChanges(float* l, float* w, float* m, float* h, float* e, float* c, float* sKer, bool bw, float ht, float st, float ha, float sa,
-		float sv, float vm, float sat, float wb);
+	void setChanges(SliderValues* slider_values);
 	unsigned char* getData();
 	unsigned int getHeight();
 	unsigned int getWidth();

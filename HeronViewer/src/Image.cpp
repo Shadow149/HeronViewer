@@ -216,30 +216,9 @@ void Image::renderImage(const char* fileLoc) {
 	rendering = false;
 }
 
-void Image::setChanges(float* l, float* w, float* m, float* h, float* e, float* c, float* sKer, bool bw, float ht, float st, float ha, float sa,
-	float sv, float vm, float sat, float wb)
+void Image::setChanges(SliderValues* slider_values)
 {
-	// TODO limits
-	low = l;
-	whites = w;
-	mid = m;
-	high = h;
-	//gamma = g;
-	exp = e;
-	contrast = c;
-	sharp_kernel = sKer;
-	this->bw = bw;
-
-	this->sat = sat;
-	this->wb = wb;
-
-	high_thresh = ht;
-	shad_thresh = st;
-	high_incr = ha;
-	shad_incr = sa;
-
-	shad_var = sv;
-	var_mult = vm;
+	m_pVals = slider_values;
 
 	// TODO implement this properly
 	changed = true;
@@ -491,34 +470,32 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	process_compute_shader_.use();
-	process_compute_shader_.setFloatArray("low", low, 4);
-	process_compute_shader_.setFloatArray("whites", whites, 4);
-	process_compute_shader_.setFloatArray("mid", mid, 4);
-	process_compute_shader_.setFloatArray("high", high, 4);
-	process_compute_shader_.setFloatArray("contrast", contrast, 4);
-	process_compute_shader_.setFloatArray("expo", exp, 4);
+	process_compute_shader_.setFloatArray("low", m_pVals->low, 4);
+	process_compute_shader_.setFloatArray("whites", m_pVals->whites, 4);
+	process_compute_shader_.setFloatArray("mid", m_pVals->mid, 4);
+	process_compute_shader_.setFloatArray("high", m_pVals->high, 4);
+	process_compute_shader_.setFloatArray("contrast", m_pVals->contrast, 4);
+	process_compute_shader_.setFloatArray("expo", m_pVals->expo, 4);
 
-	process_compute_shader_.setBool("bw", bw);
-	process_compute_shader_.setFloat("sat", sat);
-	process_compute_shader_.setFloat("wb", wb);
+	process_compute_shader_.setBool("bw", m_pVals->bw);
+	process_compute_shader_.setFloat("sat", m_pVals->sat);
+	process_compute_shader_.setFloat("wb", m_pVals->wb);
 	process_compute_shader_.setBool("clip", *clip);
 	process_compute_shader_.setBool("b4", *b4);
 
-	process_compute_shader_.setFloat("high_thresh", high_thresh);
-	process_compute_shader_.setFloat("shad_thresh", shad_thresh);
-	process_compute_shader_.setFloat("high_incr", high_incr);
-	process_compute_shader_.setFloat("shad_incr", shad_incr);
-	process_compute_shader_.setFloat("shad_var", shad_var);
-	process_compute_shader_.setFloat("var_mult", var_mult);
+	process_compute_shader_.setFloat("yiq_y", m_pVals->yiq_y);
+	process_compute_shader_.setFloat("yiq_z", m_pVals->yiq_z);
+	process_compute_shader_.setFloat("xyz_y", m_pVals->xyz_y);
+	process_compute_shader_.setFloat("xyz_z", m_pVals->xyz_z);
+	process_compute_shader_.setFloat("noise", m_pVals->noise);
 
-	process_compute_shader_.setFloatArray("sharp_kernel", sharp_kernel, 9);
+	//process_compute_shader_.setFloatArray("sharp_kernel", m_pVals->sharp_kernel, 9);
 
 	process_compute_shader_.setFloatArray("cdf", cdf, 256);
 	process_compute_shader_.setBool("histogram_loaded", histogram_loaded);
 	int x = width / 32;
 	int y = height / 32;
 	glDispatchCompute(x, y, 1);
-	//Console::log("COMPUTE DISPATCH " + std::to_string(x) + " / " + std::to_string(y) + " = " + std::to_string(x * y) + " WORK GROUPS");
 
 	glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
@@ -535,8 +512,8 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 
 		hist_compute_shader_.use();
 		hist_compute_shader_.setBool("histogram_loaded", histogram_loaded);
-		hist_compute_shader_.setBool("bw", bw);
-		hist_compute_shader_.setFloat("var_mult", var_mult);
+		hist_compute_shader_.setBool("bw", m_pVals->bw);
+		hist_compute_shader_.setFloat("var_mult", m_pVals->scope_brightness);
 
 		glDispatchCompute(x, y, 1);
 
@@ -615,45 +592,15 @@ void Image::cleanup()
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
-	//free(small_data);
 }
 
 float Image::calcCurve(float t, int chr)
 {
-	//std::cout << exp[0] << exp[1] << exp[2] << exp[3] << std::endl;
-	t *= pow(2, exp[chr]) * (1+whites[chr]);
-	return (4 * pow((1 - t), 3) * t * (0.25 + low[chr] - contrast[chr])) + (6 * pow((1 - t), 2) * pow(t, 2) * (0.5 + mid[chr])) + (4 * (1 - t) * pow(t, 3) * (0.75 + high[chr] + contrast[chr])) + (pow(t, 4) * 1);
-}
-
-void Image::calcCurveHist(float v, int chr, float* red, float* green, float* blue) {
-	float t = 0;
-	if (chr == 1) { // red
-		t = v * exp[chr];
-		*red   = (4 * pow((1 - t), 3) * t * (0.25 + low[chr] - contrast[chr])) + (6 * pow((1 - t), 2) * pow(t, 2) * (0.5 + mid[chr])) + (4 * (1 - t) * pow(t, 3) * (0.75 + high[chr] + contrast[chr])) + (pow(t, 4) * 1);
-		t = v * -exp[chr];
-		*green = (4 * pow((1 - t), 3) * t * (0.25 + -low[chr] - -contrast[chr])) + (6 * pow((1 - t), 2) * pow(t, 2) * (0.5 + -mid[chr])) + (4 * (1 - t) * pow(t, 3) * (0.75 + -high[chr] + -contrast[chr])) + (pow(t, 4) * 1);
-		t = v * -exp[chr];
-		*blue  = (4 * pow((1 - t), 3) * t * (0.25 + -low[chr] - -contrast[chr])) + (6 * pow((1 - t), 2) * pow(t, 2) * (0.5 + -mid[chr])) + (4 * (1 - t) * pow(t, 3) * (0.75 + -high[chr] + -contrast[chr])) + (pow(t, 4) * 1);
-	}
-	if (chr == 2) { // green
-		t = v * -exp[chr];
-		*red = (4 * pow((1 - t), 3) * t * (0.25 + -low[chr] - -contrast[chr])) + (6 * pow((1 - t), 2) * pow(t, 2) * (0.5 + -mid[chr])) + (4 * (1 - t) * pow(t, 3) * (0.75 + -high[chr] + -contrast[chr])) + (pow(t, 4) * 1);
-		t = v * exp[chr];
-		*green = (4 * pow((1 - t), 3) * t * (0.25 + low[chr] - contrast[chr])) + (6 * pow((1 - t), 2) * pow(t, 2) * (0.5 + mid[chr])) + (4 * (1 - t) * pow(t, 3) * (0.75 + high[chr] + contrast[chr])) + (pow(t, 4) * 1);
-		t = v * -exp[chr];
-		*blue = (4 * pow((1 - t), 3) * t * (0.25 + -low[chr] - -contrast[chr])) + (6 * pow((1 - t), 2) * pow(t, 2) * (0.5 + -mid[chr])) + (4 * (1 - t) * pow(t, 3) * (0.75 + -high[chr] + -contrast[chr])) + (pow(t, 4) * 1);
-	}
-
-	if (chr == 3) { // blue
-		t = v * -exp[chr];
-		*red = (4 * pow((1 - t), 3) * t * (0.25 + -low[chr] - -contrast[chr])) + (6 * pow((1 - t), 2) * pow(t, 2) * (0.5 + -mid[chr])) + (4 * (1 - t) * pow(t, 3) * (0.75 + -high[chr] + -contrast[chr])) + (pow(t, 4) * 1);
-		t = v * -exp[chr];
-		*green = (4 * pow((1 - t), 3) * t * (0.25 + -low[chr] - -contrast[chr])) + (6 * pow((1 - t), 2) * pow(t, 2) * (0.5 + -mid[chr])) + (4 * (1 - t) * pow(t, 3) * (0.75 + -high[chr] + -contrast[chr])) + (pow(t, 4) * 1);
-		t = v * exp[chr];
-		*blue = (4 * pow((1 - t), 3) * t * (0.25 + low[chr] - contrast[chr])) + (6 * pow((1 - t), 2) * pow(t, 2) * (0.5 + mid[chr])) + (4 * (1 - t) * pow(t, 3) * (0.75 + high[chr] + contrast[chr])) + (pow(t, 4) * 1);
-	}
-
-
+	t *= pow(2, m_pVals->expo[chr]) * (1+m_pVals->whites[chr]);
+	return (4 * pow((1 - t), 3) * t * (0.25 + m_pVals->low[chr] - m_pVals->contrast[chr]))
+		+ (6 * pow((1 - t), 2) * pow(t, 2) * (0.5 + m_pVals->mid[chr]))
+		+ (4 * (1 - t) * pow(t, 3) * (0.75 + m_pVals->high[chr] + m_pVals->contrast[chr]))
+		+ (pow(t, 4) * 1);
 }
 
 void Image::scale(glm::vec3 s)
