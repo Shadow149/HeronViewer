@@ -44,6 +44,7 @@ private:
 	float scale_factor = 1.0f;
 	int x = 0;
 	int y = 0;
+	int loops = 0;
 
 	GLuint FramebufferName = 0, small_framebuffer = 1;
 	GLuint renderedTexture, small_framebuffer_tex;
@@ -86,9 +87,8 @@ private:
 
 	unsigned int comp_texture;
 	unsigned vectorscope;
-	unsigned vectorscope_acc;
 	unsigned waveform;
-	unsigned waveform_acc;
+
 	GLuint SSBO;
 	GLuint SSBO_orig;
 
@@ -97,6 +97,11 @@ private:
 	void updatePreviewSize();
 
 public:
+
+	// FOR DEBUGGING
+	unsigned waveform_acc;
+	unsigned vectorscope_acc;
+
 	ImVec2 size;
 	ImVec2 previewSize;
 

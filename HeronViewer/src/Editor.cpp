@@ -162,7 +162,7 @@ void Editor::render()
 
 				ImGui::Separator();
 
-				sliderChanged |= SliderFloatReset(vals.lift[n], 0.0f, "lift", &(vals.lift[n]), -1, 2);
+				sliderChanged |= SliderFloatReset(vals.lift[n], 0.0f, "lift", &(vals.lift[n]), -1, 1);
 				sliderChanged |= SliderFloatReset(vals.gamma[n], 1.0f, "gamma", &(vals.gamma[n]), 0, 2);
 				sliderChanged |= SliderFloatReset(vals.gain[n], 1.0f, "gain", &(vals.gain[n]), -1, 2);
 

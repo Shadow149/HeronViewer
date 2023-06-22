@@ -1,8 +1,6 @@
 #version 430 core
 
-#define SIZE 32
-
-layout (local_size_x = SIZE, local_size_y = SIZE, local_size_z = 1) in;
+layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
 // ----------------------------------------------------------------------------
 //
@@ -29,13 +27,9 @@ layout(r32i, binding = 7) uniform coherent iimage2D vectorscope_acc;
 
 uniform bool histogram_loaded;
 uniform float var_mult;
-uniform bool bw;
-
 
 shared uint local_bins[256*4];
 shared uint orig_local_bins[256];
-
-
 
 vec3 hsv2rgb(vec3 c)
 {
@@ -55,6 +49,20 @@ vec3 rgb2hsv(vec3 c)
     return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 }
 
+float circle_atan(float x, float y) {
+    if (x > 0) return atan(y/x);
+    if (x < 0 && y >= 0) return atan(y/x) + 3.14;
+    if (x < 0 && y < 0) return atan(y/x) - 3.14;
+    if (x == 0 && y > 0) return 3.14/2.0;
+    if (x == 0 && y < 0) return -3.14/2.0;
+    return 0;
+}
+
+
+vec2 cart2polar(vec2 c) {
+    return vec2(sqrt(pow(c.x,2) + pow(c.y,2)), atan(c.y,c.x));
+}
+
 vec2 polar2cart(vec2 c) {
     return vec2(c.x * cos(c.y), c.x * sin(c.y));
 }
@@ -70,7 +78,7 @@ void main() {
     ivec2 texSize = imageSize(img);
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);
 
-    uint lid = gl_LocalInvocationID.x + gl_LocalInvocationID.y * SIZE;
+    uint lid = gl_LocalInvocationID.x + gl_LocalInvocationID.y * 32;
 
     if (lid < 256) {
         local_bins[lid*4] = 0;
@@ -83,35 +91,19 @@ void main() {
         }
     }
 
-    if (pixelCoord.x < 255 && pixelCoord.y < 255) {
-        imageStore(vectorscope_texture, pixelCoord, vec4(vec3(0),1));
-    }
-
-    if (pixelCoord.x < 512 && pixelCoord.y < 255) {
-        //imageStore(waveform_texture, pixelCoord, vec4(vec3(0),1));
-        //imageAtomicAdd(waveform_acc, pixelCoord, 100);
-        
-        //imageStore(waveform_acc, pixelCoord, ivec4(ivec3(0),1));
-        //imageAtomicAnd(waveform_acc, pixelCoord, 0);
-        
-        //imageAtomicExchange(waveform_acc, pixelCoord, 0);
-        
-        //imageStore(waveform_acc, cc, ivec4(ivec3(0),1));
-    }
-
     barrier();
     memoryBarrier();
   
     // Ensure the current invocation is within the texture bounds
     if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y) {
-
         vec4 texColor = imageLoad(img, pixelCoord);
-
-        // Convert color to grayscale
+        vec3 hsv = rgb2hsv(texColor.rgb);
+        vec2 cart = polar2cart(vec2(hsv.y,hsv.x * 6.28318530718));
+        cart.x = (cart.x * 128) + 128;
+        cart.y = (cart.y * 128) + 128;
+        ivec2 c = ivec2(cart);
         float grayscale = calcLum(texColor);
-      
-        // Convert grayscale value to histogram bin index
-        // x 4 since we store hist values as L, R, G, B, ...
+
         uint binIndex = uint(grayscale * 255.0);
 
         uint rIndex = uint(texColor.b * 255.0) * 4;
@@ -142,24 +134,16 @@ void main() {
             atomicAdd(orig_local_bins[binIndex], 1);
         }
 
-        vec3 hsv = rgb2hsv(texColor.rgb);
-        ivec2 c = ivec2(polar2cart(vec2(hsv.y,hsv.x * 3.1459 * 2)) * 128);
-
-        c += ivec2(128,128);
-
-        if (!bw) {
-            ivec2 bar = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 255 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
-            imageAtomicExchange(vectorscope_acc, bar, 0);
-        }
 
         imageAtomicAdd(vectorscope_acc, c, 1);
 
+        //ivec2 foo = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 512 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
+        //imageAtomicExchange(waveform_acc, foo, 0);
 
-        ivec2 foo = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 512 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
-        imageAtomicExchange(waveform_acc, foo, 0);
+        ivec2 cc = ivec2( pixelCoord.x, int(254 - binIndex));
 
-        ivec2 cc = ivec2( int( min(float(pixelCoord.x)/float(texSize.x),1) * 511 ), int(254 - binIndex));
         imageAtomicAdd(waveform_acc, cc, 1);
+
     }
 
     barrier();
@@ -176,17 +160,22 @@ void main() {
        }
     }
 
-    if (pixelCoord.x < 512 && pixelCoord.y < 255) {
-        int count = imageLoad(waveform_acc, pixelCoord).x;
-        imageStore(waveform_texture, pixelCoord, vec4(vec3(count/(var_mult*70)),1));
-    }
-    if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y && !bw) {
-        vec4 texColor = imageLoad(img, pixelCoord);
-        vec3 hsv = rgb2hsv(texColor.rgb);
-        ivec2 c = ivec2(polar2cart(vec2(hsv.y,hsv.x * 3.1459 * 2)) * 128);
 
-        c += ivec2(128,128);
-        int count = imageLoad(vectorscope_acc, c).x;
-        imageStore(vectorscope_texture, c, vec4(texColor.rgb * min(1,count/(var_mult*120)),1));
-    }
+    ivec2 foo = ivec2( pixelCoord.x, int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
+    int count = imageLoad(waveform_acc, foo).x;
+    imageStore(waveform_texture, foo, vec4(1) * count/(var_mult*20));
+    //if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y && !bw) {
+    //    int count = imageLoad(vectorscope_acc, c).x;
+    //    imageStore(vectorscope_texture, c, vec4(texColor.rgb * min(1,count/(var_mult*120)),1));
+    //}
+    
+    //if (pixelCoord.x < 255 && pixelCoord.y < 255) {
+    //}
+    ivec2 bar = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 255 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
+    int count_ = imageLoad(vectorscope_acc, bar).x;
+    vec2 n = bar - ivec2(128);
+    vec3 hsv_ = vec3(cart2polar(vec2(n.x/ 255.0f, n.y / 255.0f)),1);
+    vec4 col = vec4(hsv2rgb(vec3((hsv_.y ) / 6.28318530718 , hsv_.x*2, hsv_.z)),1);
+    // * (count/(var_mult*70))
+    imageStore(vectorscope_texture, bar, col * (count_/(var_mult*1000)));
 }
