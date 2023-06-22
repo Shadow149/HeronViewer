@@ -20,6 +20,10 @@ uniform float[4] expo;
 uniform float[4] contrast;
 uniform float[4] whites;
 
+uniform float[4] lift;
+uniform float[4] gamma;
+uniform float[4] gain;
+
 uniform float[9] sharp_kernel;
 
 uniform float cdf[256];
@@ -192,7 +196,8 @@ float edit_channel(float v, int chr) {
 	vec4 result = vec4(0);
 	float t = pow(2,expo[chr]) * v * (1 + whites[chr]);
 	float val = (4 * pow((1-t),3) * t * (0.25 + low[chr] - contrast[chr])) + (6 * pow((1-t),2) * pow(t,2) * (0.5 + mid[chr])) + (4 * (1-t) * pow(t,3) * (0.75 + high[chr] + contrast[chr])) + (pow(t,4) * 1);
-	return val;
+	return pow(gain[chr] * (((1 - lift[chr]) * val) + lift[chr]), gamma[chr]);
+;
 }
 
 float edit_channel_lum(float v) {

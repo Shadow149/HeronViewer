@@ -1,4 +1,5 @@
 #include "Editor.h"
+#include <algorithm>
 
 void Editor::updateSharpenKernel() {
 	float a[9], b[9], c[9], d[9], e[9];
@@ -51,6 +52,13 @@ void Editor::render()
 				sliderChanged |= ImGui::SliderFloat("Mid", &(vals.mid[n]), -1, 1);
 				sliderChanged |= ImGui::SliderFloat("Whites", &(vals.whites[n]), -1, 1);
 				sliderChanged |= ImGui::SliderFloat("Low", &(vals.low[n]), -1, 1);
+
+				ImGui::Separator();
+
+				sliderChanged |= ImGui::SliderFloat("lift", &(vals.lift[n]), -1, 2);
+				sliderChanged |= ImGui::SliderFloat("gamma", &(vals.gamma[n]), 0, 2);
+				sliderChanged |= ImGui::SliderFloat("gain", &(vals.gain[n]), -1, 2);
+
 				ImGui::EndTabItem();
 			}
 		ImGui::EndTabBar();
@@ -246,16 +254,16 @@ void Editor::reset()
 	vals.bw = false;
 	vals.inv = false;
 
-	memset(vals.low, LOW_DEFAULT, 4 * sizeof(float));
-	memset(vals.mid, MID_DEFAULT, 4 * sizeof(float));
-	memset(vals.high, HIGH_DEFAULT, 4 * sizeof(float));
-	memset(vals.expo, EXP_DEFAULT, 4 * sizeof(float));
-	memset(vals.contrast, CONTRAST_DEFAULT, 4 * sizeof(float));
-	memset(vals.whites, WHITE_DEFAULT, 4 * sizeof(float));
+	std::fill_n(vals.low, 4,LOW_DEFAULT);
+	std::fill_n(vals.mid, 4,MID_DEFAULT);
+	std::fill_n(vals.high, 4,HIGH_DEFAULT);
+	std::fill_n(vals.expo, 4,EXP_DEFAULT);
+	std::fill_n(vals.contrast, 4,CONTRAST_DEFAULT);
+	std::fill_n(vals.whites, 4,WHITE_DEFAULT);
 
-	memset(vals.lift, LOW_DEFAULT, 4 * sizeof(float));
-	memset(vals.gamma, LOW_DEFAULT, 4 * sizeof(float));
-	memset(vals.gain, LOW_DEFAULT, 4 * sizeof(float));
+	std::fill_n(vals.lift, 4, 0.0f);
+	std::fill_n(vals.gamma, 4, 1.0f);
+	std::fill_n(vals.gain, 4, 1.0f);
 
 	vals.sat = SAT_DEFAULT;
 	vals.wb = WB_DEFAULT;

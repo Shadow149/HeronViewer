@@ -477,6 +477,10 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	process_compute_shader_.setFloatArray("contrast", m_pVals->contrast, 4);
 	process_compute_shader_.setFloatArray("expo", m_pVals->expo, 4);
 
+	process_compute_shader_.setFloatArray("lift", m_pVals->lift, 4);
+	process_compute_shader_.setFloatArray("gamma", m_pVals->gamma, 4);
+	process_compute_shader_.setFloatArray("gain", m_pVals->gain, 4);
+
 	process_compute_shader_.setBool("bw", m_pVals->bw);
 	process_compute_shader_.setFloat("sat", m_pVals->sat);
 	process_compute_shader_.setFloat("wb", m_pVals->wb);
@@ -597,10 +601,11 @@ void Image::cleanup()
 float Image::calcCurve(float t, int chr)
 {
 	t *= pow(2, m_pVals->expo[chr]) * (1+m_pVals->whites[chr]);
-	return (4 * pow((1 - t), 3) * t * (0.25 + m_pVals->low[chr] - m_pVals->contrast[chr]))
+	float g =  (4 * pow((1 - t), 3) * t * (0.25 + m_pVals->low[chr] - m_pVals->contrast[chr]))
 		+ (6 * pow((1 - t), 2) * pow(t, 2) * (0.5 + m_pVals->mid[chr]))
 		+ (4 * (1 - t) * pow(t, 3) * (0.75 + m_pVals->high[chr] + m_pVals->contrast[chr]))
 		+ (pow(t, 4) * 1);
+	return pow(m_pVals->gain[chr] * ((1.0 - m_pVals->lift[chr]) * g + m_pVals->lift[chr]), m_pVals->gamma[chr]);
 }
 
 void Image::scale(glm::vec3 s)
