@@ -27,7 +27,6 @@ struct SliderValues
 	float blur;
 	float p_blur;
 
-
 	float yiq_y;
 	float yiq_z;
 	float xyz_y;

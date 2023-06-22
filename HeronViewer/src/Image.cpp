@@ -498,6 +498,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	process_compute_shader_.setFloatArray("gamma", m_pVals->gamma, 4);
 	process_compute_shader_.setFloatArray("gain", m_pVals->gain, 4);
 
+	process_compute_shader_.setBool("inv", m_pVals->inv);
 	process_compute_shader_.setBool("bw", m_pVals->bw);
 	process_compute_shader_.setFloat("sat", m_pVals->sat);
 	process_compute_shader_.setFloat("wb", m_pVals->wb);

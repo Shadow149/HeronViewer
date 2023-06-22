@@ -1,4 +1,4 @@
-#include "Editor.h"
+﻿#include "Editor.h"
 #include <algorithm>
 #include <imnodes.h>
 
@@ -142,9 +142,35 @@ void Editor::render()
 
 	ImGui::Begin(name.c_str());
 
+	if (ImGui::Button("Reset")) {
+		reset();
+		Status::setStatus("Settings Reset!");
+	}
+	ImGui::SameLine();
+
+	if (ImGui::Button("Save")) {
+		updateConfigFile();
+		Status::setStatus("Saving...");
+	}
+	ImGui::SameLine();
+	if (img->rendering) {
+		ImGui::Button("Exporting...");
+		Status::setStatus("Exporting...");
+	}
+	else {
+		if (ImGui::Button("Export")) {
+			exportImage();
+		}
+	}
+
+	ImGui::Separator();
+
+
 	if (sliderChanged |= ImGui::Button(vals.bw ? COLOR_LABEL : BW_LABEL)) {
 		vals.bw = !vals.bw;
 	}
+
+	ImGui::Checkbox("Invert", &vals.inv);
 
 	sliderChanged |= ImGui::SliderFloat("White Balance", &vals.wb, 1667, 25000);
 
@@ -198,28 +224,8 @@ void Editor::render()
 	sliderChanged |= SliderFloatReset(vals.scope_brightness, 2.0f, "Scope Brightness", &vals.scope_brightness, 0, 10);
 
 
-	float r, g, b;
-	drawColorSelector("Foo", 200, &r, &g, &b);
-
-	if (ImGui::Button("Reset")) {
-		reset();
-		Status::setStatus("Settings Reset!");
-	}
-
-	if (ImGui::Button("Save")) {
-		updateConfigFile();
-		Status::setStatus("Saving...");
-	}
-
-	if (img->rendering) {
-		ImGui::Button("Exporting...");
-		Status::setStatus("Exporting...");
-	}
-	else {
-		if (ImGui::Button("Export")) {
-			exportImage();
-		}
-	}
+	//float r, g, b;
+	//drawColorSelector("Foo", 200, &r, &g, &b);
 
 	ImGui::End();
 
