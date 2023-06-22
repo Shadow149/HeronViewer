@@ -140,6 +140,8 @@
     <ClCompile Include="..\..\OpenGL\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\..\OpenGL\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\..\OpenGL\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\Graph.cpp" />
+    <ClCompile Include="include\imnodes.cpp" />
     <ClCompile Include="src\Preferences.cpp" />
     <ClCompile Include="src\FileDialog.cpp" />
     <ClCompile Include="src\Overlay.cpp" />
@@ -174,6 +176,9 @@
     <ClInclude Include="..\..\OpenGL\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\..\OpenGL\imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\OpenGL\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\Graph.h" />
+    <ClInclude Include="include\imnodes.h" />
+    <ClInclude Include="include\imnodes_internal.h" />
     <ClInclude Include="include\shader_c.h" />
     <ClInclude Include="include\stb_image_write.h" />
     <ClInclude Include="src\Preferences.h" />

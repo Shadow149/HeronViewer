@@ -66,38 +66,6 @@ private:
 
 	SliderValues vals = SliderValues();
 
-	/////////////////// slider values //////////////////////////////
-
-	//const char* bw_label = BW_LABEL;
-
-	/*float low[4] = { LOW_DEFAULT, LOW_DEFAULT, LOW_DEFAULT, LOW_DEFAULT };
-	float mid[4] = { MID_DEFAULT, MID_DEFAULT, MID_DEFAULT, MID_DEFAULT };
-	float high[4] = { HIGH_DEFAULT, HIGH_DEFAULT, HIGH_DEFAULT, HIGH_DEFAULT };
-	float exp[4] = { EXP_DEFAULT, EXP_DEFAULT, EXP_DEFAULT, EXP_DEFAULT };
-	float contrast[4] = { CONTRAST_DEFAULT, CONTRAST_DEFAULT, CONTRAST_DEFAULT, CONTRAST_DEFAULT };
-	float whites[4] = { WHITE_DEFAULT, WHITE_DEFAULT, WHITE_DEFAULT, WHITE_DEFAULT };
-
-	float sat = SAT_DEFAULT;
-	float wb = WB_DEFAULT;
-
-	float sharp = SHARP_DEFAULT;
-	float blur = BLUR_DEFAULT;
-	
-	float p_sharp = SHARP_DEFAULT;
-	float p_blur = BLUR_DEFAULT;
-
-	float high_thresh = 0;
-	float shad_thresh = 0;
-	float high_incr = 0;
-	float shad_incr = 0;
-
-	float shad_var = 0;
-	float var_mult = 2;
-
-	bool bw = false;*/
-
-	////////////////////////////////////////////
-
 	bool iniWriting = false;
 	bool iniReading = false;
 	bool imLoaded = false;

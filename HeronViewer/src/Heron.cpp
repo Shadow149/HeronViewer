@@ -3,6 +3,7 @@
 #include <stb/stb_image.h>
 
 #include "FileDialog.h"
+#include "Graph.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -123,8 +124,9 @@ void Heron::initModules() {
 	modules.push_back(hist);
 	modules.push_back(new Curve(image, "Curve"));
 	modules.push_back(new Console("Console"));
-	modules.push_back(new Overlay("Overlay"));
+	modules.push_back(new Overlay("Overlay", true));
 	modules.push_back(Preferences::instance());
+	modules.push_back(new Graph("Node Editor"));
 	modules.push_back(image);
 
 	fpsMetric = Overlay::registerMetric();
@@ -195,6 +197,7 @@ void Heron::render()
 
 		for (Module* m : modules) {
 			//m->setStyle();
+			if (!m->visible) continue; // TODO remove check in individual render funcs
 			m->render();
 		}
 

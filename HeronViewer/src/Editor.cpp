@@ -1,5 +1,100 @@
 #include "Editor.h"
 #include <algorithm>
+#include <imnodes.h>
+
+#include "Curve.h"
+
+glm::vec3 rgb2hsv(glm::vec3 c)
+{
+	glm::vec4 K = glm::vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+	glm::vec4 p = glm::mix(glm::vec4(c.b, c.g, K.w, K.z), glm::vec4(c.g, c.b, K.x, K.y), glm::step(c.b, c.g));
+	glm::vec4 q = glm::mix(glm::vec4(p.x, p.y, p.w, c.r), glm::vec4(c.r, p.y, p.z, p.x), glm::step(p.x, c.r));
+
+	float d = q.x - glm::min(q.w, q.y);
+	float e = 1.0e-10;
+	return {abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x};
+}
+
+glm::vec3 hsv2rgb(glm::vec3 c)
+{
+	glm::vec4 K = glm::vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+	glm::vec3 p = abs(glm::fract(glm::vec3(c.x, c.x, c.x) + glm::vec3(K.x, K.y, K.z)) * 6.0f - glm::vec3(K.w, K.w, K.w));
+	return c.z * glm::mix(glm::vec3(K.x, K.x, K.x), clamp(p - glm::vec3(K.x, K.x, K.x), 0.0f, 1.0f), c.y);
+}
+
+
+long double TAU = 6.2831855;
+// color editor for 3 or 4 component colors
+bool drawColorSelector(const char* label, float height, float* r, float* g, float* b) {
+	ImGui::PushID(label);
+
+	ImVec2 buttonStart = ImGui::GetCursorScreenPos();
+
+
+	//ImGui::Image((void*)g_wheelTexture, ImVec2(height, height), ImVec2(0, 0), ImVec2(1, 1));
+
+	ImGui::SetCursorScreenPos(buttonStart);
+	ImGui::InvisibleButton(label, ImVec2(height, height)); ImGui::SameLine();
+
+	glm::vec3 rgb = glm::vec3(glm::max(0.f, *r), glm::max(0.f, *g), glm::max(0.f, *b));
+	glm::vec3 hsv = rgb2hsv(rgb);
+
+	float h = hsv.r;
+	float s = hsv.g;
+	float v = hsv.b;
+
+	glm::vec2 onCircle = glm::vec2(cos(h * TAU), sin(h * TAU)) * s;
+
+	glm::vec2 center = glm::vec2(buttonStart.x, buttonStart.y) + glm::vec2(height, height) * 0.5f + onCircle * height * 0.5f;
+
+	bool changed = false;
+	if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0)) {
+		float speed = 0.3f;
+		if (ImGui::GetIO().KeyShift) {
+			speed *= 1.0f;
+		}
+		const ImVec2 delta = ImGui::GetCursorScreenPos();
+		onCircle += glm::vec2(glm::vec2(delta.x - buttonStart.x, delta.y - buttonStart.y));
+		s = glm::min(1.0f, glm::length(onCircle));
+		if (s == 0.0f) {
+			h = 0.0f;
+		}
+		else {
+			h = atan2f(onCircle.y, onCircle.x) / TAU;
+			if (h < 0) {
+				h += 1.0f;
+			}
+		}
+		//center = (glm::vec2(delta.x, delta.y));
+		//ImGui::ResetMouseDragDelta();
+		ImGui::GetWindowDrawList()->AddCircle(ImVec2(center.x - ImGui::GetCursorScreenPos().x + ImGui::GetMousePos().x + height * 0.5f,
+			center.y - ImGui::GetCursorScreenPos().y + ImGui::GetMousePos().y - height * 0.5f)
+			, 3.0f, ImColor(255, 255, 255));
+		changed = true;
+	}
+	//printf("%f, %f\n", center.x - ImGui::GetMousePos().x, center.y - ImGui::GetMousePos().y);
+	
+
+	glm::vec4 c = glm::vec4(hsv2rgb(glm::vec3(h, s, 0.5f)), 1.0f);
+	ImVec4 im_c = ImVec4(c.x, c.y, c.z, c.w);
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, im_c);
+	changed |= ImGui::VSliderFloat("##v", ImVec2(10, height), &v, 0.0f, 10.0f, "");
+	ImGui::PopStyleColor();
+
+
+	ImGui::SameLine();
+
+	if (changed) {
+		rgb = (hsv2rgb(glm::vec3(h, s, v)));
+		*r = rgb.r;
+		*g = rgb.g;
+		*b = rgb.b;
+	}
+
+	ImGui::PopID();
+	return changed;
+}
+
 
 void Editor::updateSharpenKernel() {
 	float a[9], b[9], c[9], d[9], e[9];
@@ -47,6 +142,11 @@ void Editor::render()
 			if (ImGui::BeginTabItem(tab_names[n]))
 			{
 				sliderChanged |= ImGui::SliderFloat("Exposure", &(vals.expo[n]), -2, 2);
+				ImGui::SameLine();
+				if (ImGui::Button("R")) {
+					std::fill_n(vals.expo, 4, EXP_DEFAULT);
+					sliderChanged = true;
+				}
 				sliderChanged |= ImGui::SliderFloat("Contrast", &(vals.contrast[n]), -1, 1);
 				sliderChanged |= ImGui::SliderFloat("High", &(vals.high[n]), -1, 1);
 				sliderChanged |= ImGui::SliderFloat("Mid", &(vals.mid[n]), -1, 1);
@@ -58,6 +158,7 @@ void Editor::render()
 				sliderChanged |= ImGui::SliderFloat("lift", &(vals.lift[n]), -1, 2);
 				sliderChanged |= ImGui::SliderFloat("gamma", &(vals.gamma[n]), 0, 2);
 				sliderChanged |= ImGui::SliderFloat("gain", &(vals.gain[n]), -1, 2);
+
 
 				ImGui::EndTabItem();
 			}
@@ -76,7 +177,10 @@ void Editor::render()
 		vals.p_blur = vals.blur;
 	}
 
-	sliderChanged |= ImGui::SliderFloat("Noise", &vals.noise, 0, 5);
+	ImGui::Checkbox("Noise?", &vals.noise_selected);
+	if (vals.noise_selected) {
+		sliderChanged |= ImGui::SliderFloat("Noise", &vals.noise, 0, 5);
+	}
 	sliderChanged |= ImGui::SliderFloat("Blue/Orange", &vals.yiq_y, -1, 1);
 	sliderChanged |= ImGui::SliderFloat("Green/Purple", &vals.yiq_z, -1, 1);
 	sliderChanged |= ImGui::SliderFloat("Yellow/Blue", &vals.xyz_y, -1, 1);
@@ -85,6 +189,10 @@ void Editor::render()
 	ImGui::Separator();
 
 	sliderChanged |= ImGui::SliderFloat("Scope Brightness", &vals.scope_brightness, 0, 10);
+
+
+	float r, g, b;
+	drawColorSelector("Foo", 200, &r, &g, &b);
 
 	if (ImGui::Button("Reset")) {
 		reset();
@@ -268,6 +376,7 @@ void Editor::reset()
 	vals.sat = SAT_DEFAULT;
 	vals.wb = WB_DEFAULT;
 
+	vals.noise_selected = false;
 	vals.noise = 0;
 
 	vals.sharp = SHARP_DEFAULT;

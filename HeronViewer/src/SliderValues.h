@@ -19,6 +19,7 @@ struct SliderValues
 	float sat;
 	float wb;
 
+	bool noise_selected;
 	float noise;
 
 	float sharp;

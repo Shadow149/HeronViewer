@@ -36,6 +36,7 @@ uniform float yiq_z;
 uniform float xyz_y;
 uniform float xyz_z;
 uniform float noise;
+uniform bool noise_selected;
 
 uniform bool clip;
 uniform bool b4;
@@ -248,11 +249,13 @@ vec4 pixelTransform(vec4 pix, ivec2 coord, ivec2 tex_size) {
 		}
 	} 
 
-	//float r = rand(vec2(floor(coord.x * tex_size.x), floor(coord.y * tex_size.y)));
-	//r = -1 + (r * 2); // rescale to -1 to 1
-	//float var = pow((5-noise),2);
-	//float noise_ = ((1.0/(1.0 + pow(2.71,-(r/var)))) - 0.5)*2.0;
-	//result += noise_;
+	if (noise_selected){
+		float r = rand(vec2(floor(coord.x), floor(coord.y)));
+		r = -1 + (r * 2); // rescale to -1 to 1
+		float var = pow((5-noise),2);
+		float noise_ = ((1.0/(1.0 + pow(2.71,-(r/var)))) - 0.5)*2.0;
+		result += noise_;
+	}
 
 	//result = vec4(-result.xyz + 1,0);
     return result;

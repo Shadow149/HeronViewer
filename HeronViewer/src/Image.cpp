@@ -491,6 +491,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	process_compute_shader_.setFloat("yiq_z", m_pVals->yiq_z);
 	process_compute_shader_.setFloat("xyz_y", m_pVals->xyz_y);
 	process_compute_shader_.setFloat("xyz_z", m_pVals->xyz_z);
+	process_compute_shader_.setBool("noise_selected", m_pVals->noise_selected);
 	process_compute_shader_.setFloat("noise", m_pVals->noise);
 
 	//process_compute_shader_.setFloatArray("sharp_kernel", m_pVals->sharp_kernel, 9);

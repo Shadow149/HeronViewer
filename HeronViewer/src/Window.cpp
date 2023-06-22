@@ -1,5 +1,6 @@
 #include "Window.h"
 
+
 Window::Window(int w, int h) {
 	SCR_WIDTH = w;
 	SCR_HEIGHT = h;
@@ -65,8 +66,9 @@ void Window::initImGui()
 {
 	// Initialize ImGUI
 	IMGUI_CHECKVERSION();
-	ImGuiContext* context =  ImGui::CreateContext();
+	ImGui::CreateContext();
 	ImPlot::CreateContext();
+	ImNodes::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
