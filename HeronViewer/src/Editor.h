@@ -28,6 +28,8 @@
 #define BW_LABEL "to Black and White"
 #define COLOR_LABEL "to Color"
 
+static int btn_id = 0;
+
 class Editor : public Module
 {
 public:

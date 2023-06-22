@@ -95,6 +95,18 @@ bool drawColorSelector(const char* label, float height, float* r, float* g, floa
 	return changed;
 }
 
+template<typename T>
+bool SliderFloatReset(T &data, T reset_value, const char* label, float* v, float v_min, float v_max, const char* format = "%.3f", ImGuiSliderFlags flags = 0)
+{
+	const bool change = ImGui::SliderFloat(label, v, v_min, v_max, format, flags);
+	ImGui::SameLine();
+	if (ImGui::Button(("R##" + std::to_string(btn_id++)).c_str())) {
+		data = reset_value;
+		return true;
+	}
+	return change;
+}
+
 
 void Editor::updateSharpenKernel() {
 	float a[9], b[9], c[9], d[9], e[9];
@@ -141,23 +153,18 @@ void Editor::render()
 		for (int n = 0; n < 4; n++)
 			if (ImGui::BeginTabItem(tab_names[n]))
 			{
-				sliderChanged |= ImGui::SliderFloat("Exposure", &(vals.expo[n]), -2, 2);
-				ImGui::SameLine();
-				if (ImGui::Button("R")) {
-					std::fill_n(vals.expo, 4, EXP_DEFAULT);
-					sliderChanged = true;
-				}
-				sliderChanged |= ImGui::SliderFloat("Contrast", &(vals.contrast[n]), -1, 1);
-				sliderChanged |= ImGui::SliderFloat("High", &(vals.high[n]), -1, 1);
-				sliderChanged |= ImGui::SliderFloat("Mid", &(vals.mid[n]), -1, 1);
-				sliderChanged |= ImGui::SliderFloat("Whites", &(vals.whites[n]), -1, 1);
-				sliderChanged |= ImGui::SliderFloat("Low", &(vals.low[n]), -1, 1);
+				sliderChanged |= SliderFloatReset(vals.expo[n], 0.0f, "Exposure", &(vals.expo[n]), -2, 2);
+				sliderChanged |= SliderFloatReset(vals.contrast[n], 0.0f, "Contrast", &(vals.contrast[n]), -1, 1);
+				sliderChanged |= SliderFloatReset(vals.high[n], 0.0f, "High", &(vals.high[n]), -1, 1);
+				sliderChanged |= SliderFloatReset(vals.mid[n], 0.0f, "Mid", &(vals.mid[n]), -1, 1);
+				sliderChanged |= SliderFloatReset(vals.whites[n], 0.0f, "Whites", &(vals.whites[n]), -1, 1);
+				sliderChanged |= SliderFloatReset(vals.low[n], 0.0f, "Low", &(vals.low[n]), -1, 1);
 
 				ImGui::Separator();
 
-				sliderChanged |= ImGui::SliderFloat("lift", &(vals.lift[n]), -1, 2);
-				sliderChanged |= ImGui::SliderFloat("gamma", &(vals.gamma[n]), 0, 2);
-				sliderChanged |= ImGui::SliderFloat("gain", &(vals.gain[n]), -1, 2);
+				sliderChanged |= SliderFloatReset(vals.lift[n], 0.0f, "lift", &(vals.lift[n]), -1, 2);
+				sliderChanged |= SliderFloatReset(vals.gamma[n], 1.0f, "gamma", &(vals.gamma[n]), 0, 2);
+				sliderChanged |= SliderFloatReset(vals.gain[n], 1.0f, "gain", &(vals.gain[n]), -1, 2);
 
 
 				ImGui::EndTabItem();
@@ -167,10 +174,10 @@ void Editor::render()
 
 	ImGui::Separator();
 
-	sliderChanged |= ImGui::SliderFloat("Saturation", &vals.sat, -1, 1);
+	sliderChanged |= SliderFloatReset(vals.sat, 0.0f, "Saturation", &vals.sat, -1, 1);
 
-	sliderChanged |= ImGui::SliderFloat("Sharpen: Blur", &vals.blur, 0, 5);
-	sliderChanged |= ImGui::SliderFloat("Sharpen: Sharp", &vals.sharp, 0, 5);
+	sliderChanged |= SliderFloatReset(vals.blur, 0.0f, "Sharpen: Blur", &vals.blur, 0, 5);
+	sliderChanged |= SliderFloatReset(vals.sharp, 0.0f, "Sharpen: Sharp", &vals.sharp, 0, 5);
 	if (vals.sharp != vals.p_sharp || vals.blur != vals.p_blur) {
 		updateSharpenKernel();
 		vals.p_sharp = vals.sharp;
@@ -179,16 +186,16 @@ void Editor::render()
 
 	ImGui::Checkbox("Noise?", &vals.noise_selected);
 	if (vals.noise_selected) {
-		sliderChanged |= ImGui::SliderFloat("Noise", &vals.noise, 0, 5);
+		sliderChanged |= SliderFloatReset(vals.noise, 0.0f, "Noise", &vals.noise, 0, 5);
 	}
-	sliderChanged |= ImGui::SliderFloat("Blue/Orange", &vals.yiq_y, -1, 1);
-	sliderChanged |= ImGui::SliderFloat("Green/Purple", &vals.yiq_z, -1, 1);
-	sliderChanged |= ImGui::SliderFloat("Yellow/Blue", &vals.xyz_y, -1, 1);
-	sliderChanged |= ImGui::SliderFloat("Purple/Green", &vals.xyz_z, -1, 1);
+	sliderChanged |= SliderFloatReset(vals.yiq_y, 0.0f, "Blue/Orange", &vals.yiq_y, -1, 1);
+	sliderChanged |= SliderFloatReset(vals.yiq_z, 0.0f, "Green/Purple", &vals.yiq_z, -1, 1);
+	sliderChanged |= SliderFloatReset(vals.xyz_y, 0.0f, "Yellow/Blue", &vals.xyz_y, -1, 1);
+	sliderChanged |= SliderFloatReset(vals.xyz_z, 0.0f, "Purple/Green", &vals.xyz_z, -1, 1);
 
 	ImGui::Separator();
 
-	sliderChanged |= ImGui::SliderFloat("Scope Brightness", &vals.scope_brightness, 0, 10);
+	sliderChanged |= SliderFloatReset(vals.scope_brightness, 2.0f, "Scope Brightness", &vals.scope_brightness, 0, 10);
 
 
 	float r, g, b;
@@ -229,7 +236,8 @@ void Editor::render()
 		}
 	}
 
-	
+	btn_id = 0;
+
 }
 
 void Editor::exportImage() {
