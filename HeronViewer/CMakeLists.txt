@@ -1259,7 +1259,7 @@ endif()
 # Include directories
 ################################################################################
 if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
-    target_include_directories(${PROJECT_NAME} PRIVATE
+    target_include_directories(${PROJECT_NAME} PUBLIC
         "$<$<CONFIG:Debug>:"
             "${CMAKE_CURRENT_SOURCE_DIR}/include;"
             "${CMAKE_CURRENT_SOURCE_DIR}/include/freeimage;"
