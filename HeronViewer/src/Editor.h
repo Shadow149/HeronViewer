@@ -11,6 +11,14 @@
 
 #include "SliderValues.h"
 
+#include <algorithm>
+#include <imnodes.h>
+
+#include "Curve.h"
+#include <imgui_internal.h>
+
+#include "Widgets.h"
+
 
 #define LOW_DEFAULT 0.0f
 #define MID_DEFAULT 0.0f

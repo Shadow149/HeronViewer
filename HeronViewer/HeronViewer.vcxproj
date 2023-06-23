@@ -163,6 +163,7 @@
     <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="stb_image_resize.cpp" />
     <ClCompile Include="std_image.cpp" />
+    <ClCompile Include="src\Widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\ImGuiFileDialog\ImGuiFileDialog.h" />
@@ -199,6 +200,7 @@
     <ClInclude Include="src\Utils.h" />
     <ClInclude Include="src\Window.h" />
     <ClInclude Include="src\Status.h" />
+    <ClInclude Include="src\Widgets.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\histogram.comp" />

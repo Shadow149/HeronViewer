@@ -1,98 +1,40 @@
 ﻿#include "Editor.h"
-#include <algorithm>
-#include <imnodes.h>
 
-#include "Curve.h"
+bool Spinner(const char* label, float radius, int thickness, const ImU32& color) {
+	ImGuiWindow* window = ImGui::GetCurrentWindow();
+	if (window->SkipItems)
+		return false;
 
-glm::vec3 rgb2hsv(glm::vec3 c)
-{
-	glm::vec4 K = glm::vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-	glm::vec4 p = glm::mix(glm::vec4(c.b, c.g, K.w, K.z), glm::vec4(c.g, c.b, K.x, K.y), glm::step(c.b, c.g));
-	glm::vec4 q = glm::mix(glm::vec4(p.x, p.y, p.w, c.r), glm::vec4(c.r, p.y, p.z, p.x), glm::step(p.x, c.r));
+	ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+	const ImGuiID id = window->GetID(label);
 
-	float d = q.x - glm::min(q.w, q.y);
-	float e = 1.0e-10;
-	return {abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x};
-}
+	ImVec2 pos = window->DC.CursorPos;
+	ImVec2 size((radius) * 2, (radius + style.FramePadding.y) * 2);
 
-glm::vec3 hsv2rgb(glm::vec3 c)
-{
-	glm::vec4 K = glm::vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-	glm::vec3 p = abs(glm::fract(glm::vec3(c.x, c.x, c.x) + glm::vec3(K.x, K.y, K.z)) * 6.0f - glm::vec3(K.w, K.w, K.w));
-	return c.z * glm::mix(glm::vec3(K.x, K.x, K.x), clamp(p - glm::vec3(K.x, K.x, K.x), 0.0f, 1.0f), c.y);
-}
+	const ImRect bb(pos, ImVec2(pos.x + size.x, pos.y + size.y));
+	ImGui::ItemSize(bb, style.FramePadding.y);
+	if (!ImGui::ItemAdd(bb, id))
+		return false;
 
+	// Render
+	window->DrawList->PathClear();
 
-long double TAU = 6.2831855;
-// color editor for 3 or 4 component colors
-bool drawColorSelector(const char* label, float height, float* r, float* g, float* b) {
-	ImGui::PushID(label);
+	int num_segments = 30;
+	int start = abs(ImSin(g.Time * 1.8f) * (num_segments - 5));
 
-	ImVec2 buttonStart = ImGui::GetCursorScreenPos();
+	const float a_min = IM_PI * 2.0f * ((float)start) / (float)num_segments;
+	const float a_max = IM_PI * 2.0f * ((float)num_segments - 3) / (float)num_segments;
 
+	const ImVec2 centre = ImVec2(pos.x + radius, pos.y + radius + style.FramePadding.y);
 
-	//ImGui::Image((void*)g_wheelTexture, ImVec2(height, height), ImVec2(0, 0), ImVec2(1, 1));
-
-	ImGui::SetCursorScreenPos(buttonStart);
-	ImGui::InvisibleButton(label, ImVec2(height, height)); ImGui::SameLine();
-
-	glm::vec3 rgb = glm::vec3(glm::max(0.f, *r), glm::max(0.f, *g), glm::max(0.f, *b));
-	glm::vec3 hsv = rgb2hsv(rgb);
-
-	float h = hsv.r;
-	float s = hsv.g;
-	float v = hsv.b;
-
-	glm::vec2 onCircle = glm::vec2(cos(h * TAU), sin(h * TAU)) * s;
-
-	glm::vec2 center = glm::vec2(buttonStart.x, buttonStart.y) + glm::vec2(height, height) * 0.5f + onCircle * height * 0.5f;
-
-	bool changed = false;
-	if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0)) {
-		float speed = 0.3f;
-		if (ImGui::GetIO().KeyShift) {
-			speed *= 1.0f;
-		}
-		const ImVec2 delta = ImGui::GetCursorScreenPos();
-		onCircle += glm::vec2(glm::vec2(delta.x - buttonStart.x, delta.y - buttonStart.y));
-		s = glm::min(1.0f, glm::length(onCircle));
-		if (s == 0.0f) {
-			h = 0.0f;
-		}
-		else {
-			h = atan2f(onCircle.y, onCircle.x) / TAU;
-			if (h < 0) {
-				h += 1.0f;
-			}
-		}
-		//center = (glm::vec2(delta.x, delta.y));
-		//ImGui::ResetMouseDragDelta();
-		ImGui::GetWindowDrawList()->AddCircle(ImVec2(center.x - ImGui::GetCursorScreenPos().x + ImGui::GetMousePos().x + height * 0.5f,
-			center.y - ImGui::GetCursorScreenPos().y + ImGui::GetMousePos().y - height * 0.5f)
-			, 3.0f, ImColor(255, 255, 255));
-		changed = true;
-	}
-	//printf("%f, %f\n", center.x - ImGui::GetMousePos().x, center.y - ImGui::GetMousePos().y);
-	
-
-	glm::vec4 c = glm::vec4(hsv2rgb(glm::vec3(h, s, 0.5f)), 1.0f);
-	ImVec4 im_c = ImVec4(c.x, c.y, c.z, c.w);
-	ImGui::PushStyleColor(ImGuiCol_FrameBg, im_c);
-	changed |= ImGui::VSliderFloat("##v", ImVec2(10, height), &v, 0.0f, 10.0f, "");
-	ImGui::PopStyleColor();
-
-
-	ImGui::SameLine();
-
-	if (changed) {
-		rgb = (hsv2rgb(glm::vec3(h, s, v)));
-		*r = rgb.r;
-		*g = rgb.g;
-		*b = rgb.b;
+	for (int i = 0; i < num_segments; i++) {
+		const float a = a_min + ((float)i / (float)num_segments) * (a_max - a_min);
+		window->DrawList->PathLineTo(ImVec2(centre.x + ImCos(a + g.Time * 8) * radius,
+			centre.y + ImSin(a + g.Time * 8) * radius));
 	}
 
-	ImGui::PopID();
-	return changed;
+	window->DrawList->PathStroke(color, false, thickness);
 }
 
 template<typename T>
@@ -152,10 +94,11 @@ void Editor::render()
 		updateConfigFile();
 		Status::setStatus("Saving...");
 	}
-	ImGui::SameLine();
 	if (img->rendering) {
 		ImGui::Button("Exporting...");
 		Status::setStatus("Exporting...");
+		ImGui::SameLine();
+		Spinner("EXPORTING...", ImGui::CalcTextSize("Exporting...").y/2, 3, ImGui::GetColorU32(ImVec4(255, 255, 255, 255)));
 	}
 	else {
 		if (ImGui::Button("Export")) {
@@ -197,6 +140,18 @@ void Editor::render()
 			}
 		ImGui::EndTabBar();
 	}
+
+	ImGui::Separator();
+
+	sliderChanged |= drawColorSelector("High", ImGui::GetWindowWidth() / 3, &vals.high[1], &vals.high[2], &vals.high[3]); ImGui::SameLine();
+	sliderChanged |= drawColorSelector("Mid", ImGui::GetWindowWidth() / 3, &vals.mid[1], &vals.mid[2], &vals.mid[3]); 
+	sliderChanged |= drawColorSelector("Low", ImGui::GetWindowWidth() / 3, &vals.low[1], &vals.low[2], &vals.low[3]); ImGui::SameLine();
+
+	sliderChanged |= drawColorSelector("Lift", ImGui::GetWindowWidth() / 3, &vals.lift[1], &vals.lift[2], &vals.lift[3]);
+	sliderChanged |= drawColorSelector("Gamma", ImGui::GetWindowWidth() / 3, &vals.gamma[1], &vals.gamma[2], &vals.gamma[3], false); ImGui::SameLine();
+	sliderChanged |= drawColorSelector("Gain", ImGui::GetWindowWidth() / 3, &vals.gain[1], &vals.gain[2], &vals.gain[3], false,  0);
+
+
 
 	ImGui::Separator();
 

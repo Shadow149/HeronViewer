@@ -16,5 +16,6 @@ public:
 private:
 	int numNodes = 1;
 	std::vector<std::pair<int, int>> links;
+	float r = 0, g = 0, b = 0;
 };
 
