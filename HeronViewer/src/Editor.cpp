@@ -209,11 +209,26 @@ void Editor::render()
 		vals.p_sharp = vals.sharp;
 		vals.p_blur = vals.blur;
 	}
+	ImGui::Separator();
 
 	ImGui::Checkbox("Noise?", &vals.noise_selected);
 	if (vals.noise_selected) {
 		sliderChanged |= SliderFloatReset(vals.noise, 0.0f, "Noise", &vals.noise, 0, 5);
 	}
+
+	ImGui::Separator();
+
+	sliderChanged |= SliderFloatReset(vals.hues[0], 0.0f, "Red", &vals.hues[0], -1, 1);
+	sliderChanged |= SliderFloatReset(vals.hues[1], 0.0f, "Orange", &vals.hues[1], -1, 1);
+	sliderChanged |= SliderFloatReset(vals.hues[2], 0.0f, "Yellow", &vals.hues[2], -1, 1);
+	sliderChanged |= SliderFloatReset(vals.hues[3], 0.0f, "Green", &vals.hues[3], -1, 1);
+	sliderChanged |= SliderFloatReset(vals.hues[4], 0.0f, "Cyan", &vals.hues[4], -1, 1);
+	sliderChanged |= SliderFloatReset(vals.hues[5], 0.0f, "Blue", &vals.hues[5], -1, 1);
+	sliderChanged |= SliderFloatReset(vals.hues[6], 0.0f, "Purple", &vals.hues[6], -1, 1);
+	sliderChanged |= SliderFloatReset(vals.hues[7], 0.0f, "Pink", &vals.hues[7], -1, 1);
+
+	ImGui::Separator();
+
 	sliderChanged |= SliderFloatReset(vals.yiq_y, 0.0f, "Blue/Orange", &vals.yiq_y, -1, 1);
 	sliderChanged |= SliderFloatReset(vals.yiq_z, 0.0f, "Green/Purple", &vals.yiq_z, -1, 1);
 	sliderChanged |= SliderFloatReset(vals.xyz_y, 0.0f, "Yellow/Blue", &vals.xyz_y, -1, 1);
@@ -386,6 +401,8 @@ void Editor::reset()
 	std::fill_n(vals.lift, 4, 0.0f);
 	std::fill_n(vals.gamma, 4, 1.0f);
 	std::fill_n(vals.gain, 4, 1.0f);
+
+	std::fill_n(vals.hues, 8, 0.0f);
 
 	vals.sat = SAT_DEFAULT;
 	vals.wb = WB_DEFAULT;
