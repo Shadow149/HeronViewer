@@ -5,7 +5,7 @@ int Console::line_pos;
 
 void Console::init()
 {
-	font = ImGui::GetIO().Fonts->AddFontFromFileTTF("SourceCodePro-Regular.ttf", 14);
+	font = ImGui::GetIO().Fonts->AddFontFromFileTTF("./fonts/SourceCodePro-Regular.ttf", 14);
 }
 
 void Console::render()

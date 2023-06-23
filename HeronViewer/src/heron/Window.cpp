@@ -79,11 +79,11 @@ void Window::initImGui()
 	//ImGuiIO& io = ImGui::GetIO();
 
 	io.Fonts->Clear();
-	io.Fonts->AddFontFromFileTTF("OpenSans-Regular.ttf", 16);
-	io.Fonts->AddFontFromFileTTF("OpenSans-Regular.ttf", 16);
-	io.Fonts->AddFontFromFileTTF("OpenSans-Regular.ttf", 32);
-	io.Fonts->AddFontFromFileTTF("OpenSans-Regular.ttf", 11);
-	io.Fonts->AddFontFromFileTTF("OpenSans-Regular.ttf", 11);
+	io.Fonts->AddFontFromFileTTF("./fonts/OpenSans-Regular.ttf", 16);
+	io.Fonts->AddFontFromFileTTF("./fonts/OpenSans-Regular.ttf", 16);
+	io.Fonts->AddFontFromFileTTF("./fonts/OpenSans-Regular.ttf", 32);
+	io.Fonts->AddFontFromFileTTF("./fonts/OpenSans-Regular.ttf", 11);
+	io.Fonts->AddFontFromFileTTF("./fonts/OpenSans-Regular.ttf", 11);
 	io.Fonts->Build();
 
 
