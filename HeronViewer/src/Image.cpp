@@ -90,6 +90,10 @@ void Image::getImage(const char* filename) {
 	else if (height > SMALL_IMG_MAX) {
 		small_img_width = SMALL_IMG_MAX * ((float)width / height);
 		small_img_height = SMALL_IMG_MAX;
+	} else
+	{
+		small_img_width = width;
+		small_img_height = height;
 	}
 	width = small_img_width;
 	height = small_img_height;
