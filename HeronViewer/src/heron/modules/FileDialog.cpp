@@ -1,5 +1,5 @@
 #include "FileDialog.h"
-#include "Heron.h"
+#include "../Heron.h"
 
 std::string escaped(const std::string& input)
 {

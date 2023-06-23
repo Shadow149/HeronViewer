@@ -24,7 +24,7 @@
 #include <thread>
 
 #include "shader_c.h"
-#include "SliderValues.h"
+#include "../common/SliderValues.h"
 
 #define RENDER_WIDTH 1920
 #define SMALL_IMG_MAX 3000
@@ -74,9 +74,9 @@ private:
 	int nextIndex = 0;
 	float* src;
 	
-	Shader shader = Shader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\heron\\texture.vert", "C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\heron\\texture.frag");
-	ComputeShader process_compute_shader_ = ComputeShader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\heron\\texture.comp");
-	ComputeShader hist_compute_shader_ = ComputeShader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\heron\\histogram.comp");
+	Shader shader = Shader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\heron\\shaders\\texture.vert", "C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\heron\\shaders\\texture.frag");
+	ComputeShader process_compute_shader_ = ComputeShader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\heron\\shaders\\texture.comp");
+	ComputeShader hist_compute_shader_ = ComputeShader("C:\\Users\\Alfred Roberts\\Documents\\projects\\HeronViewer\\HeronViewer\\src\\heron\\shaders\\histogram.comp");
 	Histogram** hist;
 
 	std::string* shaderLoadTime;

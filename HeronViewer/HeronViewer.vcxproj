@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\freeimage;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glad;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glm;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imgui;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\ImGuiFileDialog;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imnodes;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\implot;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\mini;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\freeimage;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glad;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glm;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imgui;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\ImGuiFileDialog;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imnodes;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\implot;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\mini;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\stb;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\common;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,21 +132,21 @@
   <ItemGroup>
     <ClCompile Include="include\glm\detail\glm.cpp" />
     <ClCompile Include="src\glad\glad\glad.c" />
-    <ClCompile Include="src\heron\Console.cpp" />
-    <ClCompile Include="src\heron\Curve.cpp" />
-    <ClCompile Include="src\heron\Editor.cpp" />
-    <ClCompile Include="src\heron\FileDialog.cpp" />
-    <ClCompile Include="src\heron\Graph.cpp" />
+    <ClCompile Include="src\heron\common\Utils.cpp" />
     <ClCompile Include="src\heron\Heron.cpp" />
-    <ClCompile Include="src\heron\Histogram.cpp" />
-    <ClCompile Include="src\heron\Image.cpp" />
+    <ClCompile Include="src\heron\modules\Console.cpp" />
+    <ClCompile Include="src\heron\modules\Curve.cpp" />
+    <ClCompile Include="src\heron\modules\Editor.cpp" />
+    <ClCompile Include="src\heron\modules\FileDialog.cpp" />
+    <ClCompile Include="src\heron\modules\Graph.cpp" />
+    <ClCompile Include="src\heron\modules\Histogram.cpp" />
+    <ClCompile Include="src\heron\modules\Image.cpp" />
     <ClCompile Include="src\heron\main.cpp" />
-    <ClCompile Include="src\heron\MainPanel.cpp" />
-    <ClCompile Include="src\heron\Module.cpp" />
-    <ClCompile Include="src\heron\Overlay.cpp" />
-    <ClCompile Include="src\heron\Preferences.cpp" />
-    <ClCompile Include="src\heron\Status.cpp" />
-    <ClCompile Include="src\heron\Utils.cpp" />
+    <ClCompile Include="src\heron\modules\MainPanel.cpp" />
+    <ClCompile Include="src\heron\modules\Module.cpp" />
+    <ClCompile Include="src\heron\modules\Overlay.cpp" />
+    <ClCompile Include="src\heron\modules\Preferences.cpp" />
+    <ClCompile Include="src\heron\modules\Status.cpp" />
     <ClCompile Include="src\heron\Widgets.cpp" />
     <ClCompile Include="src\heron\Window.cpp" />
     <ClCompile Include="src\ImGuiFileDialog\ImGuiFileDialog.cpp" />
@@ -176,6 +176,8 @@
     <ClInclude Include="include\freeimage\FreeImage.h" />
     <ClInclude Include="include\glad\glad\glad.h" />
     <ClInclude Include="include\glad\KHR\khrplatform.h" />
+    <ClInclude Include="include\GLFW\glfw3.h" />
+    <ClInclude Include="include\GLFW\glfw3native.h" />
     <ClInclude Include="include\glm\common.hpp" />
     <ClInclude Include="include\glm\detail\compute_common.hpp" />
     <ClInclude Include="include\glm\detail\compute_vector_relational.hpp" />
@@ -458,9 +460,23 @@
     <ClInclude Include="include\glm\vec3.hpp" />
     <ClInclude Include="include\glm\vec4.hpp" />
     <ClInclude Include="include\glm\vector_relational.hpp" />
-    <ClInclude Include="include\ImGuiFileDialog\dirent\dirent.h" />
-    <ClInclude Include="include\ImGuiFileDialog\ImGuiFileDialog.h" />
-    <ClInclude Include="include\ImGuiFileDialog\ImGuiFileDialogConfig.h" />
+    <ClInclude Include="include\heron\common\SliderValues.h" />
+    <ClInclude Include="include\heron\common\Utils.h" />
+    <ClInclude Include="include\heron\Heron.h" />
+    <ClInclude Include="include\heron\modules\Console.h" />
+    <ClInclude Include="include\heron\modules\Curve.h" />
+    <ClInclude Include="include\heron\modules\Editor.h" />
+    <ClInclude Include="include\heron\modules\FileDialog.h" />
+    <ClInclude Include="include\heron\modules\Graph.h" />
+    <ClInclude Include="include\heron\modules\Histogram.h" />
+    <ClInclude Include="include\heron\modules\Image.h" />
+    <ClInclude Include="include\heron\modules\MainPanel.h" />
+    <ClInclude Include="include\heron\modules\Module.h" />
+    <ClInclude Include="include\heron\modules\Overlay.h" />
+    <ClInclude Include="include\heron\modules\Preferences.h" />
+    <ClInclude Include="include\heron\modules\Status.h" />
+    <ClInclude Include="include\heron\Widgets.h" />
+    <ClInclude Include="include\heron\Window.h" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />
     <ClInclude Include="include\imgui\ImGuiFileDialog.h" />
@@ -492,28 +508,11 @@
     <ClInclude Include="include\implot\implot.h" />
     <ClInclude Include="include\implot\implot_internal.h" />
     <ClInclude Include="include\mini\ini.h" />
+    <ClInclude Include="include\shader.h" />
     <ClInclude Include="include\shader_c.h" />
     <ClInclude Include="include\stb\stb_image.h" />
     <ClInclude Include="include\stb\stb_image_resize.h" />
     <ClInclude Include="include\stb\stb_image_write.h" />
-    <ClInclude Include="src\heron\Console.h" />
-    <ClInclude Include="src\heron\Curve.h" />
-    <ClInclude Include="src\heron\Editor.h" />
-    <ClInclude Include="src\heron\FileDialog.h" />
-    <ClInclude Include="src\heron\Graph.h" />
-    <ClInclude Include="src\heron\Heron.h" />
-    <ClInclude Include="src\heron\Histogram.h" />
-    <ClInclude Include="src\heron\Image.h" />
-    <ClInclude Include="src\heron\MainPanel.h" />
-    <ClInclude Include="src\heron\Module.h" />
-    <ClInclude Include="src\heron\Overlay.h" />
-    <ClInclude Include="src\heron\Preferences.h" />
-    <ClInclude Include="src\heron\SliderValues.h" />
-    <ClInclude Include="src\heron\Status.h" />
-    <ClInclude Include="src\heron\Utils.h" />
-    <ClInclude Include="src\heron\Widgets.h" />
-    <ClInclude Include="src\heron\Window.h" />
-    <ClInclude Include="include\shader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\glm\detail\func_common.inl" />
@@ -1348,6 +1347,7 @@
     <None Include="src\glm\doc\api\search\typedefs_b.html" />
     <None Include="src\glm\doc\api\search\typedefs_c.html" />
     <None Include="src\glm\doc\api\search\typedefs_d.html" />
+    <None Include="src\heron\shaders\histogram.comp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
