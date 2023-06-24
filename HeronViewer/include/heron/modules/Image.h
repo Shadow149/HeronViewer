@@ -74,9 +74,9 @@ private:
 	int nextIndex = 0;
 	float* src;
 	
-	Shader shader = Shader(".\\src\\heron\\shaders\\texture.vert", ".\\src\\heron\\shaders\\texture.frag");
-	ComputeShader process_compute_shader_ = ComputeShader(".\\src\\heron\\shaders\\texture.comp");
-	ComputeShader hist_compute_shader_ = ComputeShader(".\\src\\heron\\shaders\\histogram.comp");
+	Shader shader = Shader("./src/heron/shaders/texture.vert", "./src/heron/shaders/texture.frag");
+	ComputeShader process_compute_shader_ = ComputeShader("./src/heron/shaders/texture.comp");
+	ComputeShader hist_compute_shader_ = ComputeShader("./src/heron/shaders/histogram.comp");
 	Histogram** hist;
 
 	std::string* shaderLoadTime;

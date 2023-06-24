@@ -468,6 +468,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		std::fill_n(cdf, 256, 1.0f / 8.0f);
 	}
 
+
 	if (renderer.joinable() && !rendering) {
 		Console::log("Image rendered, join to main thread");
 		Status::setStatus("Image Exported!");
@@ -479,11 +480,11 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	*shaderLoadTime = "Framebuffer render time: " + std::to_string(glfwGetTime() - start);
 	//glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
-	glBindTexture(GL_TEXTURE_2D, vectorscope_acc);
-	glClearTexImage(vectorscope_acc, 0, GL_RED_INTEGER, GL_INT, NULL);
+	// glBindTexture(GL_TEXTURE_2D, vectorscope_acc);
+	// glClearTexImage(vectorscope_acc, 0, GL_RED_INTEGER, GL_INT, NULL);
 
-	glBindTexture(GL_TEXTURE_2D, waveform_acc);
-	glClearTexImage(waveform_acc, 0, GL_RED_INTEGER, GL_INT, NULL);
+	// glBindTexture(GL_TEXTURE_2D, waveform_acc);
+	// glClearTexImage(waveform_acc, 0, GL_RED_INTEGER, GL_INT, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glActiveTexture(GL_TEXTURE0);
@@ -528,6 +529,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	glDispatchCompute(x, y, 1);
 
 	glFinish();
+
 
 	if (getChanged() && imageLoaded) {
 		glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed

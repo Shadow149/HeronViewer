@@ -70,6 +70,7 @@ public:
         // delete the shaders as they're linked into our program now and no longer necessary
         glDeleteShader(vertex);
         glDeleteShader(fragment);
+        Console::log("LOADED SHADER");
     }
     // activate the shader
     // ------------------------------------------------------------------------

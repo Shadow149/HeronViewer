@@ -47,12 +47,17 @@ public:
         compute = glCreateShader(GL_COMPUTE_SHADER);
         glShaderSource(compute, 1, &cShaderCode, NULL);
         glCompileShader(compute);
+        int status;
+        status = glGetError();
+        Console::log("COMPILE STATUS: " + std::to_string(status));
         checkCompileErrors(compute, "COMPUTE");
 
         // shader Program
         ID = glCreateProgram();
         glAttachShader(ID, compute);
         glLinkProgram(ID);
+        status = glGetError();
+        Console::log("COMPILE STATUS: " + std::to_string(status));
         checkCompileErrors(ID, "PROGRAM");
         // delete the shaders as they're linked into our program now and no longer necessary
         glDeleteShader(compute);

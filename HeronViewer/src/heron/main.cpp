@@ -3,7 +3,7 @@
 
 int main() {
 	Heron heron(1600, 900);
-	if ( !(heron.init()) ) {
+	if ( (heron.init()) == -1 ) {
 		return -1;
 	}
 	heron.render();
