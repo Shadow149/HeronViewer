@@ -417,6 +417,7 @@ void Image::init()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 0, 0, 0, GL_RED_INTEGER, GL_INT, NULL);
 	glBindImageTexture(6, waveform_acc, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 
@@ -480,11 +481,11 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	*shaderLoadTime = "Framebuffer render time: " + std::to_string(glfwGetTime() - start);
 	//glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
-	// glBindTexture(GL_TEXTURE_2D, vectorscope_acc);
-	// glClearTexImage(vectorscope_acc, 0, GL_RED_INTEGER, GL_INT, NULL);
+	glBindTexture(GL_TEXTURE_2D, vectorscope_acc);
+	glClearTexImage(vectorscope_acc, 0, GL_RED_INTEGER, GL_INT, NULL);
 
-	// glBindTexture(GL_TEXTURE_2D, waveform_acc);
-	// glClearTexImage(waveform_acc, 0, GL_RED_INTEGER, GL_INT, NULL);
+	glBindTexture(GL_TEXTURE_2D, waveform_acc);
+	glClearTexImage(waveform_acc, 0, GL_RED_INTEGER, GL_INT, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glActiveTexture(GL_TEXTURE0);

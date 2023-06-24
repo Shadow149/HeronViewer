@@ -8,9 +8,9 @@ layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 //
 // ----------------------------------------------------------------------------
 
-layout(rgba32f, binding = 0) uniform writeonly image2D imgOutput;
+layout(rgba32f, binding = 0) uniform image2D imgOutput;
 	
-layout(binding=1) uniform readonly sampler2D texture1;
+layout(binding=1) uniform sampler2D texture1;
 
 
 uniform float[4] high;

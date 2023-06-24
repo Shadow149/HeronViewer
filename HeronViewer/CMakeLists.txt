@@ -75,7 +75,7 @@ target_link_libraries(Heron PRIVATE ${OPENGL_LIBRARIES})
 target_link_libraries(Heron PRIVATE "freeimage")
 
 find_package(glfw3 3.3 REQUIRED)
-# sudo apt-get install libglfw3                                                                                                                                                ─╯ 
+# sudo apt-get install libglfw3-dev (not libglfw3? )                                                                                                                                             ─╯ 
 target_link_libraries(Heron PRIVATE "glfw")
 # target_link_libraries(Heron PRIVATE opengl32)
 # target_link_libraries(Heron PRIVATE /lib/freeimagelib/FreeImage)
