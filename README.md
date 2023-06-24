@@ -1,4 +1,4 @@
-# HeronViewer
+# Heron - (H)eron (E)dits (R)aw with (O)pengl (N)atively
 Cross platform OpenGL, GPU accelerated raw image editor. 
 
 ![HeronViewer preview](./docs/preview.png)
