@@ -153,14 +153,9 @@
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
-    <ClCompile Include="src\imgui\imgui_impl_dx10.cpp" />
-    <ClCompile Include="src\imgui\imgui_impl_dx11.cpp" />
-    <ClCompile Include="src\imgui\imgui_impl_dx12.cpp" />
-    <ClCompile Include="src\imgui\imgui_impl_dx9.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_opengl2.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="src\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="src\imgui\imgui_stdlib.cpp" />
     <ClCompile Include="src\imgui\imgui_tables.cpp" />
     <ClCompile Include="src\imgui\imgui_widgets.cpp" />
@@ -482,10 +477,6 @@
     <ClInclude Include="include\imgui\ImGuiFileDialog.h" />
     <ClInclude Include="include\imgui\imgui_impl_allegro5.h" />
     <ClInclude Include="include\imgui\imgui_impl_android.h" />
-    <ClInclude Include="include\imgui\imgui_impl_dx10.h" />
-    <ClInclude Include="include\imgui\imgui_impl_dx11.h" />
-    <ClInclude Include="include\imgui\imgui_impl_dx12.h" />
-    <ClInclude Include="include\imgui\imgui_impl_dx9.h" />
     <ClInclude Include="include\imgui\imgui_impl_glfw.h" />
     <ClInclude Include="include\imgui\imgui_impl_glut.h" />
     <ClInclude Include="include\imgui\imgui_impl_metal.h" />
@@ -497,7 +488,6 @@
     <ClInclude Include="include\imgui\imgui_impl_sdlrenderer.h" />
     <ClInclude Include="include\imgui\imgui_impl_vulkan.h" />
     <ClInclude Include="include\imgui\imgui_impl_wgpu.h" />
-    <ClInclude Include="include\imgui\imgui_impl_win32.h" />
     <ClInclude Include="include\imgui\imgui_internal.h" />
     <ClInclude Include="include\imgui\imgui_stdlib.h" />
     <ClInclude Include="include\imgui\imstb_rectpack.h" />

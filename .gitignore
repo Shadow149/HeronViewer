@@ -1,4 +1,3 @@
-/x64
-/HeronViewer/x64
-/.vs
-/HeronViewer/imgui.ini
+x64
+.vs
+Debug
