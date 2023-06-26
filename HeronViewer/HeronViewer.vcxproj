@@ -121,13 +121,27 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\freeimage;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glad;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glm;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imgui;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\ImGuiFileDialog;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imnodes;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\implot;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\mini;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\stb;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\common;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\lib\freeimagelib;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\lib\glfw;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>xcopy /s /y /i "$(ProjectDir)fonts\"  "$(OutDir)fonts\"
+xcopy /s /y /i "$(ProjectDir)shaders\"  "$(OutDir)shaders\"
+copy /y "$(ProjectDir)imgui.ini"  "$(OutDir)imgui.ini"
+copy /y "$(ProjectDir)preferences.ini"  "$(OutDir)preferences.ini"
+copy /y "$(ProjectDir)lib\freeimagelib\FreeImage.dll" "$(OutDir)FreeImage.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="include\glm\detail\glm.cpp" />
