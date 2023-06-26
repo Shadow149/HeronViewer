@@ -99,9 +99,9 @@ void Image::getImage(const char* filename) {
 	height = small_img_height;
 	temp = FreeImage_Rescale(temp, width, height);
 
-	x = width / 32;
+	x = (width / 32) + 1;
 	Console::log("IMAGE DIMENSIONS SIZE: " + std::to_string(width) + " , " + std::to_string(height));
-	y = height / 32;
+	y = (height / 32) + 1;
 	Console::log("COMPUTE DISPATCH SIZE: " + std::to_string(x) + " , " + std::to_string(y) + " = " + std::to_string(x * y) + " WORK GROUPS");
 
 
@@ -524,8 +524,6 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 
 	process_compute_shader_.setFloatArray("cdf", cdf, 256);
 	process_compute_shader_.setBool("histogram_loaded", histogram_loaded);
-	int x = width / 32;
-	int y = height / 32;
 	glDispatchCompute(x, y, 1);
 
 	glFinish();
