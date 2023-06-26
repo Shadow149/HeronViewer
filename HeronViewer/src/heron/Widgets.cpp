@@ -122,7 +122,11 @@ bool drawColorSelector(const char* label, float height, float* r, float* g, floa
 	ImGui::GetWindowDrawList()->AddCircleFilled(ImVec2(pos.x, pos.y), 3.0f, ImColor(255, 255, 255));
 
 	bool changed = false;
-	if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0)) {
+	if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(0))
+	{
+		*r = *g = *b = 1;
+	}
+	else if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0)) {
 		float speed = 0.005f * exp(-3 * s);
 		if (ImGui::GetIO().KeyShift) {
 			speed = 0.001f;
