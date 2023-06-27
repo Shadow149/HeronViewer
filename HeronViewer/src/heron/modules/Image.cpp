@@ -529,7 +529,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	process_compute_shader_.setBool("histogram_loaded", histogram_loaded);
 	glDispatchCompute(x, y, 1);
 
-	if (imageLoaded) {
+	if (getChanged() && imageLoaded) {
 		glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * 4 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
