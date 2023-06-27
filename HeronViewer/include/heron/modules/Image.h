@@ -27,7 +27,7 @@
 #include "../common/SliderValues.h"
 
 #define RENDER_WIDTH 1920
-#define SMALL_IMG_MAX 3000
+#define SMALL_IMG_MAX 4000
 
 class Histogram;
 

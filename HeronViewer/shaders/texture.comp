@@ -20,6 +20,8 @@ uniform float[4] expo;
 uniform float[4] contrast;
 uniform float[4] whites;
 
+uniform float sat_ref;
+
 uniform float[4] lift;
 uniform float[4] gamma;
 uniform float[4] gain;
@@ -252,8 +254,14 @@ float edit_channel_lum(float v) {
 }
 
 vec4 edit_channels(vec4 pix) {
+	float sat_before = rgb2hsv(pix.rgb).y;
 	vec3 res = vec3(edit_channel(pix[2], 1),edit_channel(pix[1], 2),edit_channel(pix[0], 3));
-	return vec4(edit_channel_lum(res[0]),edit_channel_lum(res[1]),edit_channel_lum(res[2]), 1);
+	vec3 lum = vec3(edit_channel_lum(res[0]),edit_channel_lum(res[1]),edit_channel_lum(res[2]));
+	vec3 hsv_after = rgb2hsv(lum.rgb);
+	float sat_after = hsv_after.y;
+	float sat_diff = sat_after - sat_before;
+	hsv_after.y = sat_before + (sat_diff * sat_ref);
+	return vec4(hsv2rgb(hsv_after),1);
 }
 
 vec4 pixelTransform(vec4 pix, ivec2 coord, ivec2 tex_size) {

@@ -128,7 +128,7 @@ void Heron::initModules() {
 	modules.push_back(hist);
 	modules.push_back(new Curve(image, "Curve"));
 	modules.push_back(new Console("Console"));
-	modules.push_back(new Overlay("Overlay", true));
+	modules.push_back(new Overlay("Overlay"));
 	modules.push_back(Preferences::instance());
 	modules.push_back(new Graph("Node Editor"));
 	modules.push_back(image);

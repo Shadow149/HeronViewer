@@ -143,6 +143,10 @@ void Editor::render()
 
 	ImGui::Separator();
 
+	sliderChanged |= SliderFloatReset(vals.sat_ref, 1.0f, "Saturation Refine", &(vals.sat_ref), 0, 1);
+
+	ImGui::Separator();
+
 	sliderChanged |= drawColorSelector("High", ImGui::GetWindowWidth() / 3, &vals.high[1], &vals.high[2], &vals.high[3]); ImGui::SameLine();
 	sliderChanged |= drawColorSelector("Mid", ImGui::GetWindowWidth() / 3, &vals.mid[1], &vals.mid[2], &vals.mid[3]); 
 	sliderChanged |= drawColorSelector("Low", ImGui::GetWindowWidth() / 3, &vals.low[1], &vals.low[2], &vals.low[3]); ImGui::SameLine();
@@ -411,6 +415,10 @@ void Editor::reset()
 	std::fill_n(vals.gain, 4, 1.0f);
 
 	std::fill_n(vals.hues, 8, 0.0f);
+	std::fill_n(vals.sats, 8, 0.0f);
+	std::fill_n(vals.lums, 8, 0.0f);
+
+	vals.sat_ref = 1;
 
 	vals.sat = SAT_DEFAULT;
 	vals.wb = WB_DEFAULT;

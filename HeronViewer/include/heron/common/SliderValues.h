@@ -37,5 +37,7 @@ struct SliderValues
 	float xyz_y;
 	float xyz_z;
 
+	float sat_ref;
+
 	float scope_brightness;
 };

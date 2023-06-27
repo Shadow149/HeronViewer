@@ -499,6 +499,8 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	process_compute_shader_.setFloatArray("contrast", m_pVals->contrast, 4);
 	process_compute_shader_.setFloatArray("expo", m_pVals->expo, 4);
 
+	process_compute_shader_.setFloat("sat_ref", m_pVals->sat_ref);
+
 	process_compute_shader_.setFloatArray("lift", m_pVals->lift, 4);
 	process_compute_shader_.setFloatArray("gamma", m_pVals->gamma, 4);
 	process_compute_shader_.setFloatArray("gain", m_pVals->gain, 4);
