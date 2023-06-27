@@ -30,7 +30,7 @@
 #define SAT_DEFAULT 0.0f
 #define WB_DEFAULT 7200.0f
 
-#define SHARP_DEFAULT 0.2f
+#define SHARP_DEFAULT 0.5f
 #define BLUR_DEFAULT 1.0f
 
 #define BW_LABEL "to Black and White"

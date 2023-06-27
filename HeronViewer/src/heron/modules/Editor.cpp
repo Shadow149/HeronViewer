@@ -204,7 +204,6 @@ void Editor::render()
 		if (iniWriter.joinable()) {
 			iniWriter.join();
 			Console::log("iniWriter joined");
-
 		}
 	}
 

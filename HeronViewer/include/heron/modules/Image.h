@@ -88,6 +88,8 @@ private:
 	unsigned int comp_texture;
 	unsigned vectorscope;
 	unsigned waveform;
+	unsigned waveform_acc;
+	unsigned vectorscope_acc;
 
 	GLuint SSBO;
 	GLuint SSBO_orig;
@@ -97,10 +99,6 @@ private:
 	void updatePreviewSize();
 
 public:
-
-	// FOR DEBUGGING
-	unsigned waveform_acc;
-	unsigned vectorscope_acc;
 
 	ImVec2 size;
 	ImVec2 previewSize;
@@ -144,5 +142,10 @@ public:
 	void scale(glm::vec3 s);
 	void translate(glm::vec3 t);
 	void resetView();
+
+	bool isBW() const
+	{
+		return m_pVals->bw;
+	}
 };
 
