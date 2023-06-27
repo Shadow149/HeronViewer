@@ -518,6 +518,8 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	process_compute_shader_.setFloat("noise", m_pVals->noise);
 
 	process_compute_shader_.setFloatArray("hues", m_pVals->hues, 8);
+	process_compute_shader_.setFloatArray("sats", m_pVals->sats, 8);
+	process_compute_shader_.setFloatArray("lums", m_pVals->lums, 8);
 
 	process_compute_shader_.setFloatArray("sharp_kernel", m_pVals->sharp_kernel, 9);
 

@@ -48,11 +48,9 @@ void Histogram::render()
 		const double y_max = static_cast<double>(img->getHeight() * img->getWidth()) / 20.0;
 		// TODO ImPlotCond_Always doing unnecessary updates?
 		ImPlot::SetupAxesLimits(0, 255, 0, y_max, ImPlotCond_Always);
-		for (int n = img->isBW() ? 0 : 3; n >= (int)!img->isBW(); n--) {
-			ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.5f);
+		for (int n = img->isBW() ? 0 : 3; n >= 0; n--) {
 			ImPlot::SetNextFillStyle(channel_colors[n]);
 			ImPlot::PlotShaded(tab_names[n], hist_x, hist[n], 256, -INFINITY);
-			ImPlot::PopStyleVar();
 		}
 		ImPlot::EndPlot();
 	}

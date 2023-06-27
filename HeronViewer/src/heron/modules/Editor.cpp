@@ -173,14 +173,72 @@ void Editor::render()
 
 	ImGui::Separator();
 
-	sliderChanged |= SliderFloatReset(vals.hues[0], 0.0f, "Red", &vals.hues[0], -1, 1);
-	sliderChanged |= SliderFloatReset(vals.hues[1], 0.0f, "Orange", &vals.hues[1], -1, 1);
-	sliderChanged |= SliderFloatReset(vals.hues[2], 0.0f, "Yellow", &vals.hues[2], -1, 1);
-	sliderChanged |= SliderFloatReset(vals.hues[3], 0.0f, "Green", &vals.hues[3], -1, 1);
-	sliderChanged |= SliderFloatReset(vals.hues[4], 0.0f, "Cyan", &vals.hues[4], -1, 1);
-	sliderChanged |= SliderFloatReset(vals.hues[5], 0.0f, "Blue", &vals.hues[5], -1, 1);
-	sliderChanged |= SliderFloatReset(vals.hues[6], 0.0f, "Purple", &vals.hues[6], -1, 1);
-	sliderChanged |= SliderFloatReset(vals.hues[7], 0.0f, "Pink", &vals.hues[7], -1, 1);
+	if (ImGui::CollapsingHeader("HSL Editing")) {
+
+
+		if (ImGui::CollapsingHeader("Red")) {
+			sliderChanged |= SliderFloatReset(vals.hues[0], 0.0f, "Red Hue", &vals.hues[0], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.sats[0], 0.0f, "Red Saturation", &vals.sats[0], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.lums[0], 0.0f, "Red Value", &vals.lums[0], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Orange")) {
+			sliderChanged |= SliderFloatReset(vals.hues[1], 0.0f, "Orange Hue", &vals.hues[1], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.sats[1], 0.0f, "Orange Saturation", &vals.sats[1], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.lums[1], 0.0f, "Orange Value", &vals.lums[1], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Yellow")) {
+			sliderChanged |= SliderFloatReset(vals.hues[2], 0.0f, "Yellow Hue", &vals.hues[2], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.sats[2], 0.0f, "Yellow Saturation", &vals.sats[2], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.lums[2], 0.0f, "Yellow Value", &vals.lums[2], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Green")) {
+			sliderChanged |= SliderFloatReset(vals.hues[3], 0.0f, "Green Hue", &vals.hues[3], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.sats[3], 0.0f, "Green Saturation", &vals.sats[3], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.lums[3], 0.0f, "Green Value", &vals.lums[3], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Cyan")) {
+			sliderChanged |= SliderFloatReset(vals.hues[4], 0.0f, "Cyan Hue", &vals.hues[4], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.sats[4], 0.0f, "Cyan Saturation", &vals.sats[4], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.lums[4], 0.0f, "Cyan Value", &vals.lums[4], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Blue")) {
+			sliderChanged |= SliderFloatReset(vals.hues[5], 0.0f, "Blue Hue", &vals.hues[5], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.sats[5], 0.0f, "Blue Saturation", &vals.sats[5], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.lums[5], 0.0f, "Blue Value", &vals.lums[5], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Purple")) {
+			sliderChanged |= SliderFloatReset(vals.hues[6], 0.0f, "Purple Hue", &vals.hues[6], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.sats[6], 0.0f, "Purple Saturation", &vals.sats[6], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.lums[6], 0.0f, "Purple Value", &vals.lums[6], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Pink")) {
+			sliderChanged |= SliderFloatReset(vals.hues[7], 0.0f, "Pink Hue", &vals.hues[7], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.sats[7], 0.0f, "Pink Saturation", &vals.sats[7], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.lums[7], 0.0f, "Pink Value", &vals.lums[7], -1, 1);
+		}
+	}
+
 
 	ImGui::Separator();
 

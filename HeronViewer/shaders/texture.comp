@@ -39,6 +39,8 @@ uniform float noise;
 uniform bool noise_selected;
 
 uniform float hues[9];
+uniform float sats[9];
+uniform float lums[9];
 
 
 uniform bool clip;
@@ -172,9 +174,9 @@ vec4 apply_wb(vec4 v) {
 
 vec4 shift_hues(vec4 v) {
 	vec3 hsv_ = rgb2hsv(v.xyz);
-	// Reds
-	hsv_.x = hsv_.x + hues[0] * exp(-(pow(hsv_.x,2)/0.002))*0.15;
-	hsv_.x = hsv_.x + hues[0] * exp(-(pow(hsv_.x - 1,2)/0.002))*0.15; 
+
+	hsv_.x = hsv_.x + hues[0] * exp(-(pow(hsv_.x,2)/0.002))*0.15; // Reds
+	hsv_.x = hsv_.x + hues[0] * exp(-(pow(hsv_.x - 1,2)/0.002))*0.15; // Reds
 	hsv_.x = hsv_.x + hues[1] * exp(-(pow(hsv_.x - 0.09,2)/0.001))*0.1; // Orange
 	hsv_.x = hsv_.x + hues[2] * exp(-(pow(hsv_.x - 0.16,2)/0.001))*0.1; // Yellow
 	hsv_.x = hsv_.x + hues[3] * exp(-(pow(hsv_.x - 0.3,2)/0.007))*0.2; // Green
@@ -184,6 +186,35 @@ vec4 shift_hues(vec4 v) {
 
 	hsv_.x = hsv_.x + hues[6] * exp(-(pow(hsv_.x - 0.722,2)/0.01))*0.1; // Purple
 	hsv_.x = hsv_.x + hues[7] * exp(-(pow(hsv_.x - 0.846,2)/0.01))*0.1; // Pink
+
+	// Sats
+
+	hsv_.y = hsv_.y + sats[0] * exp(-(pow(hsv_.x,2)/0.002))*0.15; // Reds
+	hsv_.y = hsv_.y + sats[0] * exp(-(pow(hsv_.x - 1,2)/0.002))*0.15; // Reds
+	hsv_.y = hsv_.y + sats[1] * exp(-(pow(hsv_.x - 0.09,2)/0.001))*0.1; // Orange
+	hsv_.y = hsv_.y + sats[2] * exp(-(pow(hsv_.x - 0.16,2)/0.001))*0.1; // Yellow
+	hsv_.y = hsv_.y + sats[3] * exp(-(pow(hsv_.x - 0.3,2)/0.007))*0.2; // Green
+	hsv_.y = hsv_.y + sats[4] * exp(-(pow(hsv_.x - 0.48,2)/0.005))*0.15; // Cyan
+
+	hsv_.y = hsv_.y + sats[5] * exp(-(pow(hsv_.x - 0.65,2)/0.007))*0.15; // Blue
+
+	hsv_.y = hsv_.y + sats[6] * exp(-(pow(hsv_.x - 0.722,2)/0.01))*0.1; // Purple
+	hsv_.y = hsv_.y + sats[7] * exp(-(pow(hsv_.x - 0.846,2)/0.01))*0.1; // Pink
+
+
+	// Lums
+
+	hsv_.z = hsv_.z * ( 1 + lums[0] * exp(-(pow(hsv_.x,2)/0.002))*0.15 ); // Reds
+	hsv_.z = hsv_.z * ( 1 + lums[0] * exp(-(pow(hsv_.x - 1,2)/0.002))*0.15 ); // Reds
+	hsv_.z = hsv_.z * ( 1 + lums[1] * exp(-(pow(hsv_.x - 0.09,2)/0.001))*0.1 ); // Orange
+	hsv_.z = hsv_.z * ( 1 + lums[2] * exp(-(pow(hsv_.x - 0.16,2)/0.001))*0.1 ); // Yellow
+	hsv_.z = hsv_.z * ( 1 + lums[3] * exp(-(pow(hsv_.x - 0.3,2)/0.007))*0.2 ); // Green
+	hsv_.z = hsv_.z * ( 1 + lums[4] * exp(-(pow(hsv_.x - 0.48,2)/0.005))*0.15 ); // Cyan
+
+	hsv_.z = hsv_.z * ( 1 + lums[5] * exp(-(pow(hsv_.x - 0.65,2)/0.007))*0.15 ); // Blue
+
+	hsv_.z = hsv_.z * ( 1 + lums[6] * exp(-(pow(hsv_.x - 0.722,2)/0.01))*0.1 ); // Purple
+	hsv_.z = hsv_.z * ( 1 + lums[7] * exp(-(pow(hsv_.x - 0.846,2)/0.01))*0.1 ); // Pink
 
 	return vec4(hsv2rgb(hsv_),1);
 }
