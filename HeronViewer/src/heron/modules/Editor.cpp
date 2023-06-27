@@ -278,7 +278,7 @@ void Editor::exportImage() {
 	std::experimental::filesystem::path p = stripExtension(fileName);
 	std::experimental::filesystem::path dir = Preferences::instance()->EXPORT_DIR;
 	dir /= p;
-	exportDir = dir.u8string() + "-edit.png";
+	exportDir = dir.u8string() + "-edit.jpg";
 	img->exportImage(exportDir.c_str());
 }
 

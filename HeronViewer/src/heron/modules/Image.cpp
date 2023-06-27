@@ -141,7 +141,7 @@ void Image::bindImage() {
 
 void Image::exportImage(const char* fileLoc) {
 	exporting = true;
-	Console::log("Exporting...");
+	Console::log("Exporting to: " + std::string(fileLoc));
 	/*
 	glGenBuffers(1, &pbo);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
