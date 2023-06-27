@@ -136,14 +136,6 @@ void Image::bindImage() {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
 	glBindImageTexture(0, comp_texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 
-	glBindTexture(GL_TEXTURE_2D, waveform_acc);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, width, 255, 0, GL_RED_INTEGER, GL_INT, NULL);
-	glBindImageTexture(6, waveform_acc, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-
-	glBindTexture(GL_TEXTURE_2D, waveform);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, 255, 0, GL_RGBA, GL_FLOAT, NULL);
-	glBindImageTexture(5, waveform, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-
 	//glGenerateMipmap(GL_TEXTURE_2D);
 }
 
@@ -407,30 +399,28 @@ void Image::init()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 0, 0, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 512, 255, 0, GL_RGBA, GL_FLOAT, NULL);
 	glBindImageTexture(5, waveform, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 
-	glGenTextures(1, &waveform_acc);
-	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_2D, waveform_acc);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 0, 0, 0, GL_RED_INTEGER, GL_INT, NULL);
-	glBindImageTexture(6, waveform_acc, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+	//glGenTextures(1, &waveform_acc);
+	//glActiveTexture(GL_TEXTURE6);
+	//glBindTexture(GL_TEXTURE_2D, waveform_acc);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 0, 0, 0, GL_RED_INTEGER, GL_INT, NULL);
+	//glBindImageTexture(6, waveform_acc, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 
-	glGenTextures(1, &vectorscope_acc);
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D, vectorscope_acc);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	// format, type
-	//GL_RED_INTEGER, GL_INT
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 255, 255, 0, GL_RED_INTEGER, GL_INT, NULL);
-	glBindImageTexture(7, vectorscope_acc, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
+	//glGenTextures(1, &vectorscope_acc);
+	//glActiveTexture(GL_TEXTURE7);
+	//glBindTexture(GL_TEXTURE_2D, vectorscope_acc);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 255, 255, 0, GL_RED_INTEGER, GL_INT, NULL);
+	//glBindImageTexture(7, vectorscope_acc, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
 
 	glGenBuffers(1, &SSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
@@ -441,6 +431,16 @@ void Image::init()
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_orig);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, SSBO_orig);
+
+	glGenBuffers(1, &waveform_acc);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, waveform_acc);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, 512 * 255 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, waveform_acc);
+
+	glGenBuffers(1, &vectorscope_acc);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, vectorscope_acc);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, 255 * 255 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, vectorscope_acc);
 
 }
 
@@ -529,7 +529,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	process_compute_shader_.setBool("histogram_loaded", histogram_loaded);
 	glDispatchCompute(x, y, 1);
 
-	if (getChanged() && imageLoaded) {
+	if (imageLoaded) {
 		glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * 4 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
@@ -541,6 +541,14 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 		std::fill_n(hist_orig, 256, 0);
 
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, waveform_acc);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, 512 * 255 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
+		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, vectorscope_acc);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, 255 * 255 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
+		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, comp_texture);
 		glActiveTexture(GL_TEXTURE1);
@@ -551,12 +559,6 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 
 		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_2D, waveform);
-
-		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_2D, waveform_acc);
-
-		glActiveTexture(GL_TEXTURE7);
-		glBindTexture(GL_TEXTURE_2D, vectorscope_acc);
 
 
 		hist_compute_shader_.use();
@@ -641,7 +643,7 @@ void Image::render()
 	ImGui::End();
 
 	ImGui::Begin("Waveform");
-	ImGui::Image((ImTextureID)waveform, ImVec2(ImGui::GetWindowWidth(),ImGui::GetWindowHeight() - 70));
+	ImGui::Image((ImTextureID)waveform, ImVec2(512, 255));
 	ImGui::End();
 
 
