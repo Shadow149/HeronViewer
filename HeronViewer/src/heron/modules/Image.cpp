@@ -519,8 +519,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 
 	process_compute_shader_.setFloatArray("hues", m_pVals->hues, 8);
 
-
-	//process_compute_shader_.setFloatArray("sharp_kernel", m_pVals->sharp_kernel, 9);
+	process_compute_shader_.setFloatArray("sharp_kernel", m_pVals->sharp_kernel, 9);
 
 	process_compute_shader_.setFloatArray("cdf", cdf, 256);
 	process_compute_shader_.setBool("histogram_loaded", histogram_loaded);

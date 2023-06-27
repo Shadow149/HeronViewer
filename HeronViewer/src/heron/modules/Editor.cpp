@@ -52,12 +52,12 @@ bool SliderFloatReset(T &data, T reset_value, const char* label, float* v, float
 
 void Editor::updateSharpenKernel() {
 	float a[9], b[9], c[9], d[9], e[9];
-	scalarMul(1.0f / 16.0f, blur_kernel33, a, 3);
+	scalarMul(1.0f / 16.0f, blur_kernel, a, 3);
 	scalarMul(vals.blur, a, b, 3);
-	subMat(id33, b, c, 3);
+	subMat(id, b, c, 3);
 	scalarMul(vals.sharp, c, d, 3);
-	addMat(id33, d, e, 3);
-	normalMat(e, sharpen_kernel33, 3);
+	addMat(id, d, e, 3);
+	normalMat(e, vals.sharp_kernel, 3);
 }
 
 void Editor::toggleBwLabel() {
@@ -131,9 +131,9 @@ void Editor::render()
 
 				ImGui::Separator();
 
-				sliderChanged |= SliderFloatReset(vals.lift[n], 0.0f, "lift", &(vals.lift[n]), -1, 1);
-				sliderChanged |= SliderFloatReset(vals.gamma[n], 1.0f, "gamma", &(vals.gamma[n]), 0, 2);
-				sliderChanged |= SliderFloatReset(vals.gain[n], 1.0f, "gain", &(vals.gain[n]), -1, 2);
+				sliderChanged |= SliderFloatReset(vals.lift[n], 0.0f, "Lift", &(vals.lift[n]), -1, 1);
+				sliderChanged |= SliderFloatReset(vals.gamma[n], 1.0f, "Gamma", &(vals.gamma[n]), 0, 2);
+				sliderChanged |= SliderFloatReset(vals.gain[n], 1.0f, "Gain", &(vals.gain[n]), -1, 2);
 
 
 				ImGui::EndTabItem();
@@ -192,10 +192,6 @@ void Editor::render()
 	ImGui::Separator();
 
 	sliderChanged |= SliderFloatReset(vals.scope_brightness, 2.0f, "Scope Brightness", &vals.scope_brightness, 0, 10);
-
-
-	//float r, g, b;
-	//drawColorSelector("Foo", 200, &r, &g, &b);
 
 	ImGui::End();
 

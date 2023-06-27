@@ -28,9 +28,9 @@
 #define CONTRAST_DEFAULT 0.0f
 
 #define SAT_DEFAULT 0.0f
-#define WB_DEFAULT 6200.0f
+#define WB_DEFAULT 7200.0f
 
-#define SHARP_DEFAULT 0.0f
+#define SHARP_DEFAULT 0.2f
 #define BLUR_DEFAULT 1.0f
 
 #define BW_LABEL "to Black and White"
@@ -63,14 +63,9 @@ private:
 	std::string fileName, filePath;
 	std::string exportDir;
 
-	float sharpen_kernel[25];
-	float sharpen_kernel33[9];
 
-	float id[25] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	float blur_kernel[25] = { 1, 4, 6, 4, 1, 4, 16, 25, 26, 4, 6, 24, 36, 24, 6, 4, 16, 25, 26, 4, 1, 4, 6, 4, 1 };
-
-	float id33[9] = { 0, 0, 0, 0, 1, 0, 0, 0, 0 };
-	float blur_kernel33[9] = { 1, 2, 1, 2, 4, 2, 1, 2, 1 };
+	float id[9] = { 0, 0, 0, 0, 1, 0, 0, 0, 0 };
+	float blur_kernel[9] = { 1, 2, 1, 2, 4, 2, 1, 2, 1 };
 
 	bool sliderChanged = false;
 
