@@ -1,5 +1,7 @@
 ﻿#include "Editor.h"
 
+#include "Heron.h"
+
 bool Spinner(const char* label, float radius, int thickness, const ImU32& color) {
 	ImGuiWindow* window = ImGui::GetCurrentWindow();
 	if (window->SkipItems)
@@ -283,40 +285,57 @@ void Editor::exportImage() {
 }
 
 void Editor::writeIni() {
-	Console::log("WARNING: Editor::writeIni not implemented!");
-
-	/*iniWriting = true;
+	iniWriting = true;
 	mINI::INIFile file(stripExtension(filePath) + ".ini");
 	mINI::INIStructure ini;
 	bool readSuc = file.read(ini);
 	if (!readSuc) {
 		Console::log("Ini doesn't exist, creating one...");
 	}
-	else {
-		Console::log("Ini read...");
-	}
 
-	ini["sliders"]["bw"] = std::to_string(bw);
-	ini["sliders"]["White Balance"] = std::to_string(wb);
+	Console::log("Writing ini to " + stripExtension(filePath) + ".ini");
+
+	ini["version"]["number"] = std::to_string(HERON_VERSION);
 
 	for (int n = 0; n < 4; n++) {
-		ini["sliders"][std::string(tab_names[n]) + "_exp"] = std::to_string(exp[n]);
-		ini["sliders"][std::string(tab_names[n]) + "_contrast"] = std::to_string(contrast[n]);
-		ini["sliders"][std::string(tab_names[n]) + "_high"] = std::to_string(high[n]);
-		ini["sliders"][std::string(tab_names[n]) + "_mid"] = std::to_string(mid[n]);
-		ini["sliders"][std::string(tab_names[n]) + "_whites"] = std::to_string(whites[n]);
-		ini["sliders"][std::string(tab_names[n]) + "_low"] = std::to_string(low[n]);
+		ini["sliders"][std::string(tab_names[n]) + "_expo"] = std::to_string(vals.expo[n]);
+		ini["sliders"][std::string(tab_names[n]) + "_contrast"] = std::to_string(vals.contrast[n]);
+		ini["sliders"][std::string(tab_names[n]) + "_high"] = std::to_string(vals.high[n]);
+		ini["sliders"][std::string(tab_names[n]) + "_mid"] = std::to_string(vals.mid[n]);
+		ini["sliders"][std::string(tab_names[n]) + "_whites"] = std::to_string(vals.whites[n]);
+		ini["sliders"][std::string(tab_names[n]) + "_low"] = std::to_string(vals.low[n]);
+		ini["sliders"][std::string(tab_names[n]) + "_lift"] = std::to_string(vals.lift[n]);
+		ini["sliders"][std::string(tab_names[n]) + "_gain"] = std::to_string(vals.gain[n]);
+		ini["sliders"][std::string(tab_names[n]) + "_gamma"] = std::to_string(vals.gamma[n]);
 	}
 
-	ini["sliders"]["sat"] = std::to_string(sat);
-	ini["sliders"]["blur"] = std::to_string(blur);
-	ini["sliders"]["sharp"] = std::to_string(sharp);
-	ini["sliders"]["high_thresh"] = std::to_string(high_thresh);
-	ini["sliders"]["shad_thresh"] = std::to_string(shad_thresh);
-	ini["sliders"]["high_incr"] = std::to_string(high_incr);
-	ini["sliders"]["shad_incr"] = std::to_string(shad_incr);
-	ini["sliders"]["shad_var"] = std::to_string(shad_var);
-	ini["sliders"]["var_mult"] = std::to_string(var_mult);
+	for (int n = 0; n < 8; n++) {
+		ini["sliders"]["hues_" + std::to_string(n)] = std::to_string(vals.hues[n]);
+		ini["sliders"]["sats_" + std::to_string(n)] = std::to_string(vals.sats[n]);
+		ini["sliders"]["lums_" + std::to_string(n)] = std::to_string(vals.lums[n]);
+	}
+
+
+	ini["sliders"]["bw"] = std::to_string(vals.bw);
+	ini["sliders"]["inv"] = std::to_string(vals.inv);
+
+	ini["sliders"]["sat"] = std::to_string(vals.sat);
+	ini["sliders"]["wb"] = std::to_string(vals.wb);
+
+	ini["sliders"]["noise_selected"] = std::to_string(vals.noise_selected);
+	ini["sliders"]["noise"] = std::to_string(vals.noise);
+
+	ini["sliders"]["sharp"] = std::to_string(vals.sharp);
+	ini["sliders"]["p_sharp"] = std::to_string(vals.p_sharp);
+	ini["sliders"]["blur"] = std::to_string(vals.blur);
+	ini["sliders"]["p_blur"] = std::to_string(vals.p_blur);
+
+	ini["sliders"]["yiq_y"] = std::to_string(vals.yiq_y);
+	ini["sliders"]["yiq_z"] = std::to_string(vals.yiq_z);
+	ini["sliders"]["xyz_y"] = std::to_string(vals.xyz_y);
+	ini["sliders"]["xyz_z"] = std::to_string(vals.xyz_z);
+
+	ini["sliders"]["sat_ref"] = std::to_string(vals.sat_ref);
 
 	if (!readSuc) {
 		file.generate(ini);
@@ -327,54 +346,86 @@ void Editor::writeIni() {
 		Console::log("Ini updated");
 	}
 	Status::setStatus("Saved!");
-	iniWriting = false;*/
+	iniWriting = false;
 }
 
 void Editor::readIni() {
-	Console::log("WARNING: Editor::readIni not implemented!");
-	//iniReading = true;
-	//mINI::INIFile file(stripExtension(filePath) + ".ini");
-	//mINI::INIStructure ini;
-	//bool readSuc = file.read(ini);
-	//if (!readSuc) {
-	//	Console::log("Ini doesn't exist, no settings to import...");
-	//	iniReading = false;
-	//	reset();
-	//	return;
-	//}
-	//else {
-	//	Console::log("Config setter ini read...");
-	//}
-	//try {
-	//	bw = std::stof(ini["sliders"]["bw"]);
+	iniReading = true;
+	mINI::INIFile file(stripExtension(filePath) + ".ini");
+	mINI::INIStructure ini;
+	bool readSuc = file.read(ini);
+	if (!readSuc) {
+		Console::log("Ini doesn't exist, no settings to import...");
+		iniReading = false;
+		reset();
+		return;
+	}
 
-	//} catch (...) {
-	//}
+	Console::log("Reading ini " + stripExtension(filePath) + ".ini");
 
-	//wb = std::stof(ini["sliders"]["White Balance"]);
+	float ini_ver;
 
-	//for (int n = 0; n < 4; n++) {
-	//	exp[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_exp"]);
-	//	contrast[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_contrast"]);
-	//	high[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_high"]);
-	//	mid[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_mid"]);
-	//	whites[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_whites"]);
-	//	low[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_low"]);
-	//}
+	try {
 
-	//sat = std::stof(ini["sliders"]["sat"]);
-	//blur = std::stof(ini["sliders"]["blur"]);
-	//sharp = std::stof(ini["sliders"]["sharp"]);
-	//high_thresh = std::stof(ini["sliders"]["high_thresh"]);
-	//shad_thresh = std::stof(ini["sliders"]["shad_thresh"]);
-	//high_incr = std::stof(ini["sliders"]["high_incr"]);
-	//shad_incr = std::stof(ini["sliders"]["shad_incr"]);
-	//shad_var = std::stof(ini["sliders"]["shad_var"]);
-	//var_mult = std::stof(ini["sliders"]["var_mult"]);
-	//
-	//iniReading = false;
-	//Status::setStatus("Read settings successfully!");
-	//setChanges();
+		ini_ver = std::stof(ini["version"]["number"]);
+
+	} catch (...)
+	{
+		Console::log("ERROR: Old version of Ini with no version number... Cannot read ini");
+		return;
+	}
+
+	if (ini_ver != HERON_VERSION)
+	{
+		Console::log("ERROR: Ini version doesn't match current version of Heron! Delete the file's ini to read!");
+		return;
+	}
+
+
+	for (int n = 0; n < 4; n++) {
+		vals.expo[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_expo"]);
+		vals.contrast[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_contrast"]);
+		vals.high[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_high"]);
+		vals.mid[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_mid"]);
+		vals.whites[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_whites"]);
+		vals.low[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_low"]);
+
+		vals.lift[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_lift"]);
+		vals.gamma[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_gamma"]);
+		vals.gain[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_gain"]);
+
+	}
+
+	for (int n = 0; n < 8; n++) {
+		vals.hues[n] = std::stof(ini["sliders"]["hues_" + std::to_string(n)]);
+		vals.lums[n] = std::stof(ini["sliders"]["lums_" + std::to_string(n)]);
+		vals.sats[n] = std::stof(ini["sliders"]["sats_" + std::to_string(n)]);
+	}
+
+	vals.bw = std::stof(ini["sliders"]["bw"]);
+	vals.inv = std::stof(ini["sliders"]["inv"]);
+
+	vals.sat = std::stof(ini["sliders"]["sat"]);
+	vals.wb = std::stof(ini["sliders"]["wb"]);
+
+	vals.noise_selected = std::stof(ini["sliders"]["noise_selected"]);
+	vals.noise = std::stof(ini["sliders"]["noise"]);
+
+	vals.sharp = std::stof(ini["sliders"]["sharp"]);
+	vals.p_sharp = std::stof(ini["sliders"]["p_sharp"]);
+	vals.blur = std::stof(ini["sliders"]["blur"]);
+	vals.p_blur = std::stof(ini["sliders"]["p_blur"]);
+
+	vals.yiq_y = std::stof(ini["sliders"]["yiq_y"]);
+	vals.yiq_z = std::stof(ini["sliders"]["yiq_z"]);
+	vals.xyz_y = std::stof(ini["sliders"]["xyz_y"]);
+	vals.xyz_z = std::stof(ini["sliders"]["xyz_z"]);
+
+	vals.sat_ref = std::stof(ini["sliders"]["sat_ref"]);
+	
+	iniReading = false;
+	Status::setStatus("Read settings successfully!");
+	setChanges();
 }
 
 

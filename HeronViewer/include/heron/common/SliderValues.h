@@ -2,8 +2,8 @@
 struct SliderValues
 {
 	const char* bw_label;
-	bool bw;
-	bool inv;
+	float sharp_kernel[9];
+
 
 	float low[4];
 	float mid[4];
@@ -16,21 +16,23 @@ struct SliderValues
 	float gamma[4];
 	float gain[4];
 
+	float hues[8];
+	float sats[8];
+	float lums[8];
+
+	bool bw;
+	bool inv;
+
 	float sat;
 	float wb;
 
 	bool noise_selected;
 	float noise;
 
-	float sharp_kernel[9];
 	float sharp;
 	float p_sharp;
 	float blur;
 	float p_blur;
-
-	float hues[8];
-	float sats[8];
-	float lums[8];
 
 	float yiq_y;
 	float yiq_z;
