@@ -51,9 +51,9 @@ void Heron::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 		view_scale += yoffset * scale;
 		image->scale(s);
 
-		glm::vec3 off = glm::vec3((yoffset / view_scale) * scale, (yoffset / view_scale) * scale, 0);
-		view_pos += glm::vec3((yoffset / view_scale) * scale, (yoffset / view_scale) * scale, 0);
-		image->translate(off);
+		//glm::vec3 off = glm::vec3((yoffset / view_scale) * scale, (yoffset / view_scale) * scale, 0);
+		//view_pos += glm::vec3((yoffset / view_scale) * scale, (yoffset / view_scale) * scale, 0);
+		//image->translate(off);
 	}
 	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
 		glm::vec3 off = glm::vec3(yoffset * scale, 0, 0);

@@ -462,10 +462,17 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		threadImageLoaded = false;
 		imageLoaded = true;
 		changed = true;
-		if (size.x > size.y)
-			model = glm::scale(glm::mat4(1.0f), glm::vec3((float)size.y / (previewSize.y + 200)));
-		else
-			model = glm::scale(glm::mat4(1.0f), glm::vec3((float)size.x / (previewSize.x + 200)));
+		//view = glm::mat4(1.0f);
+		view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+		model = glm::mat4(1.0f);
+		if (size.x > size.y) {
+			scale(glm::vec3((float)size.y / height));
+			translate(glm::vec3(-(size.x / width) * ((float)width/height), -(size.y / height), 0.0f));
+		}
+		else {
+			scale(glm::vec3((float)size.x / width));
+			translate(glm::vec3(-(size.x / width), -(size.y / height) * ((float)height / width), 0.0f));
+		}
 		std::fill_n(cdf, 256, 1.0f / 8.0f);
 	}
 
