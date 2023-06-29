@@ -129,6 +129,12 @@
     <ClCompile Include="include\glm\detail\glm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\heron\modules\Vectorscope.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\heron\modules\Waveform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\freeimage\FreeImage.h">
@@ -1134,6 +1140,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\heron\Window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\heron\modules\Vectorscope.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\heron\modules\Waveform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

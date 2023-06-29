@@ -78,14 +78,12 @@ void Editor::init()
 
 void Editor::render()
 {
-	if (!visible) { return; }
-
 	if (img->imageLoaded && !configSet) {
 		configSet = true;
 		setFromConfigFile();
 	}
 
-	ImGui::Begin(name.c_str());
+	ImGui::Begin(name.c_str(), &visible);
 
 	if (ImGui::Button("Reset")) {
 		reset();

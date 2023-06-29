@@ -14,8 +14,6 @@ void Curve::init()
 
 void Curve::render()
 {
-	if (!visible) { return; }
-
 	if (img->getChanged()) {
 		for (int n = 0; n < 4; n++) {
 			for (int i = 0; i < DATA_POINTS; i++) {
@@ -27,7 +25,7 @@ void Curve::render()
 	}
 
 	ImGui::SetNextWindowBgAlpha(0.50f); // Transparent background
-	ImGui::Begin(name.c_str());
+	ImGui::Begin(name.c_str(), &visible);
 	// TODO make this better
 	ImVec2 size = ImGui::GetWindowSize();
 	ImGui::SetWindowSize(ImVec2(size.x, size.x + 40));

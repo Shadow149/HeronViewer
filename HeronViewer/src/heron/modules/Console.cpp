@@ -10,7 +10,6 @@ void Console::init()
 
 void Console::render()
 {
-	if (!visible) { return; }
 	ImGui::SetNextWindowBgAlpha(0.50f); // Transparent background
 	ImGui::Begin(name.c_str(), &visible);
 	ImGui::PushFont(font);

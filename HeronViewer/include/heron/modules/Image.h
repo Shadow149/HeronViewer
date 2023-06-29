@@ -147,5 +147,15 @@ public:
 	{
 		return m_pVals->bw;
 	}
+
+	unsigned getVectorscopeID()
+	{
+		return vectorscope;
+	}
+
+	unsigned getWaveformID()
+	{
+		return waveform;
+	}
 };
 

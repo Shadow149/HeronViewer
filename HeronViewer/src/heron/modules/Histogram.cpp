@@ -38,7 +38,7 @@ void Histogram::render()
 			hist[3][i] = img->histogram[(i*4)+3];
 		}
 	}
-	ImGui::Begin(name.c_str());
+	ImGui::Begin(name.c_str(), &visible);
 	const ImVec2 size = ImGui::GetWindowSize();
 	ImPlot::GetStyle().PlotMinSize = ImVec2(0, 0);
 	ImPlot::GetStyle().PlotDefaultSize = ImVec2(-1, size.y - 30);

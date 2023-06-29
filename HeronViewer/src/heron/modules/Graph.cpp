@@ -7,7 +7,7 @@ void Graph::init()
 
 void Graph::render()
 {
-	ImGui::Begin(name.c_str());
+	ImGui::Begin(name.c_str(), &visible);
 
 	ImNodes::BeginNodeEditor();
 

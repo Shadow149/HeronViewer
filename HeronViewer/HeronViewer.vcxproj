@@ -180,6 +180,8 @@ copy /y "$(ProjectDir)lib\freeimagelib\FreeImage.dll" "$(OutDir)FreeImage.dll"</
     <ClCompile Include="src\stb\stb_image_resize.cpp" />
     <ClCompile Include="src\stb\stb_image_write.cpp" />
     <ClCompile Include="src\stb\std_image.cpp" />
+    <ClCompile Include="src\heron\modules\Vectorscope.cpp" />
+    <ClCompile Include="src\heron\modules\Waveform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\freeimage\FreeImage.h" />
@@ -517,6 +519,8 @@ copy /y "$(ProjectDir)lib\freeimagelib\FreeImage.dll" "$(OutDir)FreeImage.dll"</
     <ClInclude Include="include\stb\stb_image.h" />
     <ClInclude Include="include\stb\stb_image_resize.h" />
     <ClInclude Include="include\stb\stb_image_write.h" />
+    <ClInclude Include="include\heron\modules\Vectorscope.h" />
+    <ClInclude Include="include\heron\modules\Waveform.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\glm\detail\func_common.inl" />

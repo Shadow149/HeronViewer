@@ -14,7 +14,6 @@ void Overlay::init()
 
 void Overlay::render()
 {
-    if (!visible) { return; }
     ImGui::SetNextWindowBgAlpha(0.35f);
     if (ImGui::Begin(name.c_str(), &visible, flags))
     {

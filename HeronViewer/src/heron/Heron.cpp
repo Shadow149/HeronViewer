@@ -4,6 +4,8 @@
 
 #include "FileDialog.h"
 #include "Graph.h"
+#include "Vectorscope.h"
+#include "Waveform.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -126,6 +128,8 @@ void Heron::initModules() {
 	modules.push_back(fileDialog);
 	modules.push_back(editor);
 	modules.push_back(hist);
+	modules.push_back(new Vectorscope(image, "Vectorscope"));
+	modules.push_back(new Waveform(image, "Waveform"));
 	modules.push_back(new Curve(image, "Curve"));
 	modules.push_back(new Console("Console"));
 	modules.push_back(new Overlay("Overlay"));

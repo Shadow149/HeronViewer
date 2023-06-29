@@ -627,8 +627,6 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 
 void Image::render()
 {
-	if (!visible) { return; }
-
 	glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
 	float start = glfwGetTime();
@@ -638,17 +636,6 @@ void Image::render()
 	ImGui::Image((ImTextureID)renderedTexture, previewSize);
 	ImGui::End();
 	*imageRender = "ImGui Window Render Time: " + std::to_string(glfwGetTime() - start);
-
-	ImGui::Begin("Vectorscope");
-	hue_wheel(255 / 2, 255, 255, ImVec2(0, 0), 0, 30, true);
-	ImGui::Image((ImTextureID)vectorscope, ImVec2(255, 255));
-	ImGui::End();
-
-	ImGui::Begin("Waveform");
-	ImGui::Image((ImTextureID)waveform, ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 60));
-	ImGui::End();
-
-
 }
 
 void Image::cleanup()
