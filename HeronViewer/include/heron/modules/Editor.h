@@ -55,6 +55,7 @@ public:
 	void loaded(bool l);
 
 	void updateConfigFile();
+	void undo();
 
 private:
 	Image* img;
@@ -70,6 +71,8 @@ private:
 	bool sliderChanged = false;
 
 	SliderValues vals = SliderValues();
+	SliderValues prev_vals = SliderValues();
+	bool new_values_set = true;
 
 	bool iniWriting = false;
 	bool iniReading = false;

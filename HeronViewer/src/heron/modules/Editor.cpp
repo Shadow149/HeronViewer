@@ -83,7 +83,19 @@ void Editor::render()
 		setFromConfigFile();
 	}
 
+
 	ImGui::Begin(name.c_str(), &visible);
+	updateMouseInWindow();
+
+
+
+	if (ImGui::IsWindowFocused() && mouseInWindow && ImGui::IsMouseDown(0) && new_values_set && sliderChanged)
+	{
+		prev_vals = vals;
+		new_values_set = false;
+	}
+	sliderChanged = false;
+
 
 	if (ImGui::Button("Reset")) {
 		reset();
@@ -272,11 +284,15 @@ void Editor::render()
 
 	sliderChanged |= SliderFloatReset(vals.scope_brightness, 2.0f, "Scope Brightness", &vals.scope_brightness, 0, 10);
 
+	if (ImGui::IsWindowFocused() && mouseInWindow && ImGui::IsMouseReleased(0) && !new_values_set)
+	{
+		new_values_set = true;
+	}
+
 	ImGui::End();
 
 	if (sliderChanged) {
 		setChanges();
-		sliderChanged = false;
 	}
 
 	if (!iniWriting || !iniReading) {
@@ -440,6 +456,7 @@ void Editor::readIni() {
 	
 	iniReading = false;
 	Status::setStatus("Read settings successfully!");
+	prev_vals = vals;
 	setChanges();
 }
 
@@ -448,6 +465,12 @@ void Editor::updateConfigFile() {
 	if (!imLoaded || iniReading || iniWriting)
 		return;
 	iniWriter = std::thread(&Editor::writeIni, this);
+}
+
+void Editor::undo()
+{
+	vals = prev_vals;
+	setChanges();
 }
 
 void Editor::setFromConfigFile() {

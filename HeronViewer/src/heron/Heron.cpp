@@ -34,6 +34,11 @@ void Heron::processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
 		b4 = true;
 	}
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+	{
+		printf("undo pressed\n");
+		editor->undo();
+	}
 }
 
 void Heron::drop_callback(GLFWwindow* window, int path_count, const char* paths[])
