@@ -1,5 +1,6 @@
 #include "Image.h"
 #include "Histogram.h"
+#include "Widgets.h"
 
 void Image::updatePreviewSize()
 {
@@ -639,11 +640,12 @@ void Image::render()
 	*imageRender = "ImGui Window Render Time: " + std::to_string(glfwGetTime() - start);
 
 	ImGui::Begin("Vectorscope");
+	hue_wheel(255 / 2, 255, 255, ImVec2(0, 0), 0, 30, true);
 	ImGui::Image((ImTextureID)vectorscope, ImVec2(255, 255));
 	ImGui::End();
 
 	ImGui::Begin("Waveform");
-	ImGui::Image((ImTextureID)waveform, ImVec2(512, 255));
+	ImGui::Image((ImTextureID)waveform, ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 60));
 	ImGui::End();
 
 

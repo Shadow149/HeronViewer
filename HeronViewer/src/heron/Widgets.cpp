@@ -30,7 +30,7 @@ ImVec2 operator/(const ImVec2& lhs, const ImVec2& rhs)
 	return { lhs.x / rhs.x, lhs.y / rhs.y };
 }
 
-bool hue_wheel(float thickness, int split, int width, ImVec2 pos, float angle)
+bool hue_wheel(float thickness, int split, int width, ImVec2 pos, float angle, float alpha, bool skin_tone_line)
 {
 	ImVec2 curPos = ImGui::GetCursorScreenPos();
 
@@ -45,6 +45,7 @@ bool hue_wheel(float thickness, int split, int width, ImVec2 pos, float angle)
 	ImVec2 const uv = ImGui::GetFontTexUvWhitePixel();
 	ImDrawList* pDrawList = ImGui::GetWindowDrawList();
 	pDrawList->PrimReserve(split * 6, split * 4);
+	float angle_b4 = angle;
 	for (int i = 0; i < split; ++i)
 	{
 		float x0 = radius * ImCos(angle);
@@ -72,13 +73,24 @@ bool hue_wheel(float thickness, int split, int width, ImVec2 pos, float angle)
 		ImGui::ColorConvertHSVtoRGB(((float)i) / ((float)(split - 1)), 1.0f, 1.0f, r0, g0, b0);
 		ImGui::ColorConvertHSVtoRGB(((float)((i + 1) % split)) / ((float)(split - 1)), 1.0f, 1.0f, r1, g1, b1);
 
-		pDrawList->PrimWriteVtx(offset + ImVec2(x0, y0), uv, IM_COL32(r0 * 255, g0 * 255, b0 * 255, 255));
-		pDrawList->PrimWriteVtx(offset + ImVec2(x1, y1), uv, IM_COL32(r1 * 255, g1 * 255, b1 * 255, 255));
-		pDrawList->PrimWriteVtx(offset + ImVec2(x2, y2), uv, IM_COL32(255, 255, 255, 255));
-		pDrawList->PrimWriteVtx(offset + ImVec2(x3, y3), uv, IM_COL32(255, 255, 255, 255));
+		pDrawList->PrimWriteVtx(offset + ImVec2(x0, y0), uv, IM_COL32(r0 * 255, g0 * 255, b0 * 255, alpha));
+		pDrawList->PrimWriteVtx(offset + ImVec2(x1, y1), uv, IM_COL32(r1 * 255, g1 * 255, b1 * 255, alpha));
+		pDrawList->PrimWriteVtx(offset + ImVec2(x2, y2), uv, IM_COL32(255, 255, 255, alpha));
+		pDrawList->PrimWriteVtx(offset + ImVec2(x3, y3), uv, IM_COL32(255, 255, 255, alpha));
 		angle += dAngle;
 	}
 	//ImGui::PopID();
+
+	if (skin_tone_line) {
+		angle = angle_b4 + (15.0f / 360.0f) * 2 * IM_PI;
+
+		float x1 = radius * ImCos(angle);
+		float y1 = radius * ImSin(angle);
+		pDrawList->AddLine(offset + ImVec2(0, 0), offset + ImVec2(x1, y1), IM_COL32_BLACK);
+	}
+
+	ImGui::GetWindowDrawList()->AddCircle(ImVec2(offset.x, offset.y), height / 2, ImColor(32, 32, 32), 0, 3);
+
 
 	return false;
 }
@@ -86,7 +98,6 @@ bool hue_wheel(float thickness, int split, int width, ImVec2 pos, float angle)
 // color editor for 3 or 4 component colors
 bool drawColorSelector(const char* label, float height, float* r, float* g, float* b, bool invert, float angle) {
 	ImGui::PushID(label);
-
 
 	if (invert) {
 		*r = 1 - *r;
@@ -103,6 +114,8 @@ bool drawColorSelector(const char* label, float height, float* r, float* g, floa
 	ImGui::RenderText(buttonStart + ImVec2(height / 2, textSize.y/2) - textSize/2, label);
 
 	hue_wheel(height / 2, height, height, ImVec2(0, topPadding), angle);
+
+
 	ImGui::SetCursorScreenPos(buttonStart);
 	ImGui::InvisibleButton(label, ImVec2(height, height)); ImGui::SameLine();
 

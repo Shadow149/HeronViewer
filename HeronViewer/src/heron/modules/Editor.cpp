@@ -40,9 +40,10 @@ bool Spinner(const char* label, float radius, int thickness, const ImU32& color)
 }
 
 template<typename T>
-bool SliderFloatReset(T &data, T reset_value, const char* label, float* v, float v_min, float v_max, const char* format = "%.3f", ImGuiSliderFlags flags = 0)
+bool SliderFloatReset(T &data, T reset_value, const char* label, float* v, float v_min, float v_max, const char* format = "%.3f", ImGuiSliderFlags flags = 0, 
+	ImU32 left_colour = ImColor(50, 50, 50), ImU32 right_colour = ImColor(220, 220, 220))
 {
-	const bool change = ImGui::SliderFloat(label, v, v_min, v_max, format, flags);
+	const bool change = ImGui::SliderFloat(label, v, v_min, v_max, format, flags, left_colour, right_colour);
 	ImGui::SameLine();
 	if (ImGui::Button(("R##" + std::to_string(btn_id++)).c_str())) {
 		data = reset_value;
@@ -114,10 +115,10 @@ void Editor::render()
 	if (sliderChanged |= ImGui::Button(vals.bw ? COLOR_LABEL : BW_LABEL)) {
 		vals.bw = !vals.bw;
 	}
-
+	ImGui::SameLine();
 	ImGui::Checkbox("Invert", &vals.inv);
 
-	sliderChanged |= ImGui::SliderFloat("White Balance", &vals.wb, 1667, 25000);
+	sliderChanged |= ImGui::SliderFloat("White Balance", &vals.wb, 1667, 25000, "%.3f", 0, ImColor(242, 126, 36), ImColor(36, 173, 242));
 
 	if (ImGui::BeginTabBar("MyTabBar"))
 	{
@@ -172,7 +173,7 @@ void Editor::render()
 	}
 	ImGui::Separator();
 
-	ImGui::Checkbox("Noise?", &vals.noise_selected);
+	ImGui::Checkbox("Noise", &vals.noise_selected);
 	if (vals.noise_selected) {
 		sliderChanged |= SliderFloatReset(vals.noise, 0.0f, "Noise", &vals.noise, 0, 5);
 	}
@@ -183,16 +184,20 @@ void Editor::render()
 
 
 		if (ImGui::CollapsingHeader("Red")) {
-			sliderChanged |= SliderFloatReset(vals.hues[0], 0.0f, "Red Hue", &vals.hues[0], -1, 1);
-			sliderChanged |= SliderFloatReset(vals.sats[0], 0.0f, "Red Saturation", &vals.sats[0], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.hues[0], 0.0f, "Red Hue", &vals.hues[0], -1, 1, "%.3f", 0,
+				ImColor(224, 27, 89), ImColor(219, 106, 35));
+			sliderChanged |= SliderFloatReset(vals.sats[0], 0.0f, "Red Saturation", &vals.sats[0], -1, 1, "%.3f", 0, 
+				ImColor(255, 255, 255), ImColor(227, 48, 48));
 			sliderChanged |= SliderFloatReset(vals.lums[0], 0.0f, "Red Value", &vals.lums[0], -1, 1);
 		}
 		ImGui::Separator();
 
 
 		if (ImGui::CollapsingHeader("Orange")) {
-			sliderChanged |= SliderFloatReset(vals.hues[1], 0.0f, "Orange Hue", &vals.hues[1], -1, 1);
-			sliderChanged |= SliderFloatReset(vals.sats[1], 0.0f, "Orange Saturation", &vals.sats[1], -1, 1);
+			sliderChanged |= SliderFloatReset(vals.hues[1], 0.0f, "Orange Hue", &vals.hues[1], -1, 1,"%.3f", 0,
+				ImColor(224, 55, 25), ImColor(224, 171, 25));
+			sliderChanged |= SliderFloatReset(vals.sats[1], 0.0f, "Orange Saturation", &vals.sats[1], -1, 1, "%.3f", 0,
+				ImColor(255, 255, 255), ImColor(219, 106, 35));
 			sliderChanged |= SliderFloatReset(vals.lums[1], 0.0f, "Orange Value", &vals.lums[1], -1, 1);
 		}
 		ImGui::Separator();

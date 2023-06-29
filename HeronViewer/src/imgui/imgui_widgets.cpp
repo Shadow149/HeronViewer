@@ -2931,7 +2931,8 @@ bool ImGui::SliderBehavior(const ImRect& bb, ImGuiID id, ImGuiDataType data_type
 
 // Note: p_data, p_min and p_max are _pointers_ to a memory address holding the data. For a slider, they are all required.
 // Read code of e.g. SliderFloat(), SliderInt() etc. or examples in 'Demo->Widgets->Data Types' to understand how to use this function directly.
-bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format, ImGuiSliderFlags flags)
+bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format, ImGuiSliderFlags flags,
+	ImU32 left_colour, ImU32 right_colour)
 {
     ImGuiWindow* window = GetCurrentWindow();
     if (window->SkipItems)
@@ -2994,6 +2995,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
     RenderNavHighlight(frame_bb, id);
     ImRect frame(frame_bb.Min + ImVec2(value_size.x + 20.0f, (frame_bb.Max.y - frame_bb.Min.y) / 2), frame_bb.Max - ImVec2(0, (frame_bb.Max.y - frame_bb.Min.y) / 2 - 3.0f));
     RenderFrame(frame.Min, frame.Max, frame_col, true, g.Style.FrameRounding);
+    window->DrawList->AddRectFilledMultiColor(frame.Min, frame.Max, left_colour, right_colour, right_colour, left_colour);
 
     // Slider behavior
     ImRect grab_bb;
@@ -3004,8 +3006,8 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
     ImVec2 center = grab_bb.Max + ImVec2(-5.0f, 0.0f);
     // Render grab
     if (grab_bb.Max.x > grab_bb.Min.x) {
-        window->DrawList->AddCircleFilled(center, 10.0f, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab));
-        window->DrawList->AddCircleFilled(center, 7.0f, GetColorU32(ImGuiCol_WindowBg));
+        window->DrawList->AddCircleFilled(center, 9.0f, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab));
+        window->DrawList->AddCircleFilled(center, 6.5f, GetColorU32(ImGuiCol_WindowBg));
         //window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
     }
 
@@ -3054,9 +3056,9 @@ bool ImGui::SliderScalarN(const char* label, ImGuiDataType data_type, void* v, i
     return value_changed;
 }
 
-bool ImGui::SliderFloat(const char* label, float* v, float v_min, float v_max, const char* format, ImGuiSliderFlags flags)
+bool ImGui::SliderFloat(const char* label, float* v, float v_min, float v_max, const char* format, ImGuiSliderFlags flags, ImU32 left_colour, ImU32 right_colour)
 {
-    return SliderScalar(label, ImGuiDataType_Float, v, &v_min, &v_max, format, flags);
+    return SliderScalar(label, ImGuiDataType_Float, v, &v_min, &v_max, format, flags, left_colour, right_colour);
 }
 
 bool ImGui::SliderFloat2(const char* label, float v[2], float v_min, float v_max, const char* format, ImGuiSliderFlags flags)
