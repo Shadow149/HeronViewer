@@ -45,7 +45,7 @@ void Histogram::render()
 	ImPlot::GetStyle().AntiAliasedLines = true;
 	if (ImPlot::BeginPlot("Hist plot", ImVec2(-1,-1), plotFlags)) {
 		ImPlot::SetupAxes("x", "y", flags, flags);
-		const double y_max = static_cast<double>(img->getHeight() * img->getWidth()) / 20.0;
+		const double y_max = static_cast<double>(img->getHeight() * img->getWidth()) / 20.0 / 2.0;
 		// TODO ImPlotCond_Always doing unnecessary updates?
 		ImPlot::SetupAxesLimits(0, 255, 0, y_max, ImPlotCond_Always);
 		for (int n = img->isBW() ? 0 : 3; n >= 0; n--) {

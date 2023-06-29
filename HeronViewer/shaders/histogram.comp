@@ -104,7 +104,7 @@ void main() {
     memoryBarrier();
   
     // Ensure the current invocation is within the texture bounds
-    if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y) {
+    if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y && lid % 2 == 0) {
         vec4 texColor = imageLoad(img, pixelCoord);
         vec3 hsv = rgb2hsv(texColor.rgb);
         vec2 cart = polar2cart(vec2(hsv.y,hsv.x * 6.28318530718));
@@ -165,15 +165,16 @@ void main() {
        }
     }
 
+    if (lid % 2 == 0) {
+        ivec2 foo = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 512 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
+        int count = int(wave_els[foo.x + foo.y * 512]);
+        imageStore(waveform_texture, foo, vec4(1) * count/float(texSize.x * texSize.y)*2 * var_mult * 20000);
 
-    ivec2 foo = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 512 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
-    int count = int(wave_els[foo.x + foo.y * 512]);
-    imageStore(waveform_texture, foo, vec4(1) * count/float(texSize.x * texSize.y) * var_mult * 20000);
-
-    ivec2 bar = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 255 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
-    int count_ = int(vec_els[bar.x + bar.y * 255]);
-    vec2 n = bar - ivec2(128);
-    vec3 hsv_ = vec3(cart2polar(vec2(n.x/ 255.0f, n.y / 255.0f)),1);
-    vec4 col = vec4(hsv2rgb(vec3((hsv_.y ) / 6.28318530718 , hsv_.x*2, hsv_.z)),1);
-    imageStore(vectorscope_texture, bar, col * (count_/float(texSize.x * texSize.y) * var_mult * 2000));
+        ivec2 bar = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 255 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
+        int count_ = int(vec_els[bar.x + bar.y * 255]);
+        vec2 n = bar - ivec2(128);
+        vec3 hsv_ = vec3(cart2polar(vec2(n.x/ 255.0f, n.y / 255.0f)),1);
+        vec4 col = vec4(hsv2rgb(vec3((hsv_.y ) / 6.28318530718 , hsv_.x*2, hsv_.z)),1);
+        imageStore(vectorscope_texture, bar, col * (count_/float(texSize.x * texSize.y)*2 * var_mult * 2000));
+    }
 }
