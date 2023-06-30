@@ -155,10 +155,8 @@ std::vector<Module*> Heron::getModules() {
 void Heron::onWindowLoad()
 {
 	Console::log("PRELOADING IMAGE...");
-	loadImage("C:\\Users\\Alfred Roberts\\Pictures\\U75A0688.jpg",
-		"U75A0688.jpg");
-	//loadImage("C:\\Users\\Alfred Roberts\\Pictures\\6ce679a1-a5f4-4c58-876b-0ce84ed0babe_rw_1920.jpg",
-	//	"6ce679a1-a5f4-4c58-876b-0ce84ed0babe_rw_1920.jpg");
+	loadImage("./images/landscape.png",
+		"landscape.png");
 }
 
 std::string Heron::getFileDialogKey() {

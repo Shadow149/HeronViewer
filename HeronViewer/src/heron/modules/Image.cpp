@@ -637,7 +637,7 @@ void Image::render()
 	glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
 	float start = glfwGetTime();
-	ImGui::Begin(name.c_str(), &visible, 8 | 16);
+	ImGui::Begin(name.c_str(), &visible);
 	size = ImGui::GetWindowSize();
 	updateMouseInWindow();
 	ImGui::Image((ImTextureID)renderedTexture, previewSize);

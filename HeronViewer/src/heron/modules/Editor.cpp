@@ -307,7 +307,6 @@ void Editor::render()
 }
 
 void Editor::exportImage() {
-	//Console::log(stripExtension(fileName));
 	std::experimental::filesystem::path p = stripExtension(fileName);
 	std::experimental::filesystem::path dir = Preferences::instance()->EXPORT_DIR;
 	dir /= p;

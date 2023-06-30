@@ -138,6 +138,7 @@
     <PostBuildEvent>
       <Command>xcopy /s /y /i "$(ProjectDir)fonts\"  "$(OutDir)fonts\"
 xcopy /s /y /i "$(ProjectDir)shaders\"  "$(OutDir)shaders\"
+xcopy /s /y /i "$(ProjectDir)images\"  "$(OutDir)images\"
 copy /y "$(ProjectDir)imgui.ini"  "$(OutDir)imgui.ini"
 copy /y "$(ProjectDir)preferences.ini"  "$(OutDir)preferences.ini"
 copy /y "$(ProjectDir)lib\freeimagelib\FreeImage.dll" "$(OutDir)FreeImage.dll"</Command>

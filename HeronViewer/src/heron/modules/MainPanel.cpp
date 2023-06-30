@@ -22,51 +22,22 @@ void MainPanel::render()
 	{
 		if (ImGui::BeginMenu("File"))
 		{
-			/*
-			if (ImGui::BeginMenu("Open Recent")) {
-				if (ImGui::MenuItem("U75A1167.CR2")) {
-					((Heron*)hWindow)->loadImage("C:\\Users\\Alfred Roberts\\Pictures\\U75A1167.CR2");
+			
+			if (ImGui::BeginMenu("Open Debug")) {
+				if (ImGui::MenuItem("Landscape")) {
+					((Heron*)hWindow)->loadImage("./images/landscape.png", "landscape.png");
 				}
-				if (ImGui::MenuItem("U75A1242.CR2")) {
-					((Heron*)hWindow)->loadImage("C:\\Users\\Alfred Roberts\\Pictures\\U75A1242.CR2");
-				}
-				if (ImGui::MenuItem("U75A1065.CR2")) {
-					((Heron*)hWindow)->loadImage("C:\\Users\\Alfred Roberts\\Pictures\\U75A1065.CR2");
-				}
-				if (ImGui::MenuItem("U75A1083.CR2")) {
-					((Heron*)hWindow)->loadImage("C:\\Users\\Alfred Roberts\\Pictures\\U75A1083.CR2");
-				}
-				if (ImGui::MenuItem("U75A1192.CR2")) {
-					((Heron*)hWindow)->loadImage("C:\\Users\\Alfred Roberts\\Pictures\\U75A1192.CR2");
-				}
-				if (ImGui::MenuItem("U75A1256.CR2")) {
-					((Heron*)hWindow)->loadImage("C:\\Users\\Alfred Roberts\\Pictures\\U75A1256.CR2");
-				}
-				if (ImGui::MenuItem("U75A1295.CR2")) {
-					((Heron*)hWindow)->loadImage("C:\\Users\\Alfred Roberts\\Pictures\\U75A1295.CR2");
-				}
-				if (ImGui::MenuItem("U75A0996.CR2")) {
-					((Heron*)hWindow)->loadImage("C:\\Users\\Alfred Roberts\\Pictures\\U75A0996.CR2");
-				}
-				if (ImGui::MenuItem("U75A1051.CR2")) {
-					((Heron*)hWindow)->loadImage("C:\\Users\\Alfred Roberts\\Pictures\\U75A1051.CR2");
-				}
-				if (ImGui::MenuItem("Isaac-Autumn-storm-Landscape-catagory-scaled.jpg")) {
-					((Heron*)hWindow)->loadImage("C:\\Users\\Alfred Roberts\\Pictures\\Isaac-Autumn-storm-Landscape-catagory-scaled.jpg");
-				}
-				if (ImGui::MenuItem("Isaac-wizard-of-the-woods-Wildlife-catagory-scaled.jpg")) {
-					((Heron*)hWindow)->loadImage("C:\\Users\\Alfred Roberts\\Pictures\\Isaac-wizard-of-the-woods-Wildlife-catagory-scaled.jpg");
+				if (ImGui::MenuItem("Colour Wheel")) {
+					((Heron*)hWindow)->loadImage("./images/color-wheel.png", "color-wheel.png");
 				}
 				ImGui::EndMenu();
 			}
-			*/
 			
-			if (ImGui::MenuItem("Open")) {
+			
+			/*if (ImGui::MenuItem("Open")) {
 				ImGuiFileDialog::Instance()->OpenDialog(((Heron*)hWindow)->getFileDialogKey(), "Choose File", "{.CR2,.png,.gif,.jpg,.jpeg}", "C:\\Users\\Alfred Roberts\\Pictures\\");
-			}
+			}*/
 
-			//if (ImGui::MenuItem("Save", "Ctrl+S")) {}
-			//if (ImGui::MenuItem("Close", "Ctrl+W")) {}
 			if (ImGui::MenuItem(Preferences::instance()->name.c_str())) {
 				Preferences::instance()->toggleShow();
 			}
@@ -89,10 +60,6 @@ void MainPanel::render()
 				((Heron*)hWindow)->unloadImage();
 			}
 			ImGui::EndMenu();
-		}
-
-		if (ImGui::MenuItem("Recompile Shader")) {
-			((Heron*)hWindow)->recompileShader();
 		}
 		
 		ImGui::EndMenuBar();
