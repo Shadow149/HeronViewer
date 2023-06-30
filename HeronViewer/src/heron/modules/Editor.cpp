@@ -279,10 +279,14 @@ void Editor::render()
 
 	ImGui::Separator();
 
-	sliderChanged |= SliderFloatReset(vals.yiq_y, 0.0f, "Blue/Orange", &vals.yiq_y, -1, 1);
-	sliderChanged |= SliderFloatReset(vals.yiq_z, 0.0f, "Green/Purple", &vals.yiq_z, -1, 1);
-	sliderChanged |= SliderFloatReset(vals.xyz_y, 0.0f, "Yellow/Blue", &vals.xyz_y, -1, 1);
-	sliderChanged |= SliderFloatReset(vals.xyz_z, 0.0f, "Purple/Green", &vals.xyz_z, -1, 1);
+	sliderChanged |= SliderFloatReset(vals.yiq_y, 0.0f, "YIQ: Blue/Orange", &vals.yiq_y, -1, 1, "%.2f", 0,
+		ImColor(34, 40, 227), ImColor(219, 106, 35));
+	sliderChanged |= SliderFloatReset(vals.yiq_z, 0.0f, "YIQ: Green/Purple", &vals.yiq_z, -1, 1, "%.2f", 0,
+		ImColor(76, 227, 34), ImColor(147, 34, 227));
+	sliderChanged |= SliderFloatReset(vals.xyz_y, 0.0f, "XYZ: Purple/Green", &vals.xyz_y, -1, 1, "%.2f", 0,
+		ImColor(147, 34, 227), ImColor(76, 227, 34));
+	sliderChanged |= SliderFloatReset(vals.xyz_z, 0.0f, "XYZ: Orange/Blue", &vals.xyz_z, -1, 1, "%.2f", 0,
+		ImColor(219, 106, 35), ImColor(34, 40, 227));
 
 	ImGui::Separator();
 
