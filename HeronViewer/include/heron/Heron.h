@@ -12,7 +12,7 @@
 
 class FileDialog;
 
-const float HERON_VERSION = 0.1;
+const std::string HERON_VERSION = "0.1.0.1";
 
 class Heron: public Window
 {

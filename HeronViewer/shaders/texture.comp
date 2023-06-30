@@ -52,6 +52,7 @@ uniform bool inv;
 
 uniform float sat;
 uniform float wb;
+uniform float tint;
 
 vec3 kelvin_table[19] = {
     vec3(255,56,0),
@@ -171,6 +172,9 @@ vec4 apply_wb(vec4 v) {
 	//return v + vec4(wb, 0, -wb, 0);
 	//int index = int(floor(wb));
 	//vec3 temp = kelvin_table[index] / 255;
+	vec3 tint_colour = vec3( 1 * min(1,tint), 1 * min(1,2-tint), 1 * min(1,tint));
+	v *= vec4(tint_colour,1);
+
 	return v * vec4(kelvinToRGB(wb),1);
 }
 

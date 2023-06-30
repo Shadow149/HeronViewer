@@ -517,6 +517,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	process_compute_shader_.setBool("bw", m_pVals->bw);
 	process_compute_shader_.setFloat("sat", m_pVals->sat);
 	process_compute_shader_.setFloat("wb", m_pVals->wb);
+	process_compute_shader_.setFloat("tint", m_pVals->tint);
 	process_compute_shader_.setBool("clip", *clip);
 	process_compute_shader_.setBool("b4", *b4);
 

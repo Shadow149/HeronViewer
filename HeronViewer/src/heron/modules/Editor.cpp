@@ -97,16 +97,17 @@ void Editor::render()
 	sliderChanged = false;
 
 
-	if (ImGui::Button("Reset")) {
+	if (ImGui::Button("Reset Settings")) {
 		reset();
 		Status::setStatus("Settings Reset!");
 	}
 	ImGui::SameLine();
 
-	if (ImGui::Button("Save")) {
+	if (ImGui::Button("Save Settings")) {
 		updateConfigFile();
 		Status::setStatus("Saving...");
 	}
+	ImGui::SameLine();
 	if (img->rendering) {
 		ImGui::Button("Exporting...");
 		Status::setStatus("Exporting...");
@@ -114,7 +115,7 @@ void Editor::render()
 		Spinner("EXPORTING...", ImGui::CalcTextSize("Exporting...").y/2, 3, ImGui::GetColorU32(ImVec4(255, 255, 255, 255)));
 	}
 	else {
-		if (ImGui::Button("Export")) {
+		if (ImGui::Button("Export to JPG")) {
 			exportImage();
 		}
 	}
@@ -128,7 +129,10 @@ void Editor::render()
 	ImGui::SameLine();
 	ImGui::Checkbox("Invert", &vals.inv);
 
-	sliderChanged |= ImGui::SliderFloat("White Balance", &vals.wb, 1667, 25000, "%.0f", 0, ImColor(242, 126, 36), ImColor(36, 173, 242));
+	sliderChanged |= SliderFloatReset(vals.wb, 7200.0f, "White Balance", &vals.wb, 1667, 25000, "%.0f", 0, ImColor(242, 126, 36), ImColor(36, 173, 242));
+
+	sliderChanged |= SliderFloatReset(vals.tint, 1.0f, "Tint", &(vals.tint), 0.0f, 2.0f, "%.2f", 0, ImColor(0, 255, 0), ImColor(255, 0, 255));
+
 
 	if (ImGui::BeginTabBar("MyTabBar"))
 	{
@@ -174,8 +178,8 @@ void Editor::render()
 
 	sliderChanged |= SliderFloatReset(vals.sat, 0.0f, "Saturation", &vals.sat, -1, 1);
 
-	sliderChanged |= SliderFloatReset(vals.blur, 0.0f, "Sharpen: Blur", &vals.blur, 0, 5);
-	sliderChanged |= SliderFloatReset(vals.sharp, 0.0f, "Sharpen: Sharp", &vals.sharp, 0, 5);
+	sliderChanged |= SliderFloatReset(vals.blur, 1.0f, "Sharpen: Blur", &vals.blur, 0, 5);
+	sliderChanged |= SliderFloatReset(vals.sharp, 0.5f, "Sharpen: Sharp", &vals.sharp, 0, 5);
 	if (vals.sharp != vals.p_sharp || vals.blur != vals.p_blur) {
 		updateSharpenKernel();
 		vals.p_sharp = vals.sharp;
@@ -325,7 +329,7 @@ void Editor::writeIni() {
 
 	Console::log("Writing ini to " + stripExtension(filePath) + ".ini");
 
-	ini["version"]["number"] = std::to_string(HERON_VERSION);
+	ini["version"]["number"] = HERON_VERSION;
 
 	for (int n = 0; n < 4; n++) {
 		ini["sliders"][std::string(tab_names[n]) + "_expo"] = std::to_string(vals.expo[n]);
@@ -393,11 +397,11 @@ void Editor::readIni() {
 
 	Console::log("Reading ini " + stripExtension(filePath) + ".ini");
 
-	float ini_ver;
+	std::string ini_ver;
 
 	try {
 
-		ini_ver = std::stof(ini["version"]["number"]);
+		ini_ver = (ini["version"]["number"]);
 
 	} catch (...)
 	{
@@ -510,6 +514,7 @@ void Editor::reset()
 
 	vals.sat = SAT_DEFAULT;
 	vals.wb = WB_DEFAULT;
+	vals.tint = 1.0f;
 
 	vals.noise_selected = false;
 	vals.noise = 0;

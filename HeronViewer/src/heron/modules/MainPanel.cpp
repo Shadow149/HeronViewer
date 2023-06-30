@@ -61,11 +61,17 @@ void MainPanel::render()
 			}
 			ImGui::EndMenu();
 		}
+
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(Status::getStatus().c_str()).x
+			- ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
+		ImGui::SetCursorPosY(ImGui::CalcTextSize(Status::getStatus().c_str()).y / 4.0f);
+		ImGui::Text(Status::getStatus().c_str());
 		
 		ImGui::EndMenuBar();
+
 	}
-	
-	ImGui::Text(Status::getStatus().c_str());
+
+
 
 	ImGui::End();
 }
