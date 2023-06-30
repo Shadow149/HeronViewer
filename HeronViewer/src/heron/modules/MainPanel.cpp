@@ -62,10 +62,11 @@ void MainPanel::render()
 			ImGui::EndMenu();
 		}
 
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(Status::getStatus().c_str()).x
-			- ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
+		std::string status_text = Status::getStatus() + " \t\t Version: " + HERON_VERSION;
+
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(status_text.c_str()).x);
 		ImGui::SetCursorPosY(ImGui::CalcTextSize(Status::getStatus().c_str()).y / 4.0f);
-		ImGui::Text(Status::getStatus().c_str());
+		ImGui::Text(status_text.c_str());
 		
 		ImGui::EndMenuBar();
 

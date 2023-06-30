@@ -96,16 +96,6 @@ vec4 clamp_pix(vec4 v) {
 	return vec4(clamp(v.x,0.0,1.0), clamp(v.y,0.0,1.0), clamp(v.z,0.0,1.0), 1);
 }
 
-vec3 rgb2hsv(vec3 c)
-{
-    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
-    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
-
-    float d = q.x - min(q.w, q.y);
-    float e = 1.0e-10;
-    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-}
 
 vec3 rgb2xyz(vec3 v) {
 	mat3 m = mat3(vec3(0.412453,0.212671,0.019334), vec3(0.357580,0.715160,0.119193), vec3(0.180423,0.072169,0.950227));
@@ -136,6 +126,71 @@ vec3 xyY2xyz(vec3 v) {
 	return r;
 }
 
+
+#ifndef saturate
+#define saturate(v) clamp(v,0.,1.)
+//      clamp(v,0.,1.)
+#endif
+
+vec3 hue2rgb(float hue){
+	hue=fract(hue);
+	return saturate(vec3(
+		abs(hue*6.-3.)-1.,
+		2.-abs(hue*6.-2.),
+		2.-abs(hue*6.-4.)
+	));
+}
+
+
+//RGB to HSL (hue, saturation, lightness/luminance).
+//Source: https://gist.github.com/yiwenl/745bfea7f04c456e0101
+vec3 rgb2hsl(vec3 c){
+	float cMin=min(min(c.r,c.g),c.b),
+	      cMax=max(max(c.r,c.g),c.b),
+	      delta=cMax-cMin;
+	vec3 hsl=vec3(0.,0.,(cMax+cMin)/2.);
+	if(delta!=0.0){ //If it has chroma and isn't gray.
+		if(hsl.z<.5){
+			hsl.y=delta/(cMax+cMin); //Saturation.
+		}else{
+			hsl.y=delta/(2.-cMax-cMin); //Saturation.
+		}
+		float deltaR=(((cMax-c.r)/6.)+(delta/2.))/delta,
+		      deltaG=(((cMax-c.g)/6.)+(delta/2.))/delta,
+		      deltaB=(((cMax-c.b)/6.)+(delta/2.))/delta;
+		//Hue.
+		if(c.r==cMax){
+			hsl.x=deltaB-deltaG;
+		}else if(c.g==cMax){
+			hsl.x=(1./3.)+deltaR-deltaB;
+		}else{ //if(c.b==cMax){
+			hsl.x=(2./3.)+deltaG-deltaR;
+		}
+		hsl.x=fract(hsl.x);
+	}
+	return hsl;
+}
+
+vec3 hsl2rgb(vec3 hsl){
+	if(hsl.y==0.){
+		return vec3(hsl.z); //Luminance.
+	}else{
+		float b;
+		if(hsl.z<.5){
+			b=hsl.z*(1.+hsl.y);
+		}else{
+			b=hsl.z+hsl.y-hsl.y*hsl.z;
+		}
+		float a=2.*hsl.z-b;
+		return a+hue2rgb(hsl.x)*(b-a);
+		/*vec3(
+			hueRamp(a,b,hsl.x+(1./3.)),
+			hueRamp(a,b,hsl.x),
+			hueRamp(a,b,hsl.x-(1./3.))
+		);*/
+	}
+}
+
 vec3 kelvinToRGB(float T) {
 	float x = 0;
 	float y = 0;
@@ -154,17 +209,11 @@ vec3 kelvinToRGB(float T) {
 	return xyz2rgb(xyY2xyz(vec3(x,y,1)));
 }
 
-vec3 hsv2rgb(vec3 c)
-{
-    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-}
 
 vec4 apply_sat(vec4 v) {
-	vec3 hsv = rgb2hsv(v.xyz);
+	vec3 hsv = rgb2hsl(v.xyz);
 	hsv.y *= (1 + sat);
-	vec3 rgb = hsv2rgb(hsv);
+	vec3 rgb = hsl2rgb(hsv);
 	return vec4(rgb, 1);
 }
 
@@ -179,7 +228,7 @@ vec4 apply_wb(vec4 v) {
 }
 
 vec4 shift_hues(vec4 v) {
-	vec3 hsv_ = rgb2hsv(v.xyz);
+	vec3 hsv_ = rgb2hsl(v.xyz);
 
 	
 	// Sats
@@ -225,7 +274,7 @@ vec4 shift_hues(vec4 v) {
 	hsv_.x = hsv_.x + hues[6] * exp(-(pow(hsv_.x - 0.722,2)/0.01))*0.1; // Purple
 	hsv_.x = hsv_.x + hues[7] * exp(-(pow(hsv_.x - 0.846,2)/0.01))*0.1; // Pink
 
-	return vec4(hsv2rgb(hsv_),1);
+	return vec4(hsl2rgb(hsv_),1);
 }
 
 
@@ -261,14 +310,14 @@ float edit_channel_lum(float v) {
 }
 
 vec4 edit_channels(vec4 pix) {
-	float sat_before = rgb2hsv(pix.rgb).y;
+	float sat_before = rgb2hsl(pix.rgb).y;
 	vec3 res = vec3(edit_channel(pix[2], 1),edit_channel(pix[1], 2),edit_channel(pix[0], 3));
 	vec3 lum = vec3(edit_channel_lum(res[0]),edit_channel_lum(res[1]),edit_channel_lum(res[2]));
-	vec3 hsv_after = rgb2hsv(lum.rgb);
+	vec3 hsv_after = rgb2hsl(lum.rgb);
 	float sat_after = hsv_after.y;
 	float sat_diff = sat_after - sat_before;
 	hsv_after.y = sat_before + (sat_diff * sat_ref);
-	return vec4(hsv2rgb(hsv_after),1);
+	return vec4(hsl2rgb(hsv_after),1);
 }
 
 vec4 pixelTransform(vec4 pix, ivec2 coord, ivec2 tex_size) {

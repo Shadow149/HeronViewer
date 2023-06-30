@@ -149,6 +149,7 @@ void main() {
         ivec2 cc = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 512), int(255 - clamp(binIndex, 0, 255)));
         atomicAdd(wave_els[cc.x + cc.y * 512], 1);
 
+
     }
 
     barrier();

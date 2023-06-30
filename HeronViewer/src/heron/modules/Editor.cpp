@@ -355,6 +355,8 @@ void Editor::writeIni() {
 
 	ini["sliders"]["sat"] = std::to_string(vals.sat);
 	ini["sliders"]["wb"] = std::to_string(vals.wb);
+	ini["sliders"]["tint"] = std::to_string(vals.tint);
+
 
 	ini["sliders"]["noise_selected"] = std::to_string(vals.noise_selected);
 	ini["sliders"]["noise"] = std::to_string(vals.noise);
@@ -441,6 +443,7 @@ void Editor::readIni() {
 
 	vals.sat = std::stof(ini["sliders"]["sat"]);
 	vals.wb = std::stof(ini["sliders"]["wb"]);
+	vals.tint = std::stof(ini["sliders"]["tint"]);
 
 	vals.noise_selected = std::stof(ini["sliders"]["noise_selected"]);
 	vals.noise = std::stof(ini["sliders"]["noise"]);
