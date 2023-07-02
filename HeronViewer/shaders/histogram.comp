@@ -39,11 +39,6 @@ uniform bool low_res;
 uniform bool histogram_loaded;
 uniform float var_mult;
 
-uniform float width;
-uniform float height;
-uniform float width_small;
-uniform float height_small;
-
 shared uint local_bins[256*4];
 shared uint orig_local_bins[256];
 
@@ -92,10 +87,12 @@ float calcLum(vec4 v) {
 
 void main() {
     ivec2 texSize = ivec2(0);
+
     if (low_res)
-        texSize = ivec2(width_small, height_small);
+        texSize = imageSize(img_small);
     else
-        texSize = ivec2(width, height);
+        texSize = imageSize(img);
+
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);
 
     uint lid = gl_LocalInvocationID.x + gl_LocalInvocationID.y * 32;
@@ -115,7 +112,7 @@ void main() {
     memoryBarrier();
   
     // Ensure the current invocation is within the texture bounds
-    if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y && lid % 2 == 0) {
+    if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y) {
         vec4 texColor = vec4(0);
         if (low_res)
             texColor = imageLoad(img_small, pixelCoord);
@@ -185,18 +182,18 @@ void main() {
            atomicAdd(elements_orig[lid], orig_local_bins[lid]);
        }
     }
-    
-    if (lid % 2 == 0) {
-        ivec2 foo = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 512 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
-        int count = int(wave_els[foo.x + foo.y * 512]);
-        imageStore(waveform_texture, pixelCoord, vec4(1) * count/float(texSize.x * texSize.y)*2 * var_mult * 20000);
 
-        ivec2 bar = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 255 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
-        int count_ = int(vec_els[bar.x + bar.y * 255]);
-        vec2 n = bar - ivec2(128);
-        vec3 hsv_ = vec3(cart2polar(vec2(n.x/ 255.0f, n.y / 255.0f)),1);
+    if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y) {
+        ivec2 wave_pos = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 512 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
+        int count = int(wave_els[wave_pos.x + wave_pos.y * 512]);
+        imageStore(waveform_texture, wave_pos, vec4(1) * count/float(texSize.x * texSize.y) * var_mult * 20000);
+
+        ivec2 vec_pos = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 255 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
+        int vec_count = int(vec_els[vec_pos.x + vec_pos.y * 255]);
+        vec2 hsv = vec_pos - ivec2(128);
+        vec3 hsv_ = vec3(cart2polar(vec2(hsv.x/ 255.0f, hsv.y / 255.0f)),1);
         vec4 col = vec4(hsv2rgb(vec3((hsv_.y ) / 6.28318530718 , hsv_.x*2, hsv_.z)),1);
-        imageStore(vectorscope_texture, bar, col * (count_/float(texSize.x * texSize.y)*2 * var_mult * 2000));
+        imageStore(vectorscope_texture, vec_pos, col * (vec_count/float(texSize.x * texSize.y) * var_mult * 2000));
     }
     
 }

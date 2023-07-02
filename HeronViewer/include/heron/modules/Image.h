@@ -67,6 +67,7 @@ private:
 	bool loading = false;
 	bool need_texture_change = false;
 	bool scrolling = false;
+	bool scope_rendered = false;
 
 	unsigned texture;
 	unsigned texture1;

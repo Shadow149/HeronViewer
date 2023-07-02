@@ -215,14 +215,16 @@ unsigned char* Image::getData()
 
 unsigned int Image::getHeight()
 {
-	if (m_pVals->show_low_res || getChanged())
+	printf("%d %d %d\n", m_pVals->show_low_res, need_texture_change, scope_rerender);
+
+	if (m_pVals->show_low_res && need_texture_change)
 		return height_small;
 	return height;
 }
 
 unsigned int Image::getWidth()
 {
-	if (m_pVals->show_low_res || getChanged())
+	if (m_pVals->show_low_res && need_texture_change)
 		return width_small;
 	return width;
 }
@@ -425,6 +427,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	if (!visible) { return; }
 	if (loading) return;
 
+
 	if (threadImageLoaded) { 
 		Console::log("Image loaded to main thread");
 		bindImage();
@@ -460,7 +463,9 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	*shaderLoadTime = "Framebuffer render time: " + std::to_string(glfwGetTime() - start);
 	//glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
-	bool low_b4 = m_pVals->show_low_res;
+	const bool low_b4 = m_pVals->show_low_res;
+
+
 	m_pVals->show_low_res |= scrolling;
 	if ((m_pVals->show_low_res) && !need_texture_change) {
 		need_texture_change = true;
@@ -468,6 +473,12 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	else if (!m_pVals->show_low_res && need_texture_change) {
 		scope_rerender = true;
 		need_texture_change = false;
+	}
+
+	if ((!getChanged() && !scrolling && !scope_rerender) || !imageLoaded) {
+		scrolling = false;
+		m_pVals->show_low_res = low_b4;
+		return;
 	}
 
 	glActiveTexture(GL_TEXTURE0);
@@ -524,23 +535,20 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	glDispatchCompute(x, y, 1);
 
 	if ((getChanged() && imageLoaded) || (!getChanged() && imageLoaded && scope_rerender)) {
+		scope_rendered = false;
 		glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * 4 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
 		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 		std::fill_n(histogram, 256 * 4, 0);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_orig);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
 		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 		std::fill_n(hist_orig, 256, 0);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, waveform_acc);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, 512 * 255 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
 		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, vectorscope_acc);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, 255 * 255 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
 		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 
 		glActiveTexture(GL_TEXTURE0);
@@ -564,12 +572,6 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		hist_compute_shader_.setBool("low_res", m_pVals->show_low_res);
 		hist_compute_shader_.setBool("histogram_loaded", histogram_loaded);
 		hist_compute_shader_.setFloat("var_mult", m_pVals->scope_brightness);
-
-		hist_compute_shader_.setFloat("width", height);
-		hist_compute_shader_.setFloat("height", height);
-		hist_compute_shader_.setFloat("width_small", width_small);
-		hist_compute_shader_.setFloat("height_small", height_small);
-
 
 
 		glDispatchCompute(x, y, 1);
@@ -596,6 +598,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		}
 		histogram_loaded = true;
 		changed = false;
+		scope_rendered = true;
 		if (!getChanged() && scope_rerender)
 			scope_rerender = false;
 	}
