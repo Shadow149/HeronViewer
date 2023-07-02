@@ -2772,6 +2772,11 @@ bool ImGui::SliderBehaviorT(const ImRect& bb, ImGuiID id, ImGuiDataType data_typ
             {
                 ClearActiveID();
             }
+            else if (g.IO.MouseDoubleClicked[0])
+            {
+                printf("double\n");
+                clicked_t = 0;
+            }
             else
             {
                 const float mouse_abs_pos = g.IO.MousePos[axis];
@@ -2999,7 +3004,9 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
 
     // Slider behavior
     ImRect grab_bb;
+
     const bool value_changed = SliderBehavior(frame, id, data_type, p_data, p_min, p_max, format, flags, &grab_bb);
+
     if (value_changed)
         MarkItemEdited(id);
 

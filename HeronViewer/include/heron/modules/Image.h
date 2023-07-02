@@ -53,6 +53,7 @@ private:
 
 	int small_img_height = 1, small_img_width = 1;
 	unsigned int height = 1, width = 1, bpp = 0;
+	unsigned height_small = 1, width_small = 1;
 	unsigned char* data;
 	unsigned char* data1;
 	GLubyte* small_data;
@@ -63,9 +64,12 @@ private:
 
 	SliderValues* m_pVals;
 	bool changed = false;
+	bool scope_rerender = true;
+	bool loading = false;
+	bool need_texture_change = false;
 
-	unsigned int texture;
-	unsigned int texture1;
+	unsigned texture;
+	unsigned texture1;
 
 	bool threadImageLoaded = false;
 	bool exporting = false;
@@ -85,7 +89,8 @@ private:
 
 	std::thread renderer;
 
-	unsigned int comp_texture;
+	unsigned comp_texture;
+	unsigned comp_texture_small;
 	unsigned vectorscope;
 	unsigned waveform;
 	unsigned waveform_acc;

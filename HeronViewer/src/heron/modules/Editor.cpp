@@ -93,6 +93,7 @@ void Editor::render()
 	{
 		prev_vals = vals;
 		new_values_set = false;
+		vals.show_low_res = true;
 	}
 	sliderChanged = false;
 
@@ -295,6 +296,7 @@ void Editor::render()
 	if (ImGui::IsWindowFocused() && mouseInWindow && ImGui::IsMouseReleased(0) && !new_values_set)
 	{
 		new_values_set = true;
+		vals.show_low_res = false;
 	}
 
 	ImGui::End();
@@ -497,7 +499,7 @@ void Editor::reset()
 {
 	vals.bw_label = BW_LABEL;
 
-	/// NEW
+	vals.show_low_res = false;
 
 	vals.bw = false;
 	vals.inv = false;

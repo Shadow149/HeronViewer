@@ -1,6 +1,9 @@
 #pragma once
 struct SliderValues
 {
+
+	bool show_low_res;
+
 	const char* bw_label;
 	float sharp_kernel[9];
 
