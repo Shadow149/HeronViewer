@@ -24,20 +24,19 @@ void Histogram::render()
 {
 	if (!visible) { return; }
 
-	if (true) {
-		for (int n = 0; n < 4; n++) {
-			for (int i = 0; i < 256; i++) {
-				hist[n][i] = 0;
-			}
-		}
-		for(int i = 0; i < 256; i ++)
-		{
-			hist[0][i] = img->histogram[(i*4)];
-			hist[1][i] = img->histogram[(i*4)+1];
-			hist[2][i] = img->histogram[(i*4)+2];
-			hist[3][i] = img->histogram[(i*4)+3];
+	for (int n = 0; n < 4; n++) {
+		for (int i = 0; i < 256; i++) {
+			hist[n][i] = 0;
 		}
 	}
+	for(int i = 0; i < 256; i ++)
+	{
+		hist[0][i] = img->histogram[(i*4)];
+		hist[1][i] = img->histogram[(i*4)+1];
+		hist[2][i] = img->histogram[(i*4)+2];
+		hist[3][i] = img->histogram[(i*4)+3];
+	}
+	
 	ImGui::Begin(name.c_str(), &visible);
 	const ImVec2 size = ImGui::GetWindowSize();
 	ImPlot::GetStyle().PlotMinSize = ImVec2(0, 0);

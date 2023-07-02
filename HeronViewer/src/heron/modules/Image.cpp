@@ -130,7 +130,6 @@ void Image::bindImage() {
 	{
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		//glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else
 	{
@@ -151,46 +150,14 @@ void Image::bindImage() {
 
 	glBindTexture(GL_TEXTURE_2D, comp_texture_small);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width_small, height_small, 0, GL_RGBA, GL_FLOAT, NULL);
-	glBindImageTexture(8, comp_texture_small, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+	glBindImageTexture(2, comp_texture_small, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 
-	//glGenerateMipmap(GL_TEXTURE_2D);
+
 }
 
 void Image::exportImage(const char* fileLoc) {
 	exporting = true;
 	Console::log("Exporting to: " + std::string(fileLoc));
-	/*
-	glGenBuffers(1, &pbo);
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
-	glBufferData(GL_PIXEL_PACK_BUFFER, width * height * (bpp / 8) * sizeof(unsigned char), 0, GL_DYNAMIC_READ);
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-	
-
-	export_data = (unsigned char*)malloc(width * height * bpp * sizeof(unsigned char));
-	memset(export_data, 0, width * height * (bpp / 8));
-
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	glBindTexture(GL_TEXTURE_2D, renderedTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);
-	// Render to our framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
-	glViewport(0, 0, width, height);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	// bind Texture
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::scale(model, glm::vec3(1.0f));
-	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-	shader.use();
-	shader.setMat4("model", model);
-	shader.setMat4("view", view);
-	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	*/
 
 	GLenum error = 0;
 
@@ -200,23 +167,18 @@ void Image::exportImage(const char* fileLoc) {
 	glGenBuffers(1, &pbo);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 	glBufferData(GL_PIXEL_PACK_BUFFER, width * height * (bpp / 8) * sizeof(GLfloat), 0, GL_STREAM_READ);
-	//glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 
-	//glFinish();
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, comp_texture);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
 	const double start = glfwGetTime();
-	//glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, export_data);
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 	Console::log("glGetTexImage time: " + std::to_string(glfwGetTime() - start));
 	const auto* d = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 	std::memcpy(export_data, d, sizeof(GLfloat) * width * height * (bpp / 8));
-	//glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-	//glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-	//glBindTexture(GL_TEXTURE_2D, 0);
 
 	renderer = std::thread(&Image::renderImage, this, fileLoc);
 
@@ -253,14 +215,14 @@ unsigned char* Image::getData()
 
 unsigned int Image::getHeight()
 {
-	if (m_pVals->show_low_res)
+	if (m_pVals->show_low_res || getChanged())
 		return height_small;
 	return height;
 }
 
 unsigned int Image::getWidth()
 {
-	if (m_pVals->show_low_res)
+	if (m_pVals->show_low_res || getChanged())
 		return width_small;
 	return width;
 }
@@ -387,11 +349,6 @@ void Image::init()
 
 	model1 = glm::translate(model1, glm::vec3(0, 0, 1));
 	model1 = glm::scale(model1, glm::vec3(0.25f));
-	//imageLoader = std::thread(&Image::getImage, this, "C:\\Users\\Alfred Roberts\\Pictures\\U75A1167.CR2");
-
-	shaderLoadTime = Overlay::registerMetric();
-	imageRender = Overlay::registerMetric();
-
 
 	glGenTextures(1, &comp_texture);
 	glActiveTexture(GL_TEXTURE0);
@@ -411,7 +368,7 @@ void Image::init()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 0, 0, 0, GL_RGBA, GL_FLOAT, NULL);
-	glBindImageTexture(8, comp_texture_small, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+	glBindImageTexture(2, comp_texture_small, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 
 	glGenTextures(1, &vectorscope);
 	glActiveTexture(GL_TEXTURE4);
@@ -433,26 +390,6 @@ void Image::init()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 512, 255, 0, GL_RGBA, GL_FLOAT, NULL);
 	glBindImageTexture(5, waveform, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 
-	//glGenTextures(1, &waveform_acc);
-	//glActiveTexture(GL_TEXTURE6);
-	//glBindTexture(GL_TEXTURE_2D, waveform_acc);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 0, 0, 0, GL_RED_INTEGER, GL_INT, NULL);
-	//glBindImageTexture(6, waveform_acc, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-
-	//glGenTextures(1, &vectorscope_acc);
-	//glActiveTexture(GL_TEXTURE7);
-	//glBindTexture(GL_TEXTURE_2D, vectorscope_acc);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 255, 255, 0, GL_RED_INTEGER, GL_INT, NULL);
-	//glBindImageTexture(7, vectorscope_acc, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32I);
-
 	glGenBuffers(1, &SSBO);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * 4 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
@@ -472,6 +409,10 @@ void Image::init()
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, vectorscope_acc);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, 255 * 255 * sizeof(unsigned), NULL, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, vectorscope_acc);
+
+
+	shaderLoadTime = Overlay::registerMetric();
+	imageRender = Overlay::registerMetric();
 
 }
 
@@ -519,60 +460,31 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	*shaderLoadTime = "Framebuffer render time: " + std::to_string(glfwGetTime() - start);
 	//glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
-	//glBindTexture(GL_TEXTURE_2D, vectorscope_acc);
-	//glClearTexImage(vectorscope_acc, 0, GL_RED_INTEGER, GL_INT, NULL);
-
-	//glBindTexture(GL_TEXTURE_2D, waveform_acc);
-	//glClearTexImage(waveform_acc, 0, GL_RED_INTEGER, GL_INT, NULL);
-	//glBindTexture(GL_TEXTURE_2D, 0);
-
-	//glBindTexture(GL_TEXTURE_2D, comp_texture_small);
-	//glBindImageTexture(0, comp_texture_small, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-
-
-	if (m_pVals->show_low_res && !need_texture_change) {
-		start = glfwGetTime();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, comp_texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width_small, height_small, 0, GL_RGBA, GL_FLOAT, NULL);
-		Console::log("Low res comp texture change time: " + std::to_string(glfwGetTime() - start));
-		start = glfwGetTime();
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width_small, height_small, 0, GL_RGB, GL_UNSIGNED_BYTE, data1);
-		Console::log("Low res texture change time: " + std::to_string(glfwGetTime() - start));
+	bool low_b4 = m_pVals->show_low_res;
+	m_pVals->show_low_res |= scrolling;
+	if ((m_pVals->show_low_res) && !need_texture_change) {
 		need_texture_change = true;
 	}
 	else if (!m_pVals->show_low_res && need_texture_change) {
-		start = glfwGetTime();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, comp_texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
-		Console::log("High res comp texture change time: " + std::to_string(glfwGetTime() - start));
-		start = glfwGetTime();
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		Console::log("High res texture change time: " + std::to_string(glfwGetTime() - start));
 		scope_rerender = true;
 		need_texture_change = false;
 	}
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, comp_texture);
 
-	//if (m_pVals->show_low_res && !need_texture_change) {
-	//	start = glfwGetTime();
-	//	Console::log("Low res texture change time: " + std::to_string(glfwGetTime() - start));
-	//	need_texture_change = true;
-	//}
-	//else if (!m_pVals->show_low_res && need_texture_change) {
-	//	start = glfwGetTime();
-	//	Console::log("High res texture change time: " + std::to_string(glfwGetTime() - start));
-	//	scope_rerender = true;
-	//	need_texture_change = false;
-	//}
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, comp_texture_small);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, texture1);
 
 
 	process_compute_shader_.use();
+	process_compute_shader_.setBool("low_res", m_pVals->show_low_res);
 	process_compute_shader_.setFloatArray("low", m_pVals->low, 4);
 	process_compute_shader_.setFloatArray("whites", m_pVals->whites, 4);
 	process_compute_shader_.setFloatArray("mid", m_pVals->mid, 4);
@@ -636,16 +548,29 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture);
 
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, comp_texture_small);
+
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, texture1);
+
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D, vectorscope);
 
 		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_2D, waveform);
 
-
 		hist_compute_shader_.use();
+		hist_compute_shader_.setBool("low_res", m_pVals->show_low_res);
 		hist_compute_shader_.setBool("histogram_loaded", histogram_loaded);
 		hist_compute_shader_.setFloat("var_mult", m_pVals->scope_brightness);
+
+		hist_compute_shader_.setFloat("width", height);
+		hist_compute_shader_.setFloat("height", height);
+		hist_compute_shader_.setFloat("width_small", width_small);
+		hist_compute_shader_.setFloat("height_small", height_small);
+
+
 
 		glDispatchCompute(x, y, 1);
 		//loops++;
@@ -691,7 +616,11 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, comp_texture);
 
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, comp_texture_small);
+
 	shader.use();
+	shader.setBool("low_res", m_pVals->show_low_res);
 	shader.setMat4("model", model);
 	shader.setMat4("view", view);
 	shader.setMat4("projection", projection);
@@ -704,8 +633,8 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-
-
+	scrolling = false;
+	m_pVals->show_low_res = low_b4;
 }
 
 
@@ -717,7 +646,11 @@ void Image::render()
 	ImGui::Begin(name.c_str(), &visible, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 	size = ImGui::GetWindowSize();
 	updateMouseInWindow();
-	ImGui::Image((ImTextureID)renderedTexture, previewSize);
+	if (loading) {
+		ImGui::SetCursorPos(size / 2 - ImVec2(50, 50));
+		Spinner("LOADING...", 100, 10, ImGui::GetColorU32(ImVec4(255, 255, 255, 255)));
+	}
+	else ImGui::Image((ImTextureID)renderedTexture, previewSize);
 	ImGui::End();
 	*imageRender = "ImGui Window Render Time: " + std::to_string(glfwGetTime() - start);
 }
@@ -744,12 +677,14 @@ void Image::scale(glm::vec3 s)
 	if (!mouseInWindow) { return; }
 	scale_factor = s.x;
 	model = glm::scale(model, s);
+	scrolling = true;
 }
 
 void Image::translate(glm::vec3 t)
 {
 	if (!mouseInWindow) { return; }
 	view = glm::translate(view, t);
+	scrolling = true;
 }
 
 void Image::resetView() {

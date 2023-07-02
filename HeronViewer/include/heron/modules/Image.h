@@ -62,11 +62,11 @@ private:
 	FIBITMAP* bitmap;
 	FIBITMAP* scaled;
 
-	SliderValues* m_pVals;
 	bool changed = false;
 	bool scope_rerender = true;
 	bool loading = false;
 	bool need_texture_change = false;
+	bool scrolling = false;
 
 	unsigned texture;
 	unsigned texture1;
@@ -104,6 +104,8 @@ private:
 	void updatePreviewSize();
 
 public:
+	// TODO FOR TESTING
+	SliderValues* m_pVals;
 
 	ImVec2 size;
 	ImVec2 previewSize;
