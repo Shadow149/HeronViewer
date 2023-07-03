@@ -215,16 +215,14 @@ unsigned char* Image::getData()
 
 unsigned int Image::getHeight()
 {
-	printf("%d %d %d\n", m_pVals->show_low_res, need_texture_change, scope_rerender);
-
-	if (m_pVals->show_low_res && need_texture_change)
+	if (m_pVals->show_low_res)
 		return height_small;
 	return height;
 }
 
 unsigned int Image::getWidth()
 {
-	if (m_pVals->show_low_res && need_texture_change)
+	if (m_pVals->show_low_res)
 		return width_small;
 	return width;
 }
@@ -427,7 +425,6 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	if (!visible) { return; }
 	if (loading) return;
 
-
 	if (threadImageLoaded) { 
 		Console::log("Image loaded to main thread");
 		bindImage();
@@ -437,7 +434,6 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		threadImageLoaded = false;
 		imageLoaded = true;
 		changed = true;
-		//view = glm::mat4(1.0f);
 		view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
 		model = glm::mat4(1.0f);
 		if (size.x > size.y) {
@@ -464,7 +460,6 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	//glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
 	const bool low_b4 = m_pVals->show_low_res;
-
 
 	m_pVals->show_low_res |= scrolling;
 	if ((m_pVals->show_low_res) && !need_texture_change) {
@@ -535,7 +530,7 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 	glDispatchCompute(x, y, 1);
 
 	if ((getChanged() && imageLoaded) || (!getChanged() && imageLoaded && scope_rerender)) {
-		scope_rendered = false;
+
 		glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO);
 		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
@@ -598,7 +593,6 @@ void Image::glrender(bool* clip, bool* b4, bool* black_bckgrd) {
 		}
 		histogram_loaded = true;
 		changed = false;
-		scope_rendered = true;
 		if (!getChanged() && scope_rerender)
 			scope_rerender = false;
 	}

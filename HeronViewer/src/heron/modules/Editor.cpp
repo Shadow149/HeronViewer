@@ -53,7 +53,6 @@ void Editor::render()
 	updateMouseInWindow();
 
 
-
 	if (ImGui::IsWindowFocused() && mouseInWindow && ImGui::IsMouseDown(0) && new_values_set && sliderChanged)
 	{
 		prev_vals = vals;

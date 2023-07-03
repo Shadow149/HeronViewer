@@ -36,7 +36,6 @@ void Heron::processInput(GLFWwindow* window)
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
 	{
-		printf("undo pressed\n");
 		editor->undo();
 	}
 }
