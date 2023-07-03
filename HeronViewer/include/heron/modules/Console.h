@@ -14,12 +14,15 @@ class Console : public Module
 public:
 	static int line_pos;
 	static std::string log_str;
-	Console(std::string n, bool v = true) : Module(n, v) { line_pos = 0; };
-	void init();
-	void render();
-	void cleanup();
-	static void log(std::string log);
-private:
-	ImFont* font;
-};
+	explicit Console(const std::string& n, const bool v = true) : Module(n, v), font_(nullptr)
+	{
+		line_pos = 0;
+	}
+	void init() override;
+	void render() override;
+	void cleanup() override;
+	static void log(const std::string& log);
 
+private:
+	ImFont* font_;
+};

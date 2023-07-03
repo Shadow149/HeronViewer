@@ -1,10 +1,6 @@
 #include "Graph.h"
 
 
-void Graph::init()
-{
-}
-
 void Graph::render()
 {
 	ImGui::Begin(name.c_str(), &visible);
@@ -24,13 +20,14 @@ void Graph::render()
 	{
 		if (ImGui::MenuItem("add"))
 		{
-			numNodes++;
+			num_nodes_++;
 		}
 		ImGui::EndPopup();
 	}
 	ImGui::PopStyleVar();
 
-	for (int i = 0; i < numNodes; i++) {
+	for (int i = 0; i < num_nodes_; i++)
+	{
 		ImNodes::BeginNode(i);
 		ImNodes::BeginInputAttribute(i * 2);
 		ImGui::Text("in");
@@ -41,9 +38,9 @@ void Graph::render()
 		ImNodes::EndNode();
 	}
 
-	for (int i = 0; i < links.size(); ++i)
+	for (int i = 0; i < links_.size(); ++i)
 	{
-		const std::pair<int, int> p = links[i];
+		const std::pair<int, int> p = links_[i];
 		ImNodes::Link(i, p.first, p.second);
 	}
 
@@ -52,12 +49,8 @@ void Graph::render()
 	int start_attr, end_attr;
 	if (ImNodes::IsLinkCreated(&start_attr, &end_attr))
 	{
-		links.push_back(std::make_pair(start_attr, end_attr));
+		links_.emplace_back(start_attr, end_attr);
 	}
 
 	ImGui::End();
-}
-
-void Graph::cleanup()
-{
 }

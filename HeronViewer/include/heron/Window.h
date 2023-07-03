@@ -19,20 +19,22 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <future>
 
-class Window {
+class Window
+{
 public:
-	Window(int w = 1600, int h = 900);
+	virtual ~Window() = default;
+	explicit Window(int w = 1600, int h = 900);
 
 	int init();
-	void setBackground();
-	void initImGui();
-	void ImGuiRenderInit();
-	void ImGuiCleanUp();
-	void ImGuiRender();
+	static void set_background();
+	void init_im_gui() const;
+	static void im_gui_render_init();
+	static void im_gui_clean_up();
+	static void im_gui_render();
 	virtual void render() = 0;
 
 protected:
-	GLFWwindow* window;
-	unsigned int SCR_WIDTH;
-	unsigned int SCR_HEIGHT;
+	GLFWwindow* window_{};
+	int scr_width_;
+	int scr_height_;
 };

@@ -14,55 +14,55 @@ class FileDialog;
 
 const std::string HERON_VERSION = "0.1.0.1";
 
-class Heron: public Window
+class Heron final : public Window
 {
 public:
-	Heron() : Window(1600, 900) {};
-	Heron(int w, int h) : Window(w, h) {};
-	std::string getFileDialogKey();
-	std::vector<Module*> getModules();
-	void onWindowLoad();
-	void render();
-	void unloadImage();
-	void loadImage(std::string filePath, std::string fileName);
+	Heron() : Window(1600, 900){}
 
-	void saveImage();
+	Heron(const int w, const int h) : Window(w, h){}
 
-	void setImagePath(std::string s);
-	void recompileShader();
+	std::string get_file_dialog_key();
+	std::vector<Module*> get_modules();
+	void on_window_load();
+	void render() override;
+	void unload_image() const;
+	void load_image(std::string file_path, std::string file_name);
+
+	void save_image() const;
+	void set_image_path(std::string s);
 
 private:
-	glm::vec3 view_pos = glm::vec3(0);
-	float view_scale = 1.0f;
-	FileDialog* fileDialog = NULL;
-	Image* image = NULL;
-	Histogram* hist = NULL;
-	Editor* editor = NULL;
-	std::vector<Module*> modules;
-
-	std::string imgFilePath;
-	std::string imgFile;
-
-	float deltaTime = 0.0f;
-	float lastFrame = 0.0f;
-	std::string* fpsMetric;
-	std::string* frameTime;
-	std::string* renderTime;
-	std::string* imGuiRenderTime;
-
-	bool key_pressed = false;
-	bool clip = false;
-	bool b4 = false;
-	bool black_bckgrd = false;
-
-	void processInput(GLFWwindow* window);
+	void process_input(GLFWwindow* window);
 	void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 	void drop_callback(GLFWwindow* window, int path_count, const char* paths[]);
 	static void static_scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 	static void static_drop_callback(GLFWwindow* window, int path_count, const char* paths[]);
 
-	void calcTime();
-	void initGlfw();
-	void initModules();
-};
+	void calc_time();
+	void init_glfw();
+	void init_modules();
 
+private:
+	glm::vec3 view_pos_ = glm::vec3(0);
+	float view_scale_ = 1.0f;
+	FileDialog* file_dialog_ = nullptr;
+	Image* image_ = nullptr;
+	Histogram* hist_ = nullptr;
+	Editor* editor_ = nullptr;
+	std::vector<Module*> modules_;
+
+	std::string img_file_path_;
+	std::string img_file_;
+
+	float delta_time_ = 0.0f;
+	float last_frame_ = 0.0f;
+	std::string* fps_metric_{};
+	std::string* frame_time_{};
+	std::string* render_time_{};
+	std::string* im_gui_render_time_{};
+
+	bool key_pressed_ = false;
+	bool clip_ = false;
+	bool b4_ = false;
+	bool black_bckgrd_ = false;
+};

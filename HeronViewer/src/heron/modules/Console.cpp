@@ -5,15 +5,15 @@ int Console::line_pos;
 
 void Console::init()
 {
-	font = ImGui::GetIO().Fonts->AddFontFromFileTTF("./fonts/SourceCodePro-Regular.ttf", 14);
+	font_ = ImGui::GetIO().Fonts->AddFontFromFileTTF("./fonts/SourceCodePro-Regular.ttf", 14);
 }
 
 void Console::render()
 {
 	ImGui::SetNextWindowBgAlpha(0.50f); // Transparent background
 	ImGui::Begin(name.c_str(), &visible);
-	ImGui::PushFont(font);
-	ImGui::TextWrapped(Console::log_str.c_str());
+	ImGui::PushFont(font_);
+	ImGui::TextWrapped(log_str.c_str());
 	ImGui::PopFont();
 	ImGui::End();
 }
@@ -22,12 +22,12 @@ void Console::cleanup()
 {
 }
 
-void Console::log(std::string log)
+void Console::log(const std::string& log)
 {
-	Console::log_str += "> " + log + "\n";
-	if (line_pos > MAX_LINES) {
-		Console::log_str = "";
+	log_str += "> " + log + "\n";
+	if (line_pos > MAX_LINES)
+	{
+		log_str = "";
 		line_pos = 0;
 	}
 }
-

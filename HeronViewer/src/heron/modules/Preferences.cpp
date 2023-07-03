@@ -1,103 +1,110 @@
 #include "Preferences.h"
 
-Preferences* Preferences::pref;
+Preferences* Preferences::pref_;
 
-Preferences* Preferences::instance() {
-	if (!pref)
-		pref = new Preferences();
-	return pref;
+Preferences* Preferences::instance()
+{
+	if (!pref_)
+		pref_ = new Preferences();
+	return pref_;
 }
 
 void Preferences::init()
 {
-	if (!readingIni && !writingIni)
-		prefThread = std::thread(&Preferences::readSettings, this);
+	if (!reading_ini_ && !writing_ini_)
+		pref_thread_ = std::thread(&Preferences::read_settings, this);
 }
 
 void Preferences::render()
 {
-	if (!writingIni && !readingIni) {
-		if (prefThread.joinable()) {
-			prefThread.join();
+	if (!writing_ini_ && !reading_ini_)
+	{
+		if (pref_thread_.joinable())
+		{
+			pref_thread_.join();
 			Console::log("iniWriter joined");
 		}
 	}
 
-    if (!visible) { return; }
+	if (!visible) { return; }
 
-    if (ImGui::Begin(name.c_str(), &visible))
-    {
-        ImGui::InputText("Export Directory", &exportDirStr);
+	if (ImGui::Begin(name.c_str(), &visible))
+	{
+		ImGui::InputText("Export Directory", &export_dir_str_);
 
-        if (ImGui::Button("Save")) {
-            saveSettings();
-        }
-    }
-    ImGui::End();
+		if (ImGui::Button("Save"))
+		{
+			save_settings();
+		}
+	}
+	ImGui::End();
 }
 
-void Preferences::cleanup()
+void Preferences::save_settings()
 {
+	EXPORT_DIR = export_dir_str_;
+
+	if (!reading_ini_ && !writing_ini_)
+		pref_thread_ = std::thread(&Preferences::write_settings, this);
 }
 
-void Preferences::saveSettings() {
-    EXPORT_DIR = exportDirStr;
-
-	if (!readingIni && !writingIni)
-		prefThread = std::thread(&Preferences::writeSettings, this);
-}
-
-void Preferences::readSettings() {
-	readingIni = true;
-	mINI::INIFile file(PREFERENCES_FILE);
+void Preferences::read_settings()
+{
+	reading_ini_ = true;
+	const mINI::INIFile file(PREFERENCES_FILE);
 	mINI::INIStructure ini;
-	bool readSuc = file.read(ini);
+	const bool read_suc = file.read(ini);
 
-	if (!readSuc) {
+	if (!read_suc)
+	{
 		Console::log("No preferences ini, will save current settings...");
-		writeSettings();
+		write_settings();
 		return;
 	}
-	else {
-		Console::log("Preferences ini read...");
-	}
+	Console::log("Preferences ini read...");
 
 	EXPORT_DIR = ini["preferences"]["EXPORT_DIR"];
 
-	writeToBuffers();
+	write_to_buffers();
 
-	Status::setStatus("Preferences Read");
-	readingIni = false;
+	Status::set_status("Preferences Read");
+	reading_ini_ = false;
 }
 
-void Preferences::writeToBuffers() {
-	exportDirStr = EXPORT_DIR.u8string();
+void Preferences::write_to_buffers()
+{
+	export_dir_str_ = EXPORT_DIR.u8string();
 }
 
 
-void Preferences::writeSettings() {
-	writingIni = true;
-	mINI::INIFile file(PREFERENCES_FILE);
+void Preferences::write_settings()
+{
+	writing_ini_ = true;
+	const mINI::INIFile file(PREFERENCES_FILE);
 	mINI::INIStructure ini;
-	bool readSuc = file.read(ini);
+	const bool read_suc = file.read(ini);
 
-	if (!readSuc) {
+	if (!read_suc)
+	{
 		Console::log("No preferences ini, will create one...");
 	}
-	else {
+	else
+	{
 		Console::log("Preferences ini read...");
 	}
 
 	ini["preferences"]["EXPORT_DIR"] = EXPORT_DIR.u8string();
 
-	if (!readSuc) {
+	if (!read_suc)
+	{
 		file.generate(ini);
 		Console::log("Ini generated");
 	}
-	else {
+	else
+	{
 		file.write(ini);
 		Console::log("Ini updated");
 	}
-	Status::setStatus("Preferences Saved!");
-	writingIni = false;
+	Status::set_status("Preferences Saved!");
+	writing_ini_ = false;
 }

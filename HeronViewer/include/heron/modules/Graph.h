@@ -9,13 +9,12 @@ class Graph :
     public Module
 {
 public:
-	Graph(std::string n) : Module(std::move(n), false) {}
-	void init();
-	void render();
-	void cleanup();
+	explicit Graph(std::string n) : Module(std::move(n), false) {}
+	void init() override {};
+	void render() override;
+	void cleanup() override {};
 private:
-	int numNodes = 1;
-	std::vector<std::pair<int, int>> links;
-	float r = 0, g = 0, b = 0;
+	int num_nodes_ = 1;
+	std::vector<std::pair<int, int>> links_;
 };
 

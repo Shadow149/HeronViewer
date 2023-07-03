@@ -1,6 +1,6 @@
 #include "Utils.h"
 
-float clamp(float v, float l, float h)
+float clamp(float v, const float l, const float h)
 {
 	if (v > h)
 		v = h;
@@ -9,7 +9,7 @@ float clamp(float v, float l, float h)
 	return v;
 }
 
-void addMat(float* first, float* second, float* result, int size) {
+void addMat(float* first, float* second, float* result, const int size) {
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
 			result[(size * i) + j] = first[(size * i) + j] + second[(size * i) + j];
@@ -17,7 +17,7 @@ void addMat(float* first, float* second, float* result, int size) {
 	}
 }
 
-void subMat(float* first, float* second, float* result, int size) {
+void subMat(float* first, float* second, float* result, const int size) {
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
 			result[(size * i) + j] = first[(size * i) + j] - second[(size * i) + j];
@@ -25,7 +25,7 @@ void subMat(float* first, float* second, float* result, int size) {
 	}
 }
 
-void scalarMul(float c, float* ker, float* result, int size) {
+void scalarMul(const float c, float* ker, float* result, const int size) {
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
 			result[(size * i) + j] = ker[(size * i) + j] * c;
@@ -33,7 +33,7 @@ void scalarMul(float c, float* ker, float* result, int size) {
 	}
 }
 
-void normalMat(float* ker, float* result, int size) {
+void normalMat(float* ker, float* result, const int size) {
 	float sum = 0;
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {

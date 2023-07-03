@@ -12,21 +12,19 @@ class Image;
 class Histogram : public Module
 {
 public:
-	Histogram(Image* i, std::string n, bool v = true) : Module(n, v) {
-		img = i;
-	};
-	void init();
-	void render();
-	void cleanup();
+	Histogram(Image* i, const std::string n, const bool v = true) : Module(n, v) {
+		img_ = i;
+	}
+	void init() override;
+	void render() override;
+	void cleanup() override {}
 private:
-	Image* img;
-	//
-	const ImPlotAxisFlags flags = ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoGridLines;
-	// ImPlotFlags_NoInputs
-	const ImPlotFlags plotFlags = ImPlotFlags_NoTitle | ImPlotFlags_NoFrame | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoMouseText | ImPlotFlags_NoLegend | ImPlotFlags_AntiAliased;
+	Image* img_;
+
+	const ImPlotAxisFlags axis_flags_ = ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoGridLines;
+	const ImPlotFlags plot_flags_ = ImPlotFlags_NoTitle | ImPlotFlags_NoFrame | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoMouseText | ImPlotFlags_NoLegend | ImPlotFlags_AntiAliased;
 	
-	int hist[4][256];
-	int hist_edit[4][256];
-	int hist_x[256] = { 0 };
+	unsigned hist_[4][256]{};
+	unsigned hist_x_[256] = { 0 };
 };
 

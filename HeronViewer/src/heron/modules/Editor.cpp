@@ -3,13 +3,16 @@
 #include "Heron.h"
 
 
-template<typename T>
-bool SliderFloatReset(T& data, T reset_value, const char* label, float* v, float v_min, float v_max, const char* format = "%.2f", ImGuiSliderFlags flags = 0,
-	ImU32 left_colour = ImColor(50, 50, 50), ImU32 right_colour = ImColor(220, 220, 220))
+template <typename T>
+bool slider_float_reset(T& data, T reset_value, const char* label, float* v, const float v_min, const float v_max,
+                        const char* format = "%.2f", const ImGuiSliderFlags flags = 0,
+                        const ImU32 left_colour = ImColor(50, 50, 50),
+                        const ImU32 right_colour = ImColor(220, 220, 220))
 {
 	const bool change = ImGui::SliderFloat(label, v, v_min, v_max, format, flags, left_colour, right_colour);
 	ImGui::SameLine();
-	if (ImGui::Button(("R##" + std::to_string(btn_id++)).c_str())) {
+	if (ImGui::Button(("R##" + std::to_string(btn_id++)).c_str()))
+	{
 		data = reset_value;
 		return true;
 	}
@@ -17,105 +20,116 @@ bool SliderFloatReset(T& data, T reset_value, const char* label, float* v, float
 }
 
 
-
-void Editor::updateSharpenKernel() {
+void Editor::update_sharpen_kernel()
+{
 	float a[9], b[9], c[9], d[9], e[9];
-	scalarMul(1.0f / 16.0f, blur_kernel, a, 3);
-	scalarMul(vals.blur, a, b, 3);
-	subMat(id, b, c, 3);
-	scalarMul(vals.sharp, c, d, 3);
-	addMat(id, d, e, 3);
-	normalMat(e, vals.sharp_kernel, 3);
+	scalarMul(1.0f / 16.0f, blur_kernel_, a, 3);
+	scalarMul(vals_.blur, a, b, 3);
+	subMat(id_, b, c, 3);
+	scalarMul(vals_.sharp, c, d, 3);
+	addMat(id_, d, e, 3);
+	normalMat(e, vals_.sharp_kernel, 3);
 }
 
-void Editor::toggleBwLabel() {
-	if (vals.bw_label == BW_LABEL)
-		vals.bw_label = COLOR_LABEL;
+void Editor::toggle_bw_label()
+{
+	if (vals_.bw_label == BW_LABEL)
+		vals_.bw_label = COLOR_LABEL;
 	else
-		vals.bw_label = BW_LABEL;
+		vals_.bw_label = BW_LABEL;
 }
 
 void Editor::init()
 {
-	updateSharpenKernel();
-	setChanges();
+	update_sharpen_kernel();
+	set_changes();
 }
 
 void Editor::render()
 {
-	if (img->imageLoaded && !configSet) {
-		configSet = true;
-		setFromConfigFile();
+	if (img_->image_loaded && !config_set_)
+	{
+		config_set_ = true;
+		set_from_config_file();
 	}
 
 
 	ImGui::Begin(name.c_str(), &visible);
-	updateMouseInWindow();
+	update_mouse_in_window();
 
 
-	if (ImGui::IsWindowFocused() && mouseInWindow && ImGui::IsMouseDown(0) && new_values_set && sliderChanged)
+	if (ImGui::IsWindowFocused() && mouse_in_window_ && ImGui::IsMouseDown(0) && new_values_set_ && slider_changed_)
 	{
-		prev_vals = vals;
-		new_values_set = false;
-		vals.show_low_res = true;
+		prev_vals_ = vals_;
+		new_values_set_ = false;
+		vals_.show_low_res = true;
 	}
-	sliderChanged = false;
+	slider_changed_ = false;
 
 
-	if (ImGui::Button("Reset Settings")) {
+	if (ImGui::Button("Reset Settings"))
+	{
 		reset();
-		Status::setStatus("Settings Reset!");
+		Status::set_status("Settings Reset!");
 	}
 	ImGui::SameLine();
 
-	if (ImGui::Button("Save Settings")) {
-		updateConfigFile();
-		Status::setStatus("Saving...");
+	if (ImGui::Button("Save Settings"))
+	{
+		update_config_file();
+		Status::set_status("Saving...");
 	}
 	ImGui::SameLine();
-	if (img->rendering) {
+	if (img_->rendering)
+	{
 		ImGui::Button("Exporting...");
-		Status::setStatus("Exporting...");
+		Status::set_status("Exporting...");
 		ImGui::SameLine();
-		Spinner("EXPORTING...", ImGui::CalcTextSize("Exporting...").y/2, 3, ImGui::GetColorU32(ImVec4(255, 255, 255, 255)));
+		spinner("EXPORTING...", ImGui::CalcTextSize("Exporting...").y / 2, 3,
+		        ImGui::GetColorU32(ImVec4(255, 255, 255, 255)));
 	}
-	else {
-		if (ImGui::Button("Export to JPG")) {
-			exportImage();
+	else
+	{
+		if (ImGui::Button("Export to JPG"))
+		{
+			export_image();
 		}
 	}
 
 	ImGui::Separator();
 
 
-	if (sliderChanged |= ImGui::Button(vals.bw ? COLOR_LABEL : BW_LABEL)) {
-		vals.bw = !vals.bw;
+	if (slider_changed_ |= ImGui::Button(vals_.bw ? COLOR_LABEL : BW_LABEL))
+	{
+		vals_.bw = !vals_.bw;
 	}
 	ImGui::SameLine();
-	ImGui::Checkbox("Invert", &vals.inv);
+	ImGui::Checkbox("Invert", &vals_.inv);
 
-	sliderChanged |= SliderFloatReset(vals.wb, 7200.0f, "White Balance", &vals.wb, 1667, 25000, "%.0f", 0, ImColor(242, 126, 36), ImColor(36, 173, 242));
+	slider_changed_ |= slider_float_reset(vals_.wb, 7200.0f, "White Balance", &vals_.wb, 1667, 25000, "%.0f", 0,
+	                                      ImColor(242, 126, 36), ImColor(36, 173, 242));
 
-	sliderChanged |= SliderFloatReset(vals.tint, 1.0f, "Tint", &(vals.tint), 0.0f, 2.0f, "%.2f", 0, ImColor(0, 255, 0), ImColor(255, 0, 255));
+	slider_changed_ |= slider_float_reset(vals_.tint, 1.0f, "Tint", &(vals_.tint), 0.0f, 2.0f, "%.2f", 0,
+	                                      ImColor(0, 255, 0), ImColor(255, 0, 255));
 
 
 	if (ImGui::BeginTabBar("MyTabBar"))
 	{
 		for (int n = 0; n < 4; n++)
-			if (ImGui::BeginTabItem(tab_names[n]))
+			if (ImGui::BeginTabItem(tab_names_[n]))
 			{
-				sliderChanged |= SliderFloatReset(vals.expo[n], 0.0f, "Exposure", &(vals.expo[n]), -2, 2);
-				sliderChanged |= SliderFloatReset(vals.contrast[n], 0.0f, "Contrast", &(vals.contrast[n]), -1, 1);
-				sliderChanged |= SliderFloatReset(vals.high[n], 0.0f, "High", &(vals.high[n]), -1, 1);
-				sliderChanged |= SliderFloatReset(vals.mid[n], 0.0f, "Mid", &(vals.mid[n]), -1, 1);
-				sliderChanged |= SliderFloatReset(vals.whites[n], 0.0f, "Whites", &(vals.whites[n]), -1, 1);
-				sliderChanged |= SliderFloatReset(vals.low[n], 0.0f, "Low", &(vals.low[n]), -1, 1);
+				slider_changed_ |= slider_float_reset(vals_.expo[n], 0.0f, "Exposure", &(vals_.expo[n]), -2, 2);
+				slider_changed_ |= slider_float_reset(vals_.contrast[n], 0.0f, "Contrast", &(vals_.contrast[n]), -1, 1);
+				slider_changed_ |= slider_float_reset(vals_.high[n], 0.0f, "High", &(vals_.high[n]), -1, 1);
+				slider_changed_ |= slider_float_reset(vals_.mid[n], 0.0f, "Mid", &(vals_.mid[n]), -1, 1);
+				slider_changed_ |= slider_float_reset(vals_.whites[n], 0.0f, "Whites", &(vals_.whites[n]), -1, 1);
+				slider_changed_ |= slider_float_reset(vals_.low[n], 0.0f, "Low", &(vals_.low[n]), -1, 1);
 
 				ImGui::Separator();
 
-				sliderChanged |= SliderFloatReset(vals.lift[n], 0.0f, "Lift", &(vals.lift[n]), -1, 1);
-				sliderChanged |= SliderFloatReset(vals.gamma[n], 1.0f, "Gamma", &(vals.gamma[n]), 0, 2);
-				sliderChanged |= SliderFloatReset(vals.gain[n], 1.0f, "Gain", &(vals.gain[n]), -1, 2);
+				slider_changed_ |= slider_float_reset(vals_.lift[n], 0.0f, "Lift", &(vals_.lift[n]), -1, 1);
+				slider_changed_ |= slider_float_reset(vals_.gamma[n], 1.0f, "Gamma", &(vals_.gamma[n]), 0, 2);
+				slider_changed_ |= slider_float_reset(vals_.gain[n], 1.0f, "Gain", &(vals_.gain[n]), -1, 2);
 
 
 				ImGui::EndTabItem();
@@ -125,257 +139,294 @@ void Editor::render()
 
 	ImGui::Separator();
 
-	sliderChanged |= SliderFloatReset(vals.sat_ref, 1.0f, "Saturation Refine", &(vals.sat_ref), 0, 1);
+	slider_changed_ |= slider_float_reset(vals_.sat_ref, 1.0f, "Saturation Refine", &(vals_.sat_ref), 0, 1);
 
 	ImGui::Separator();
 
-	sliderChanged |= drawColorSelector("High", ImGui::GetWindowWidth() / 3, &vals.high[1], &vals.high[2], &vals.high[3]); ImGui::SameLine();
-	sliderChanged |= drawColorSelector("Mid", ImGui::GetWindowWidth() / 3, &vals.mid[1], &vals.mid[2], &vals.mid[3]); 
-	sliderChanged |= drawColorSelector("Low", ImGui::GetWindowWidth() / 3, &vals.low[1], &vals.low[2], &vals.low[3]); ImGui::SameLine();
+	slider_changed_ |= draw_color_selector("High", ImGui::GetWindowWidth() / 3, &vals_.high[1], &vals_.high[2],
+	                                     &vals_.high[3]);
+	ImGui::SameLine();
+	slider_changed_ |= draw_color_selector("Mid", ImGui::GetWindowWidth() / 3, &vals_.mid[1], &vals_.mid[2],
+	                                     &vals_.mid[3]);
+	slider_changed_ |= draw_color_selector("Low", ImGui::GetWindowWidth() / 3, &vals_.low[1], &vals_.low[2],
+	                                     &vals_.low[3]);
+	ImGui::SameLine();
 
-	sliderChanged |= drawColorSelector("Lift", ImGui::GetWindowWidth() / 3, &vals.lift[1], &vals.lift[2], &vals.lift[3]);
-	sliderChanged |= drawColorSelector("Gamma", ImGui::GetWindowWidth() / 3, &vals.gamma[1], &vals.gamma[2], &vals.gamma[3], false); ImGui::SameLine();
-	sliderChanged |= drawColorSelector("Gain", ImGui::GetWindowWidth() / 3, &vals.gain[1], &vals.gain[2], &vals.gain[3], false,  0);
-
-
-
-	ImGui::Separator();
-
-	sliderChanged |= SliderFloatReset(vals.sat, 0.0f, "Saturation", &vals.sat, -1, 1);
-
-	sliderChanged |= SliderFloatReset(vals.blur, 1.0f, "Sharpen: Blur", &vals.blur, 0, 5);
-	sliderChanged |= SliderFloatReset(vals.sharp, 0.5f, "Sharpen: Sharp", &vals.sharp, 0, 5);
-	if (vals.sharp != vals.p_sharp || vals.blur != vals.p_blur) {
-		updateSharpenKernel();
-		vals.p_sharp = vals.sharp;
-		vals.p_blur = vals.blur;
-	}
-	ImGui::Separator();
-
-	ImGui::Checkbox("Noise", &vals.noise_selected);
-	if (vals.noise_selected) {
-		sliderChanged |= SliderFloatReset(vals.noise, 0.0f, "Noise", &vals.noise, 0, 5);
-	}
-
-	ImGui::Separator();
-
-	if (ImGui::CollapsingHeader("HSL Editing")) {
-
-
-		if (ImGui::CollapsingHeader("Red")) {
-			sliderChanged |= SliderFloatReset(vals.hues[0], 0.0f, "Red Hue", &vals.hues[0], -1, 1, "%.2f", 0,
-				ImColor(224, 27, 89), ImColor(219, 106, 35));
-			sliderChanged |= SliderFloatReset(vals.sats[0], 0.0f, "Red Saturation", &vals.sats[0], -1, 1, "%.2f", 0,
-				ImColor(255, 255, 255), ImColor(227, 48, 48));
-			sliderChanged |= SliderFloatReset(vals.lums[0], 0.0f, "Red Value", &vals.lums[0], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Orange")) {
-			sliderChanged |= SliderFloatReset(vals.hues[1], 0.0f, "Orange Hue", &vals.hues[1], -1, 1, "%.2f", 0,
-				ImColor(224, 55, 25), ImColor(224, 171, 25));
-			sliderChanged |= SliderFloatReset(vals.sats[1], 0.0f, "Orange Saturation", &vals.sats[1], -1, 1, "%.2f", 0,
-				ImColor(255, 255, 255), ImColor(219, 106, 35));
-			sliderChanged |= SliderFloatReset(vals.lums[1], 0.0f, "Orange Value", &vals.lums[1], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Yellow")) {
-			sliderChanged |= SliderFloatReset(vals.hues[2], 0.0f, "Yellow Hue", &vals.hues[2], -1, 1, "%.2f", 0,
-				ImColor(227, 140, 34), ImColor(192, 227, 34));
-			sliderChanged |= SliderFloatReset(vals.sats[2], 0.0f, "Yellow Saturation", &vals.sats[2], -1, 1, "%.2f", 0,
-				ImColor(255, 255, 255), ImColor(227, 221, 34));
-			sliderChanged |= SliderFloatReset(vals.lums[2], 0.0f, "Yellow Value", &vals.lums[2], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Green")) {
-			sliderChanged |= SliderFloatReset(vals.hues[3], 0.0f, "Green Hue", &vals.hues[3], -1, 1, "%.2f", 0,
-				ImColor(227, 221, 34), ImColor(34, 227, 118));
-			sliderChanged |= SliderFloatReset(vals.sats[3], 0.0f, "Green Saturation", &vals.sats[3], -1, 1, "%.2f", 0,
-				ImColor(255, 255, 255), ImColor(76, 227, 34));
-			sliderChanged |= SliderFloatReset(vals.lums[3], 0.0f, "Green Value", &vals.lums[3], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Cyan")) {
-			sliderChanged |= SliderFloatReset(vals.hues[4], 0.0f, "Cyan Hue", &vals.hues[4], -1, 1, "%.2f", 0,
-				ImColor(76, 227, 34), ImColor(34, 182, 227));
-			sliderChanged |= SliderFloatReset(vals.sats[4], 0.0f, "Cyan Saturation", &vals.sats[4], -1, 1, "%.2f", 0,
-				ImColor(255, 255, 255), ImColor(34, 227, 217));
-			sliderChanged |= SliderFloatReset(vals.lums[4], 0.0f, "Cyan Value", &vals.lums[4], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Blue")) {
-			sliderChanged |= SliderFloatReset(vals.hues[5], 0.0f, "Blue Hue", &vals.hues[5], -1, 1, "%.2f", 0,
-				ImColor(34, 166, 227), ImColor(114, 34, 227));
-			sliderChanged |= SliderFloatReset(vals.sats[5], 0.0f, "Blue Saturation", &vals.sats[5], -1, 1, "%.2f", 0,
-				ImColor(255, 255, 255), ImColor(34, 40, 227));
-			sliderChanged |= SliderFloatReset(vals.lums[5], 0.0f, "Blue Value", &vals.lums[5], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Purple")) {
-			sliderChanged |= SliderFloatReset(vals.hues[6], 0.0f, "Purple Hue", &vals.hues[6], -1, 1, "%.2f", 0,
-				ImColor(73, 34, 227), ImColor(185, 34, 227));
-			sliderChanged |= SliderFloatReset(vals.sats[6], 0.0f, "Purple Saturation", &vals.sats[6], -1, 1, "%.2f", 0,
-				ImColor(255, 255, 255), ImColor(147, 34, 227));
-			sliderChanged |= SliderFloatReset(vals.lums[6], 0.0f, "Purple Value", &vals.lums[6], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Pink")) {
-			sliderChanged |= SliderFloatReset(vals.hues[7], 0.0f, "Pink Hue", &vals.hues[7], -1, 1, "%.2f", 0,
-				ImColor(156, 34, 227), ImColor(227, 34, 105));
-			sliderChanged |= SliderFloatReset(vals.sats[7], 0.0f, "Pink Saturation", &vals.sats[7], -1, 1, "%.2f", 0,
-				ImColor(255, 255, 255), ImColor(227, 34, 150));
-			sliderChanged |= SliderFloatReset(vals.lums[7], 0.0f, "Pink Value", &vals.lums[7], -1, 1);
-		}
-	}
+	slider_changed_ |= draw_color_selector("Lift", ImGui::GetWindowWidth() / 3, &vals_.lift[1], &vals_.lift[2],
+	                                     &vals_.lift[3]);
+	slider_changed_ |= draw_color_selector("Gamma", ImGui::GetWindowWidth() / 3, &vals_.gamma[1], &vals_.gamma[2],
+	                                     &vals_.gamma[3], false);
+	ImGui::SameLine();
+	slider_changed_ |= draw_color_selector("Gain", ImGui::GetWindowWidth() / 3, &vals_.gain[1], &vals_.gain[2],
+	                                     &vals_.gain[3], false, 0);
 
 
 	ImGui::Separator();
 
-	sliderChanged |= SliderFloatReset(vals.yiq_y, 0.0f, "YIQ: Blue/Orange", &vals.yiq_y, -1, 1, "%.2f", 0,
-		ImColor(34, 40, 227), ImColor(219, 106, 35));
-	sliderChanged |= SliderFloatReset(vals.yiq_z, 0.0f, "YIQ: Green/Purple", &vals.yiq_z, -1, 1, "%.2f", 0,
-		ImColor(76, 227, 34), ImColor(147, 34, 227));
-	sliderChanged |= SliderFloatReset(vals.xyz_y, 0.0f, "XYZ: Purple/Green", &vals.xyz_y, -1, 1, "%.2f", 0,
-		ImColor(147, 34, 227), ImColor(76, 227, 34));
-	sliderChanged |= SliderFloatReset(vals.xyz_z, 0.0f, "XYZ: Orange/Blue", &vals.xyz_z, -1, 1, "%.2f", 0,
-		ImColor(219, 106, 35), ImColor(34, 40, 227));
+	slider_changed_ |= slider_float_reset(vals_.sat, 0.0f, "Saturation", &vals_.sat, -1, 1);
 
-	ImGui::Separator();
-
-	sliderChanged |= SliderFloatReset(vals.scope_brightness, 2.0f, "Scope Brightness", &vals.scope_brightness, 0, 10);
-
-	if (ImGui::IsWindowFocused() && mouseInWindow && ImGui::IsMouseReleased(0) && !new_values_set)
+	slider_changed_ |= slider_float_reset(vals_.blur, 1.0f, "Sharpen: Blur", &vals_.blur, 0, 5);
+	slider_changed_ |= slider_float_reset(vals_.sharp, 0.5f, "Sharpen: Sharp", &vals_.sharp, 0, 5);
+	if (vals_.sharp != vals_.p_sharp || vals_.blur != vals_.p_blur)
 	{
-		new_values_set = true;
-		vals.show_low_res = false;
+		update_sharpen_kernel();
+		vals_.p_sharp = vals_.sharp;
+		vals_.p_blur = vals_.blur;
+	}
+	ImGui::Separator();
+
+	ImGui::Checkbox("Noise", &vals_.noise_selected);
+	if (vals_.noise_selected)
+	{
+		slider_changed_ |= slider_float_reset(vals_.noise, 0.0f, "Noise", &vals_.noise, 0, 5);
+	}
+
+	ImGui::Separator();
+
+	if (ImGui::CollapsingHeader("HSL Editing"))
+	{
+		if (ImGui::CollapsingHeader("Red"))
+		{
+			slider_changed_ |= slider_float_reset(vals_.hues[0], 0.0f, "Red Hue", &vals_.hues[0], -1, 1, "%.2f", 0,
+			                                      ImColor(224, 27, 89), ImColor(219, 106, 35));
+			slider_changed_ |= slider_float_reset(vals_.sats[0], 0.0f, "Red Saturation", &vals_.sats[0], -1, 1, "%.2f",
+			                                      0,
+			                                      ImColor(255, 255, 255), ImColor(227, 48, 48));
+			slider_changed_ |= slider_float_reset(vals_.lums[0], 0.0f, "Red Value", &vals_.lums[0], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Orange"))
+		{
+			slider_changed_ |= slider_float_reset(vals_.hues[1], 0.0f, "Orange Hue", &vals_.hues[1], -1, 1, "%.2f", 0,
+			                                      ImColor(224, 55, 25), ImColor(224, 171, 25));
+			slider_changed_ |= slider_float_reset(vals_.sats[1], 0.0f, "Orange Saturation", &vals_.sats[1], -1, 1,
+			                                      "%.2f", 0,
+			                                      ImColor(255, 255, 255), ImColor(219, 106, 35));
+			slider_changed_ |= slider_float_reset(vals_.lums[1], 0.0f, "Orange Value", &vals_.lums[1], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Yellow"))
+		{
+			slider_changed_ |= slider_float_reset(vals_.hues[2], 0.0f, "Yellow Hue", &vals_.hues[2], -1, 1, "%.2f", 0,
+			                                      ImColor(227, 140, 34), ImColor(192, 227, 34));
+			slider_changed_ |= slider_float_reset(vals_.sats[2], 0.0f, "Yellow Saturation", &vals_.sats[2], -1, 1,
+			                                      "%.2f", 0,
+			                                      ImColor(255, 255, 255), ImColor(227, 221, 34));
+			slider_changed_ |= slider_float_reset(vals_.lums[2], 0.0f, "Yellow Value", &vals_.lums[2], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Green"))
+		{
+			slider_changed_ |= slider_float_reset(vals_.hues[3], 0.0f, "Green Hue", &vals_.hues[3], -1, 1, "%.2f", 0,
+			                                      ImColor(227, 221, 34), ImColor(34, 227, 118));
+			slider_changed_ |= slider_float_reset(vals_.sats[3], 0.0f, "Green Saturation", &vals_.sats[3], -1, 1,
+			                                      "%.2f", 0,
+			                                      ImColor(255, 255, 255), ImColor(76, 227, 34));
+			slider_changed_ |= slider_float_reset(vals_.lums[3], 0.0f, "Green Value", &vals_.lums[3], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Cyan"))
+		{
+			slider_changed_ |= slider_float_reset(vals_.hues[4], 0.0f, "Cyan Hue", &vals_.hues[4], -1, 1, "%.2f", 0,
+			                                      ImColor(76, 227, 34), ImColor(34, 182, 227));
+			slider_changed_ |= slider_float_reset(vals_.sats[4], 0.0f, "Cyan Saturation", &vals_.sats[4], -1, 1, "%.2f",
+			                                      0,
+			                                      ImColor(255, 255, 255), ImColor(34, 227, 217));
+			slider_changed_ |= slider_float_reset(vals_.lums[4], 0.0f, "Cyan Value", &vals_.lums[4], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Blue"))
+		{
+			slider_changed_ |= slider_float_reset(vals_.hues[5], 0.0f, "Blue Hue", &vals_.hues[5], -1, 1, "%.2f", 0,
+			                                      ImColor(34, 166, 227), ImColor(114, 34, 227));
+			slider_changed_ |= slider_float_reset(vals_.sats[5], 0.0f, "Blue Saturation", &vals_.sats[5], -1, 1, "%.2f",
+			                                      0,
+			                                      ImColor(255, 255, 255), ImColor(34, 40, 227));
+			slider_changed_ |= slider_float_reset(vals_.lums[5], 0.0f, "Blue Value", &vals_.lums[5], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Purple"))
+		{
+			slider_changed_ |= slider_float_reset(vals_.hues[6], 0.0f, "Purple Hue", &vals_.hues[6], -1, 1, "%.2f", 0,
+			                                      ImColor(73, 34, 227), ImColor(185, 34, 227));
+			slider_changed_ |= slider_float_reset(vals_.sats[6], 0.0f, "Purple Saturation", &vals_.sats[6], -1, 1,
+			                                      "%.2f", 0,
+			                                      ImColor(255, 255, 255), ImColor(147, 34, 227));
+			slider_changed_ |= slider_float_reset(vals_.lums[6], 0.0f, "Purple Value", &vals_.lums[6], -1, 1);
+		}
+		ImGui::Separator();
+
+
+		if (ImGui::CollapsingHeader("Pink"))
+		{
+			slider_changed_ |= slider_float_reset(vals_.hues[7], 0.0f, "Pink Hue", &vals_.hues[7], -1, 1, "%.2f", 0,
+			                                      ImColor(156, 34, 227), ImColor(227, 34, 105));
+			slider_changed_ |= slider_float_reset(vals_.sats[7], 0.0f, "Pink Saturation", &vals_.sats[7], -1, 1, "%.2f",
+			                                      0,
+			                                      ImColor(255, 255, 255), ImColor(227, 34, 150));
+			slider_changed_ |= slider_float_reset(vals_.lums[7], 0.0f, "Pink Value", &vals_.lums[7], -1, 1);
+		}
+	}
+
+
+	ImGui::Separator();
+
+	slider_changed_ |= slider_float_reset(vals_.yiq_y, 0.0f, "YIQ: Blue/Orange", &vals_.yiq_y, -1, 1, "%.2f", 0,
+	                                      ImColor(34, 40, 227), ImColor(219, 106, 35));
+	slider_changed_ |= slider_float_reset(vals_.yiq_z, 0.0f, "YIQ: Green/Purple", &vals_.yiq_z, -1, 1, "%.2f", 0,
+	                                      ImColor(76, 227, 34), ImColor(147, 34, 227));
+	slider_changed_ |= slider_float_reset(vals_.xyz_y, 0.0f, "XYZ: Purple/Green", &vals_.xyz_y, -1, 1, "%.2f", 0,
+	                                      ImColor(147, 34, 227), ImColor(76, 227, 34));
+	slider_changed_ |= slider_float_reset(vals_.xyz_z, 0.0f, "XYZ: Orange/Blue", &vals_.xyz_z, -1, 1, "%.2f", 0,
+	                                      ImColor(219, 106, 35), ImColor(34, 40, 227));
+
+	ImGui::Separator();
+
+	slider_changed_ |= slider_float_reset(vals_.scope_brightness, 2.0f, "Scope Brightness", &vals_.scope_brightness, 0,
+	                                      10);
+
+	if (ImGui::IsWindowFocused() && mouse_in_window_ && ImGui::IsMouseReleased(0) && !new_values_set_)
+	{
+		new_values_set_ = true;
+		vals_.show_low_res = false;
 	}
 
 	ImGui::End();
 
-	if (sliderChanged) {
-		setChanges();
+	if (slider_changed_)
+	{
+		set_changes();
 	}
 
-	if (!iniWriting || !iniReading) {
-		if (iniWriter.joinable()) {
-			iniWriter.join();
+	if (!ini_writing_ || !ini_reading_)
+	{
+		if (ini_writer_.joinable())
+		{
+			ini_writer_.join();
 			Console::log("iniWriter joined");
 		}
 	}
 
 	btn_id = 0;
-
 }
 
-void Editor::exportImage() {
-	std::experimental::filesystem::path p = stripExtension(fileName);
+void Editor::export_image()
+{
+	const std::experimental::filesystem::path p = stripExtension(file_name_);
 	std::experimental::filesystem::path dir = Preferences::instance()->EXPORT_DIR;
 	dir /= p;
-	exportDir = dir.u8string() + "-edit.jpg";
-	img->exportImage(exportDir.c_str());
+	export_dir_ = dir.u8string() + "-edit.jpg";
+	img_->exportImage(export_dir_.c_str());
 }
 
-void Editor::writeIni() {
-	iniWriting = true;
-	mINI::INIFile file(stripExtension(filePath) + ".ini");
+void Editor::write_ini()
+{
+	ini_writing_ = true;
+	const mINI::INIFile file(stripExtension(file_path_) + ".ini");
 	mINI::INIStructure ini;
-	bool readSuc = file.read(ini);
-	if (!readSuc) {
+	const bool read_suc = file.read(ini);
+	if (!read_suc)
+	{
 		Console::log("Ini doesn't exist, creating one...");
 	}
 
-	Console::log("Writing ini to " + stripExtension(filePath) + ".ini");
+	Console::log("Writing ini to " + stripExtension(file_path_) + ".ini");
 
 	ini["version"]["number"] = HERON_VERSION;
 
-	for (int n = 0; n < 4; n++) {
-		ini["sliders"][std::string(tab_names[n]) + "_expo"] = std::to_string(vals.expo[n]);
-		ini["sliders"][std::string(tab_names[n]) + "_contrast"] = std::to_string(vals.contrast[n]);
-		ini["sliders"][std::string(tab_names[n]) + "_high"] = std::to_string(vals.high[n]);
-		ini["sliders"][std::string(tab_names[n]) + "_mid"] = std::to_string(vals.mid[n]);
-		ini["sliders"][std::string(tab_names[n]) + "_whites"] = std::to_string(vals.whites[n]);
-		ini["sliders"][std::string(tab_names[n]) + "_low"] = std::to_string(vals.low[n]);
-		ini["sliders"][std::string(tab_names[n]) + "_lift"] = std::to_string(vals.lift[n]);
-		ini["sliders"][std::string(tab_names[n]) + "_gain"] = std::to_string(vals.gain[n]);
-		ini["sliders"][std::string(tab_names[n]) + "_gamma"] = std::to_string(vals.gamma[n]);
+	for (int n = 0; n < 4; n++)
+	{
+		ini["sliders"][std::string(tab_names_[n]) + "_expo"] = std::to_string(vals_.expo[n]);
+		ini["sliders"][std::string(tab_names_[n]) + "_contrast"] = std::to_string(vals_.contrast[n]);
+		ini["sliders"][std::string(tab_names_[n]) + "_high"] = std::to_string(vals_.high[n]);
+		ini["sliders"][std::string(tab_names_[n]) + "_mid"] = std::to_string(vals_.mid[n]);
+		ini["sliders"][std::string(tab_names_[n]) + "_whites"] = std::to_string(vals_.whites[n]);
+		ini["sliders"][std::string(tab_names_[n]) + "_low"] = std::to_string(vals_.low[n]);
+		ini["sliders"][std::string(tab_names_[n]) + "_lift"] = std::to_string(vals_.lift[n]);
+		ini["sliders"][std::string(tab_names_[n]) + "_gain"] = std::to_string(vals_.gain[n]);
+		ini["sliders"][std::string(tab_names_[n]) + "_gamma"] = std::to_string(vals_.gamma[n]);
 	}
 
-	for (int n = 0; n < 8; n++) {
-		ini["sliders"]["hues_" + std::to_string(n)] = std::to_string(vals.hues[n]);
-		ini["sliders"]["sats_" + std::to_string(n)] = std::to_string(vals.sats[n]);
-		ini["sliders"]["lums_" + std::to_string(n)] = std::to_string(vals.lums[n]);
+	for (int n = 0; n < 8; n++)
+	{
+		ini["sliders"]["hues_" + std::to_string(n)] = std::to_string(vals_.hues[n]);
+		ini["sliders"]["sats_" + std::to_string(n)] = std::to_string(vals_.sats[n]);
+		ini["sliders"]["lums_" + std::to_string(n)] = std::to_string(vals_.lums[n]);
 	}
 
 
-	ini["sliders"]["bw"] = std::to_string(vals.bw);
-	ini["sliders"]["inv"] = std::to_string(vals.inv);
+	ini["sliders"]["bw"] = std::to_string(vals_.bw);
+	ini["sliders"]["inv"] = std::to_string(vals_.inv);
 
-	ini["sliders"]["sat"] = std::to_string(vals.sat);
-	ini["sliders"]["wb"] = std::to_string(vals.wb);
-	ini["sliders"]["tint"] = std::to_string(vals.tint);
+	ini["sliders"]["sat"] = std::to_string(vals_.sat);
+	ini["sliders"]["wb"] = std::to_string(vals_.wb);
+	ini["sliders"]["tint"] = std::to_string(vals_.tint);
 
 
-	ini["sliders"]["noise_selected"] = std::to_string(vals.noise_selected);
-	ini["sliders"]["noise"] = std::to_string(vals.noise);
+	ini["sliders"]["noise_selected"] = std::to_string(vals_.noise_selected);
+	ini["sliders"]["noise"] = std::to_string(vals_.noise);
 
-	ini["sliders"]["sharp"] = std::to_string(vals.sharp);
-	ini["sliders"]["p_sharp"] = std::to_string(vals.p_sharp);
-	ini["sliders"]["blur"] = std::to_string(vals.blur);
-	ini["sliders"]["p_blur"] = std::to_string(vals.p_blur);
+	ini["sliders"]["sharp"] = std::to_string(vals_.sharp);
+	ini["sliders"]["p_sharp"] = std::to_string(vals_.p_sharp);
+	ini["sliders"]["blur"] = std::to_string(vals_.blur);
+	ini["sliders"]["p_blur"] = std::to_string(vals_.p_blur);
 
-	ini["sliders"]["yiq_y"] = std::to_string(vals.yiq_y);
-	ini["sliders"]["yiq_z"] = std::to_string(vals.yiq_z);
-	ini["sliders"]["xyz_y"] = std::to_string(vals.xyz_y);
-	ini["sliders"]["xyz_z"] = std::to_string(vals.xyz_z);
+	ini["sliders"]["yiq_y"] = std::to_string(vals_.yiq_y);
+	ini["sliders"]["yiq_z"] = std::to_string(vals_.yiq_z);
+	ini["sliders"]["xyz_y"] = std::to_string(vals_.xyz_y);
+	ini["sliders"]["xyz_z"] = std::to_string(vals_.xyz_z);
 
-	ini["sliders"]["sat_ref"] = std::to_string(vals.sat_ref);
+	ini["sliders"]["sat_ref"] = std::to_string(vals_.sat_ref);
 
-	if (!readSuc) {
+	if (!read_suc)
+	{
 		file.generate(ini);
 		Console::log("Ini generated");
 	}
-	else {
+	else
+	{
 		file.write(ini);
 		Console::log("Ini updated");
 	}
-	Status::setStatus("Saved!");
-	iniWriting = false;
+	Status::set_status("Saved!");
+	ini_writing_ = false;
 }
 
-void Editor::readIni() {
-	iniReading = true;
-	mINI::INIFile file(stripExtension(filePath) + ".ini");
+void Editor::read_ini()
+{
+	ini_reading_ = true;
+	const mINI::INIFile file(stripExtension(file_path_) + ".ini");
 	mINI::INIStructure ini;
-	bool readSuc = file.read(ini);
-	if (!readSuc) {
+	const bool read_suc = file.read(ini);
+	if (!read_suc)
+	{
 		Console::log("Ini doesn't exist, no settings to import...");
-		iniReading = false;
+		ini_reading_ = false;
 		reset();
 		return;
 	}
 
-	Console::log("Reading ini " + stripExtension(filePath) + ".ini");
+	Console::log("Reading ini " + stripExtension(file_path_) + ".ini");
 
 	std::string ini_ver;
 
-	try {
-
+	try
+	{
 		ini_ver = (ini["version"]["number"]);
-
-	} catch (...)
+	}
+	catch (...)
 	{
 		Console::log("ERROR: Old version of Ini with no version number... Cannot read ini");
 		return;
@@ -388,71 +439,74 @@ void Editor::readIni() {
 	}
 
 
-	for (int n = 0; n < 4; n++) {
-		vals.expo[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_expo"]);
-		vals.contrast[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_contrast"]);
-		vals.high[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_high"]);
-		vals.mid[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_mid"]);
-		vals.whites[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_whites"]);
-		vals.low[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_low"]);
+	for (int n = 0; n < 4; n++)
+	{
+		vals_.expo[n] = std::stof(ini["sliders"][std::string(tab_names_[n]) + "_expo"]);
+		vals_.contrast[n] = std::stof(ini["sliders"][std::string(tab_names_[n]) + "_contrast"]);
+		vals_.high[n] = std::stof(ini["sliders"][std::string(tab_names_[n]) + "_high"]);
+		vals_.mid[n] = std::stof(ini["sliders"][std::string(tab_names_[n]) + "_mid"]);
+		vals_.whites[n] = std::stof(ini["sliders"][std::string(tab_names_[n]) + "_whites"]);
+		vals_.low[n] = std::stof(ini["sliders"][std::string(tab_names_[n]) + "_low"]);
 
-		vals.lift[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_lift"]);
-		vals.gamma[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_gamma"]);
-		vals.gain[n] = std::stof(ini["sliders"][std::string(tab_names[n]) + "_gain"]);
-
+		vals_.lift[n] = std::stof(ini["sliders"][std::string(tab_names_[n]) + "_lift"]);
+		vals_.gamma[n] = std::stof(ini["sliders"][std::string(tab_names_[n]) + "_gamma"]);
+		vals_.gain[n] = std::stof(ini["sliders"][std::string(tab_names_[n]) + "_gain"]);
 	}
 
-	for (int n = 0; n < 8; n++) {
-		vals.hues[n] = std::stof(ini["sliders"]["hues_" + std::to_string(n)]);
-		vals.lums[n] = std::stof(ini["sliders"]["lums_" + std::to_string(n)]);
-		vals.sats[n] = std::stof(ini["sliders"]["sats_" + std::to_string(n)]);
+	for (int n = 0; n < 8; n++)
+	{
+		vals_.hues[n] = std::stof(ini["sliders"]["hues_" + std::to_string(n)]);
+		vals_.lums[n] = std::stof(ini["sliders"]["lums_" + std::to_string(n)]);
+		vals_.sats[n] = std::stof(ini["sliders"]["sats_" + std::to_string(n)]);
 	}
 
-	vals.bw = std::stof(ini["sliders"]["bw"]);
-	vals.inv = std::stof(ini["sliders"]["inv"]);
+	vals_.bw = std::stof(ini["sliders"]["bw"]);
+	vals_.inv = std::stof(ini["sliders"]["inv"]);
 
-	vals.sat = std::stof(ini["sliders"]["sat"]);
-	vals.wb = std::stof(ini["sliders"]["wb"]);
-	vals.tint = std::stof(ini["sliders"]["tint"]);
+	vals_.sat = std::stof(ini["sliders"]["sat"]);
+	vals_.wb = std::stof(ini["sliders"]["wb"]);
+	vals_.tint = std::stof(ini["sliders"]["tint"]);
 
-	vals.noise_selected = std::stof(ini["sliders"]["noise_selected"]);
-	vals.noise = std::stof(ini["sliders"]["noise"]);
+	vals_.noise_selected = std::stof(ini["sliders"]["noise_selected"]);
+	vals_.noise = std::stof(ini["sliders"]["noise"]);
 
-	vals.sharp = std::stof(ini["sliders"]["sharp"]);
-	vals.p_sharp = std::stof(ini["sliders"]["p_sharp"]);
-	vals.blur = std::stof(ini["sliders"]["blur"]);
-	vals.p_blur = std::stof(ini["sliders"]["p_blur"]);
+	vals_.sharp = std::stof(ini["sliders"]["sharp"]);
+	vals_.p_sharp = std::stof(ini["sliders"]["p_sharp"]);
+	vals_.blur = std::stof(ini["sliders"]["blur"]);
+	vals_.p_blur = std::stof(ini["sliders"]["p_blur"]);
 
-	vals.yiq_y = std::stof(ini["sliders"]["yiq_y"]);
-	vals.yiq_z = std::stof(ini["sliders"]["yiq_z"]);
-	vals.xyz_y = std::stof(ini["sliders"]["xyz_y"]);
-	vals.xyz_z = std::stof(ini["sliders"]["xyz_z"]);
+	vals_.yiq_y = std::stof(ini["sliders"]["yiq_y"]);
+	vals_.yiq_z = std::stof(ini["sliders"]["yiq_z"]);
+	vals_.xyz_y = std::stof(ini["sliders"]["xyz_y"]);
+	vals_.xyz_z = std::stof(ini["sliders"]["xyz_z"]);
 
-	vals.sat_ref = std::stof(ini["sliders"]["sat_ref"]);
-	
-	iniReading = false;
-	Status::setStatus("Read settings successfully!");
-	prev_vals = vals;
-	setChanges();
+	vals_.sat_ref = std::stof(ini["sliders"]["sat_ref"]);
+
+	ini_reading_ = false;
+	Status::set_status("Read settings successfully!");
+	prev_vals_ = vals_;
+	set_changes();
 }
 
 
-void Editor::updateConfigFile() {
-	if (!imLoaded || iniReading || iniWriting)
+void Editor::update_config_file()
+{
+	if (!im_loaded_ || ini_reading_ || ini_writing_)
 		return;
-	iniWriter = std::thread(&Editor::writeIni, this);
+	ini_writer_ = std::thread(&Editor::write_ini, this);
 }
 
 void Editor::undo()
 {
-	vals = prev_vals;
-	setChanges();
+	vals_ = prev_vals_;
+	set_changes();
 }
 
-void Editor::setFromConfigFile() {
-	if (iniWriting || iniReading)
+void Editor::set_from_config_file()
+{
+	if (ini_writing_ || ini_reading_)
 		return;
-	iniWriter = std::thread(&Editor::readIni, this);
+	ini_writer_ = std::thread(&Editor::read_ini, this);
 }
 
 void Editor::cleanup()
@@ -461,67 +515,49 @@ void Editor::cleanup()
 
 void Editor::reset()
 {
-	vals.bw_label = BW_LABEL;
+	vals_.bw_label = BW_LABEL;
 
-	vals.show_low_res = false;
+	vals_.show_low_res = false;
 
-	vals.bw = false;
-	vals.inv = false;
+	vals_.bw = false;
+	vals_.inv = false;
 
-	std::fill_n(vals.low, 4,LOW_DEFAULT);
-	std::fill_n(vals.mid, 4,MID_DEFAULT);
-	std::fill_n(vals.high, 4,HIGH_DEFAULT);
-	std::fill_n(vals.expo, 4,EXP_DEFAULT);
-	std::fill_n(vals.contrast, 4,CONTRAST_DEFAULT);
-	std::fill_n(vals.whites, 4,WHITE_DEFAULT);
+	std::fill_n(vals_.low, 4,LOW_DEFAULT);
+	std::fill_n(vals_.mid, 4,MID_DEFAULT);
+	std::fill_n(vals_.high, 4,HIGH_DEFAULT);
+	std::fill_n(vals_.expo, 4,EXP_DEFAULT);
+	std::fill_n(vals_.contrast, 4,CONTRAST_DEFAULT);
+	std::fill_n(vals_.whites, 4,WHITE_DEFAULT);
 
-	std::fill_n(vals.lift, 4, 0.0f);
-	std::fill_n(vals.gamma, 4, 1.0f);
-	std::fill_n(vals.gain, 4, 1.0f);
+	std::fill_n(vals_.lift, 4, 0.0f);
+	std::fill_n(vals_.gamma, 4, 1.0f);
+	std::fill_n(vals_.gain, 4, 1.0f);
 
-	std::fill_n(vals.hues, 8, 0.0f);
-	std::fill_n(vals.sats, 8, 0.0f);
-	std::fill_n(vals.lums, 8, 0.0f);
+	std::fill_n(vals_.hues, 8, 0.0f);
+	std::fill_n(vals_.sats, 8, 0.0f);
+	std::fill_n(vals_.lums, 8, 0.0f);
 
-	vals.sat_ref = 1;
+	vals_.sat_ref = 1;
 
-	vals.sat = SAT_DEFAULT;
-	vals.wb = WB_DEFAULT;
-	vals.tint = 1.0f;
+	vals_.sat = SAT_DEFAULT;
+	vals_.wb = WB_DEFAULT;
+	vals_.tint = 1.0f;
 
-	vals.noise_selected = false;
-	vals.noise = 0;
+	vals_.noise_selected = false;
+	vals_.noise = 0;
 
-	vals.sharp = SHARP_DEFAULT;
-	vals.p_sharp = SHARP_DEFAULT; // Prev sharp
-	vals.blur = BLUR_DEFAULT;
-	vals.p_blur = BLUR_DEFAULT; // Prev blur
+	vals_.sharp = SHARP_DEFAULT;
+	vals_.p_sharp = SHARP_DEFAULT; // Prev sharp
+	vals_.blur = BLUR_DEFAULT;
+	vals_.p_blur = BLUR_DEFAULT; // Prev blur
 
 
-	vals.yiq_y = 0;
-	vals.yiq_z = 0;
-	vals.xyz_y = 0;
-	vals.xyz_z = 0;
+	vals_.yiq_y = 0;
+	vals_.yiq_z = 0;
+	vals_.xyz_y = 0;
+	vals_.xyz_z = 0;
 
-	vals.scope_brightness = 2;
+	vals_.scope_brightness = 2;
 
-	setChanges();
-
+	set_changes();
 }
-
-void Editor::setChanges() {
-	img->setChanges(&vals);
-}
-
-void Editor::updateFile(std::string& fn, std::string& fp)
-{
-	configSet = false;
-	fileName = fn;
-	filePath = fp;
-	//setFromConfigFile();
-}
-
-void Editor::loaded(bool l) {
-	imLoaded = l;
-}
-

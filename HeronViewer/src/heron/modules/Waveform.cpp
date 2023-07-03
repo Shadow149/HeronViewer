@@ -3,17 +3,9 @@
 #include "Image.h"
 #include "Widgets.h"
 
-void Waveform::init()
-{
-}
-
 void Waveform::render()
 {
 	ImGui::Begin(name.c_str(), &visible);
-	ImGui::Image((ImTextureID)img->getWaveformID(), ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 60));
+	ImGui::Image((ImTextureID)img_->get_waveform_id(), ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 60));
 	ImGui::End();
-}
-
-void Waveform::cleanup()
-{
 }

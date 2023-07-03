@@ -1,13 +1,13 @@
 #include "Status.h"
 
-std::string Status::status_text;
+std::string Status::status_text_;
 
-void Status::setStatus(std::string status)
+void Status::set_status(const std::string& status)
 {
-	status_text = status;
+	status_text_ = status;
 }
 
-std::string Status::getStatus()
+std::string Status::get_status()
 {
-	return status_text;
+	return status_text_;
 }

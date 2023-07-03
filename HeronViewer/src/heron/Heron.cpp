@@ -7,36 +7,42 @@
 #include "Vectorscope.h"
 #include "Waveform.h"
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void framebuffer_size_callback(GLFWwindow* window, const int width, const int height)
 {
 	glViewport(0, 0, width, height);
 }
 
 
-void Heron::processInput(GLFWwindow* window)
+void Heron::process_input(GLFWwindow* window)
 {
-	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_RELEASE) {
-		clip = false;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_RELEASE)
+	{
+		clip_ = false;
 	}
-	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE) {
-		b4 = false;
+	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
+	{
+		b4_ = false;
 	}
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !key_pressed) {
-		black_bckgrd = !black_bckgrd;
-		key_pressed = true;
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !key_pressed_)
+	{
+		black_bckgrd_ = !black_bckgrd_;
+		key_pressed_ = true;
 	}
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE && key_pressed) {
-		key_pressed = false;
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE && key_pressed_)
+	{
+		key_pressed_ = false;
 	}
-	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
-		clip = true;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
+	{
+		clip_ = true;
 	}
-	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
-		b4 = true;
+	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+	{
+		b4_ = true;
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
 	{
-		editor->undo();
+		editor_->undo();
 	}
 }
 
@@ -44,187 +50,188 @@ void Heron::drop_callback(GLFWwindow* window, int path_count, const char* paths[
 {
 	const std::string path = paths[0];
 	const std::string fileName = path.substr(path.find_last_of("/\\") + 1);
-	loadImage(path, fileName);
+	load_image(path, fileName);
 }
 
-void Heron::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void Heron::scroll_callback(GLFWwindow* window, const double xoffset, const double yoffset)
 {
-	float scale = 0.05f;
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
-		glm::vec3 s = glm::vec3(1 + yoffset * scale, 1 + yoffset * scale, 0);
-		view_scale += yoffset * scale;
-		image->scale(s);
-
-		//glm::vec3 off = glm::vec3((yoffset / view_scale) * scale, (yoffset / view_scale) * scale, 0);
-		//view_pos += glm::vec3((yoffset / view_scale) * scale, (yoffset / view_scale) * scale, 0);
-		//image->translate(off);
+	constexpr double scale = 0.05;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+	{
+		const auto s = glm::vec3(1 + yoffset * scale, 1 + yoffset * scale, 0);
+		view_scale_ += yoffset * scale;
+		image_->scale(s);
 	}
-	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-		glm::vec3 off = glm::vec3(yoffset * scale, 0, 0);
-		view_pos += off;
-		image->translate(off);
+	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+	{
+		const auto off = glm::vec3(yoffset * scale, 0, 0);
+		view_pos_ += off;
+		image_->translate(off);
 	}
-	else {
-		glm::vec3 off = glm::vec3(xoffset * scale, yoffset * scale, 0);
-		view_pos += off;
-		image->translate(off);
+	else
+	{
+		const auto off = glm::vec3(xoffset * scale, yoffset * scale, 0);
+		view_pos_ += off;
+		image_->translate(off);
 	}
 }
 
-void Heron::setImagePath(std::string s) {
-	imgFilePath = s;
-}
-
-void Heron::recompileShader()
+void Heron::set_image_path(const std::string s)
 {
-	image->recompileShader();
+	img_file_path_ = s;
 }
 
-void Heron::loadImage(std::string filePath, std::string fileName) {
-	unloadImage();
-	Console::log("Change Image : " + filePath);
-	imgFile = filePath;
-	image->imageLoader = std::thread(&Image::getImage, image, imgFile.c_str());
-	editor->updateFile(fileName, filePath);
-	editor->loaded(true);
-	image->resetView();
-}
-
-void Heron::unloadImage() {
-	image->unload();
-	editor->reset();
-	editor->loaded(false);
-	image->resetView();
-}
-
-void Heron::static_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void Heron::load_image(const std::string file_path, const std::string file_name)
 {
-	Heron* that = static_cast<Heron*>(glfwGetWindowUserPointer(window));
+	unload_image();
+	Console::log("Change Image : " + file_path);
+	img_file_ = file_path;
+	image_->image_loader = std::thread(&Image::get_image, image_, img_file_.c_str());
+	editor_->update_file(file_name, file_path);
+	editor_->loaded(true);
+}
+
+void Heron::unload_image() const
+{
+	image_->unload();
+	editor_->reset();
+	editor_->loaded(false);
+}
+
+void Heron::static_scroll_callback(GLFWwindow* window, const double xoffset, const double yoffset)
+{
+	const auto that = static_cast<Heron*>(glfwGetWindowUserPointer(window));
 	that->scroll_callback(window, xoffset, yoffset);
 }
 
-void Heron::static_drop_callback(GLFWwindow* window, int path_count, const char* paths[])
+void Heron::static_drop_callback(GLFWwindow* window, const int path_count, const char* paths[])
 {
-	Heron* that = static_cast<Heron*>(glfwGetWindowUserPointer(window));
+	const auto that = static_cast<Heron*>(glfwGetWindowUserPointer(window));
 	that->drop_callback(window, path_count, paths);
 }
 
-void Heron::initGlfw()
+void Heron::init_glfw()
 {
 	// GLFWimage images[1];
 	// images[0].pixels = stbi_load("heron.jpg", &images[0].width, &images[0].height, 0, 4); //rgba channels 
 	// glfwSetWindowIcon(window, 1, images);
 	// stbi_image_free(images[0].pixels);
 
-	glfwSetWindowUserPointer(window, this);
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetScrollCallback(window, static_scroll_callback);
-	glfwSetDropCallback(window, static_drop_callback);
-
+	glfwSetWindowUserPointer(window_, this);
+	glfwSetFramebufferSizeCallback(window_, framebuffer_size_callback);
+	glfwSetScrollCallback(window_, static_scroll_callback);
+	glfwSetDropCallback(window_, static_drop_callback);
 }
 
-void Heron::initModules() {
-	fileDialog = new FileDialog(this, "File Dialog");
-	image = new Image("Image", &hist);
-	hist = new Histogram(image, "Histogram");
-	editor = new Editor(image, "Editor");
-	modules.push_back(new MainPanel(this, "Main"));
-	modules.push_back(fileDialog);
-	modules.push_back(editor);
-	modules.push_back(hist);
-	modules.push_back(new Vectorscope(image, "Vectorscope"));
-	modules.push_back(new Waveform(image, "Waveform"));
-	modules.push_back(new Curve(image, "Curve"));
-	modules.push_back(new Console("Console"));
-	modules.push_back(new Overlay("Overlay"));
-	modules.push_back(Preferences::instance());
-	modules.push_back(new Graph("Node Editor"));
-	modules.push_back(image);
+void Heron::init_modules()
+{
+	file_dialog_ = new FileDialog(this, "File Dialog");
+	image_ = new Image("Image", &hist_);
+	hist_ = new Histogram(image_, "Histogram");
+	editor_ = new Editor(image_, "Editor");
+	modules_.push_back(new MainPanel(this, "Main"));
+	modules_.push_back(file_dialog_);
+	modules_.push_back(editor_);
+	modules_.push_back(hist_);
+	modules_.push_back(new Vectorscope(image_, "Vectorscope"));
+	modules_.push_back(new Waveform(image_, "Waveform"));
+	modules_.push_back(new Curve(image_, "Curve"));
+	modules_.push_back(new Console("Console"));
+	modules_.push_back(new Overlay("Overlay"));
+	modules_.push_back(Preferences::instance());
+	modules_.push_back(new Graph("Node Editor"));
+	modules_.push_back(image_);
 
-	fpsMetric = Overlay::registerMetric();
-	frameTime = Overlay::registerMetric();
-	renderTime = Overlay::registerMetric();
-	imGuiRenderTime = Overlay::registerMetric();
+	fps_metric_ = Overlay::register_metric();
+	frame_time_ = Overlay::register_metric();
+	render_time_ = Overlay::register_metric();
+	im_gui_render_time_ = Overlay::register_metric();
 }
 
-std::vector<Module*> Heron::getModules() {
-	return modules;
+std::vector<Module*> Heron::get_modules()
+{
+	return modules_;
 }
 
-void Heron::onWindowLoad()
+void Heron::on_window_load()
 {
 	Console::log("PRELOADING IMAGE...");
-	loadImage("./images/landscape.png",
-		"landscape.png");
+	load_image("./images/landscape.png",
+	           "landscape.png");
 }
 
-std::string Heron::getFileDialogKey() {
-	return fileDialog->name;
+std::string Heron::get_file_dialog_key()
+{
+	return file_dialog_->name;
 }
 
-void Heron::saveImage() {
-	editor->updateConfigFile();
+void Heron::save_image() const
+{
+	editor_->update_config_file();
 }
 
-void Heron::calcTime() {
-	float currentFrame = glfwGetTime();
-	deltaTime = currentFrame - lastFrame;
-	lastFrame = currentFrame;
-	*fpsMetric = "Fps: " + std::to_string(1 / deltaTime);
+void Heron::calc_time()
+{
+	const double current_frame = glfwGetTime();
+	delta_time_ = current_frame - last_frame_;
+	last_frame_ = current_frame;
+	*fps_metric_ = "Fps: " + std::to_string(1 / delta_time_);
 #ifdef SHOW_FPS
 	Overlay::updateFps(1.0f / deltaTime);
 #endif
-	*frameTime = "Frame Time: " + std::to_string(deltaTime);
+	*frame_time_ = "Frame Time: " + std::to_string(delta_time_);
 }
 
 void Heron::render()
 {
-	initGlfw();
-	initModules();
-	initImGui();
+	init_glfw();
+	init_modules();
+	init_im_gui();
 
-	for (Module* m : modules) {
+	for (Module* m : modules_)
+	{
 		m->init();
 	}
 
-	onWindowLoad();
+	on_window_load();
 
-	while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(window_))
 	{
-		calcTime();
-		processInput(window);
+		calc_time();
+		process_input(window_);
 
 		float start = glfwGetTime();
-		image->glrender(&clip, &b4, &black_bckgrd);
-		*renderTime = "Gl Render Time: " + std::to_string(glfwGetTime() - start);
+		image_->glrender(&clip_, &b4_, &black_bckgrd_);
+		*render_time_ = "Gl Render Time: " + std::to_string(glfwGetTime() - start);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		glViewport(0, 0, scr_width_, scr_height_);
 
 		start = glfwGetTime();
 
-		ImGuiRenderInit();
+		im_gui_render_init();
 
-		for (Module* m : modules) {
+		for (Module* m : modules_)
+		{
 			//m->setStyle();
 			if (!m->visible) continue; // TODO remove check in individual render funcs
 			m->render();
 		}
 
-		ImGuiRender();
+		im_gui_render();
 
-		*imGuiRenderTime = "ImGui Render Time: " + std::to_string(glfwGetTime() - start);
+		*im_gui_render_time_ = "ImGui Render Time: " + std::to_string(glfwGetTime() - start);
 
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(window_);
 		glfwPollEvents();
 	}
 
-	ImGuiCleanUp();
+	im_gui_clean_up();
 
-	for (Module* m : modules) {
+	for (Module* m : modules_)
+	{
 		m->cleanup();
 	}
 
 	glfwTerminate();
-
 }

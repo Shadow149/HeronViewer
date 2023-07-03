@@ -11,36 +11,37 @@
 #include <thread>
 
 #include"implot.h"
+#include "mini/ini.h"
 
 #define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 #include <experimental/filesystem>
 
-#include "mini/ini.h"
 
 #define PREFERENCES_FILE "preferences.ini"
 
 class Preferences : public Module
 {
+public:
+	static Preferences* instance();
+	void init() override;
+	void render() override;
+	void cleanup() override {};
+
 private:
-	static Preferences* pref;
+	explicit Preferences(const std::string& n = "Preferences", const bool v = false) : Module(n, v, false) {}
 
-	bool readingIni = false, writingIni = false;
-	std::thread prefThread;
-	std::string exportDirStr;
-
-	Preferences(std::string n = "Preferences", bool v = false) : Module(n, v, false) { };
-
-	void saveSettings();
-	void writeSettings();
-	void writeToBuffers();
-	void readSettings();
+	void save_settings();
+	void write_settings();
+	void write_to_buffers();
+	void read_settings();
 
 public:
 	std::experimental::filesystem::path EXPORT_DIR;
+private:
+	static Preferences* pref_;
 
-	static Preferences* instance();
-	void init();
-	void render();
-	void cleanup();
+	bool reading_ini_ = false, writing_ini_ = false;
+	std::thread pref_thread_;
+	std::string export_dir_str_;
+
 };
-

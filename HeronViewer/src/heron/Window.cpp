@@ -1,9 +1,9 @@
 #include "Window.h"
 
 
-Window::Window(int w, int h) {
-	SCR_WIDTH = w;
-	SCR_HEIGHT = h;
+Window::Window(const int w, const int h) {
+	scr_width_ = w;
+	scr_height_ = h;
 }
 
 int Window::init() {
@@ -19,28 +19,28 @@ int Window::init() {
 
 	// glfw window creation
 	// --------------------
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Heron", NULL, NULL);
-	if (window == NULL)
+	window_ = glfwCreateWindow(scr_width_, scr_height_, "Heron", nullptr, nullptr);
+	if (window_ == nullptr)
 	{
 		Console::log("Failed to create GLFW window");
 		glfwTerminate();
 		return -1;
 	}
-	glfwMakeContextCurrent(window);
+	glfwMakeContextCurrent(window_);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		Console::log("Failed to initialize GLAD");
 		return -1;
 	}
-	glfwMaximizeWindow(window);
+	glfwMaximizeWindow(window_);
 
 	glfwSwapInterval(1);
 
 	Console::log("OpenGL init complete!");
 
 	Console::log("=== CONTEXT INFO ===");
-	Console::log("VERSION: " + std::string((char*)(glGetString(GL_VERSION))));
+	Console::log("VERSION: " + std::string((char*)glGetString(GL_VERSION)));
 	Console::log("VENDOR: " + std::string((char*)(glGetString(GL_VENDOR))));
 	Console::log("RENDERER: " + std::string((char*)(glGetString(GL_RENDERER))));
 	Console::log("===");
@@ -58,12 +58,12 @@ int Window::init() {
 	return 1;
 }
 
-void Window::setBackground() {
+void Window::set_background() {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Window::initImGui()
+void Window::init_im_gui() const
 {
 	// Initialize ImGUI
 	IMGUI_CHECKVERSION();
@@ -72,12 +72,10 @@ void Window::initImGui()
 	ImNodes::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplGlfw_InitForOpenGL(window_, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-	//ImGuiIO& io = ImGui::GetIO();
 
 	io.Fonts->Clear();
 	io.Fonts->AddFontFromFileTTF("./fonts/OpenSans-Regular.ttf", 16);
@@ -128,14 +126,14 @@ void Window::initImGui()
 
 }
 
-void Window::ImGuiRenderInit() {
+void Window::im_gui_render_init() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 	ImGui::DockSpaceOverViewport();
 }
 
-void Window::ImGuiCleanUp()
+void Window::im_gui_clean_up()
 {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
@@ -143,7 +141,7 @@ void Window::ImGuiCleanUp()
 	ImGui::DestroyContext();
 }
 
-void Window::ImGuiRender()
+void Window::im_gui_render()
 {
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

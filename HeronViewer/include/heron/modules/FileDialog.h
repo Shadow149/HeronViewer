@@ -12,14 +12,13 @@ class Heron;
 class FileDialog : public Module
 {
 public:
-	FileDialog(Heron* h, std::string n, bool v = true) : Module(n, v, false) { hWindow = h; };
-	void init();
-	void render();
-	void cleanup();
-	void setStyle();
-	const char* fileName;
-	std::string escape;
-private:
-	Heron* hWindow;
-};
+	FileDialog(Heron* h, const std::string n, const bool v = true) : Module(n, v, false) { heron_window_ = h; }
+	void init() override {};
+	void render() override;
+	void cleanup() override {};
+	void set_style() override;
 
+private:
+	Heron* heron_window_;
+	std::string escape_;
+};

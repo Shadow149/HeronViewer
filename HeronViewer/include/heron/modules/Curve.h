@@ -8,24 +8,27 @@
 #include"imgui_impl_opengl3.h"
 #include <implot.h>
 
-#define DATA_POINTS 255
+enum
+{
+	DATA_POINTS = 255
+};
 
-class Curve : public Module
+class Curve final : public Module
 {
 public:
-	Curve(Image* i, std::string n, bool v = true) : Module(n, v) {
-		img = i;
-	};
-	void init();
-	void render();
-	void cleanup();
+	Curve(Image* i, const std::string& n, const bool v = true) : Module(n, v) {
+		img_ = i;
+	}
+	void init() override;
+	void render() override;
+	void cleanup() override;
 private:
-	const ImPlotAxisFlags flags = ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoGridLines;
-	const ImPlotFlags plotFlags = ImPlotFlags_NoTitle | ImPlotFlags_NoFrame | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoMouseText | ImPlotFlags_NoInputs | ImPlotFlags_NoLegend;
-	Image* img;
+	const ImPlotAxisFlags axis_flags_ = ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoGridLines;
+	const ImPlotFlags plot_flags_ = ImPlotFlags_NoTitle | ImPlotFlags_NoFrame | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoMouseText | ImPlotFlags_NoInputs | ImPlotFlags_NoLegend;
+	Image* img_;
 
-	float x_data[DATA_POINTS];
-	float y_data[4][DATA_POINTS];
-	float line[2] = { 0,1 };
+	float x_data_[DATA_POINTS]{};
+	float y_data_[4][DATA_POINTS]{};
+	float line_[2] = { 0,1 };
 };
 

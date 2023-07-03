@@ -1,52 +1,54 @@
 #include "Overlay.h"
 
-float Overlay::fps[FPS_POINTS];
-int Overlay::fps_pointer;
-std::string Overlay::stats[MAX_STATS];
-int Overlay::pointer;
+float Overlay::fps_[FPS_POINTS];
+int Overlay::fps_pointer_;
+std::string Overlay::stats_[MAX_STATS];
+int Overlay::pointer_;
 
 void Overlay::init()
 {
-    for (int i = 0; i < FPS_POINTS; i++) {
-        fps_x[i] = i;
-    }
+	for (int i = 0; i < FPS_POINTS; i++)
+	{
+		fps_x_[i] = i;
+	}
 }
 
 void Overlay::render()
 {
-    ImGui::SetNextWindowBgAlpha(0.35f);
-    if (ImGui::Begin(name.c_str(), &visible, flags))
-    {
-        for (int i = 0; i < pointer; i ++) {
-            ImGui::Text(stats[i].c_str());
-        }
+	ImGui::SetNextWindowBgAlpha(0.35f);
+	if (ImGui::Begin(name.c_str(), &visible, win_flags_))
+	{
+		for (int i = 0; i < pointer_; i ++)
+		{
+			ImGui::Text(stats_[i].c_str());
+		}
 #ifdef SHOW_FPS
         if (ImPlot::BeginPlot("FPS")) {
-            ImPlot::PlotLine("Curve", fps_x, fps, FPS_POINTS);
+            ImPlot::PlotLine("Curve", fps_x_, fps_, FPS_POINTS);
             ImPlot::EndPlot();
         }
 #endif
-    }
-    ImGui::End();
+	}
+	ImGui::End();
 }
 
-void Overlay::cleanup()
+std::string* Overlay::register_metric()
 {
+	if (pointer_ >= MAX_STATS)
+		return nullptr;
+	stats_[pointer_] = "";
+	return &stats_[pointer_++];
 }
 
-std::string* Overlay::registerMetric() {
-    if (pointer >= MAX_STATS)
-        return nullptr;
-    stats[pointer] = "";
-    return &stats[pointer++];
-}
-
-void Overlay::updateFps(float f) {
-    fps[fps_pointer++] = f;
-    if (fps_pointer >= 255) {
-        for (int i = 0; i < FPS_POINTS; i++) {
-            fps[i] = 0;
-        }
-        fps_pointer = 0;
-    }
+void Overlay::update_fps(const float f)
+{
+	fps_[fps_pointer_++] = f;
+	if (fps_pointer_ >= 255)
+	{
+		for (float& fp : fps_)
+		{
+			fp = 0;
+		}
+		fps_pointer_ = 0;
+	}
 }

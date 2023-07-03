@@ -6,25 +6,35 @@
 #include <vector>
 #include <string>
 
-#define FPS_POINTS 255
-#define MAX_STATS 255
+//#define SHOW_FPS
 
-class Overlay :
-    public Module
+enum
 {
-private:
-	static float fps[FPS_POINTS];
-	float fps_x[FPS_POINTS];
-	static int fps_pointer;
-	static std::string stats[MAX_STATS];
-	static int pointer;
-	ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav ; // | ImGuiWindowFlags_NoMove
-public:
-	Overlay(std::string n, bool v = false) : Module(n, v) { pointer = 0; fps_pointer = 0; };
-	void init();
-	void render();
-	void cleanup();
-	static std::string* registerMetric();
-	static void updateFps(float f);
+	FPS_POINTS = 255,
+	MAX_STATS = 255
 };
 
+class Overlay :
+	public Module
+{
+public:
+	explicit Overlay(const std::string n, const bool v = false) : Module(n, v), fps_x_{}
+	{
+		pointer_ = 0;
+		fps_pointer_ = 0;
+	};
+	void init() override;
+	void render() override;
+	void cleanup() override {};
+	static std::string* register_metric();
+	static void update_fps(float f);
+
+private:
+	static float fps_[FPS_POINTS];
+	float fps_x_[FPS_POINTS];
+	static int fps_pointer_;
+	static std::string stats_[MAX_STATS];
+	static int pointer_;
+	ImGuiWindowFlags win_flags_ = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
+		ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+};

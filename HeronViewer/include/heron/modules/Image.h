@@ -26,143 +26,135 @@
 #include "shader_c.h"
 #include "../common/SliderValues.h"
 
-#define RENDER_WIDTH 1920
-#define SMALL_IMG_MAX 4000
+enum
+{
+	RENDER_WIDTH = 1920,
+	SMALL_IMG_MAX = 4000
+};
 
 class Histogram;
 
 class Image : public Module
 {
-private:
-	glm::mat4 model = glm::mat4(1.0f);
-	glm::mat4 model1 = glm::mat4(1.0f);
-	glm::mat4 view = glm::mat4(1.0f);
-	glm::vec3 view_pos = glm::vec3(0.0f);
-	glm::mat4 projection = glm::mat4(1.0f);
-
-	float zoom = 0.0f;
-	float scale_factor = 1.0f;
-	int x = 0;
-	int y = 0;
-	int loops = 0;
-
-	GLuint FramebufferName = 0, small_framebuffer = 1;
-	GLuint renderedTexture, small_framebuffer_tex;
-	unsigned int VBO, VAO, EBO;
-	GLuint pbo;
-
-	int small_img_height = 1, small_img_width = 1;
-	unsigned int height = 1, width = 1, bpp = 0;
-	unsigned height_small = 1, width_small = 1;
-	unsigned char* data;
-	unsigned char* data1;
-	GLubyte* small_data;
-	GLubyte* export_data;
-	FIBITMAP* temp;
-	FIBITMAP* bitmap;
-	FIBITMAP* scaled;
-
-	bool changed = false;
-	bool scope_rerender = true;
-	bool loading = false;
-	bool need_texture_change = false;
-	bool scrolling = false;
-
-	unsigned texture;
-	unsigned texture1;
-
-	bool threadImageLoaded = false;
-	bool exporting = false;
-	GLsync sync;
-	int index = 0;
-	int nextIndex = 0;
-	float* src;
-	
-	Shader shader = Shader("./shaders/texture.vert", "./shaders/texture.frag");
-	ComputeShader process_compute_shader_ = ComputeShader("./shaders/texture.comp");
-	ComputeShader hist_compute_shader_ = ComputeShader("./shaders/histogram.comp");
-	Histogram** hist;
-
-	std::string* shaderLoadTime;
-	std::string* imageRender;
-	std::string* exportStat;
-
-	std::thread renderer;
-
-	unsigned comp_texture;
-	unsigned comp_texture_small;
-	unsigned vectorscope;
-	unsigned waveform;
-	unsigned waveform_acc;
-	unsigned vectorscope_acc;
-
-	GLuint SSBO;
-	GLuint SSBO_orig;
-
-
-	void renderImage(const char* fileLoc);
-	void updatePreviewSize();
-
 public:
-	// TODO FOR TESTING
-	SliderValues* m_pVals;
-
-	ImVec2 size;
-	ImVec2 previewSize;
-
-	bool imageLoaded = false;
-	bool rendering = false;
-	std::thread imageLoader;
-
-	unsigned histogram[256*4];
-	unsigned hist_orig[256];
-	float cdf[256];
-	bool histogram_loaded = false;
-	
-	void unload();
-	void getImage(const char* filename);
-	void setChanges(SliderValues* slider_values);
-	unsigned char* getData();
-	unsigned int getHeight();
-	unsigned int getWidth();
-	bool getChanged();
-	void recompileShader();
-
-	Image(std::string n, Histogram** hist, bool v = true) : Module(n, v) {
-		this->hist = hist;
+	Image(const std::string& n, Histogram** hist, const bool v = true) : Module(n, v)
+	{
+		this->hist_ = hist;
 	}
-	//~Image() { imageLoader.join(); }
-	void init();
-	void renderToFrameBuffer();
-	void glrender(bool* clip, bool* b4, bool* black_bckgrd);
-	void render();
-	void cleanup();
-	void bindImage();
 
-	void exportImage(const char* fileLoc);
-	void initExport();
-	void exportPBO();
+	void init() override;
+	void render_to_frame_buffer() const;
+	void glrender(const bool* clip, const bool* b4, const bool* black_bckgrd);
+	void render() override;
+	void cleanup() override;
+	void bind_image();
 
-	float calcCurve(float t, int chr);
-	void calcCurveHist(float t, int chr, float* red, float* green, float* blue);
+	void unload();
+	void get_image(const char* filename);
+	void set_changes(SliderValues* slider_values);
+	unsigned char* get_data() const;
+	unsigned get_height() const;
+	unsigned get_width() const;
+	bool get_changed() const;
+	void recompile_shader();
+
+	void exportImage(const char* file_loc);
+
+	float calc_curve(float t, int channel) const;
 
 	void scale(glm::vec3 s);
 	void translate(glm::vec3 t);
-	void resetView();
 
-	bool isBW() const
+	bool is_bw() const
 	{
-		return m_pVals->bw;
+		return vals_->bw;
 	}
 
-	unsigned getVectorscopeID()
+	unsigned get_vectorscope_id() const
 	{
-		return vectorscope;
+		return vectorscope_;
 	}
 
-	unsigned getWaveformID()
+	unsigned get_waveform_id() const
 	{
-		return waveform;
+		return waveform_;
 	}
+
+private:
+	void render_image(const char* file_loc);
+	void update_preview_size();
+
+public:
+
+	bool image_loaded = false;
+	bool rendering = false;
+	std::thread image_loader;
+
+	unsigned histogram[256 * 4]{};
+	unsigned hist_orig[256]{};
+	float cdf[256]{};
+	bool histogram_loaded = false;
+
+private:
+	SliderValues* vals_{};
+
+	glm::mat4 model_ = glm::mat4(1.0f);
+	glm::mat4 model1_ = glm::mat4(1.0f);
+	glm::mat4 view_ = glm::mat4(1.0f);
+	glm::vec3 view_pos_ = glm::vec3(0.0f);
+	glm::mat4 projection_ = glm::mat4(1.0f);
+
+	ImVec2 size;
+	ImVec2 preview_size_;
+
+	float zoom_ = 0.0f;
+	float scale_factor_ = 1.0f;
+	int x_ = 0;
+	int y_ = 0;
+
+	GLuint vbo_{}, vao_{}, ebo_{};
+	GLuint pbo_{};
+
+	GLsizei height_ = 1, width_ = 1, bpp_ = 0;
+	GLsizei height_small_ = 1, width_small_ = 1;
+
+	unsigned char* data_{};
+	unsigned char* data_low_res_{};
+	GLubyte* export_data_{};
+	FIBITMAP* bitmap_{};
+
+	bool changed_ = false;
+	bool scope_rerender_ = true;
+	bool loading_ = false;
+	bool need_texture_change_ = false;
+	bool scrolling_ = false;
+
+
+	bool thread_image_loaded_loaded_ = false;
+	bool exporting_ = false;
+
+	Shader shader_ = Shader("./shaders/texture.vert", "./shaders/texture.frag");
+	ComputeShader process_compute_shader_ = ComputeShader("./shaders/texture.comp");
+	ComputeShader hist_compute_shader_ = ComputeShader("./shaders/histogram.comp");
+	Histogram** hist_;
+
+	std::string* shaderLoadTime{};
+	std::string* imageRender{};
+
+	std::thread renderer_;
+
+	GLuint imgui_preview_texture_{};
+	GLuint framebuffer_{};
+	GLuint texture_{};
+	GLuint texture_low_res_{};
+
+	GLuint comp_texture_{};
+	GLuint comp_texture_small_{};
+	GLuint vectorscope_{};
+	GLuint waveform_{};
+	GLuint waveform_acc_{};
+	GLuint vectorscope_acc_{};
+	GLuint ssbo_{};
+	GLuint ssbo_orig_{};
+
 };
-
