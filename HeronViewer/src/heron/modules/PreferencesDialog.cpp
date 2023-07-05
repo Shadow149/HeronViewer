@@ -1,21 +1,21 @@
-#include "Preferences.h"
+#include "PreferencesDialog.h"
 
-Preferences* Preferences::pref_;
+PreferencesDialog* PreferencesDialog::pref_;
 
-Preferences* Preferences::instance()
+PreferencesDialog* PreferencesDialog::instance()
 {
 	if (!pref_)
-		pref_ = new Preferences();
+		pref_ = new PreferencesDialog();
 	return pref_;
 }
 
-void Preferences::init()
+void PreferencesDialog::init()
 {
 	if (!reading_ini_ && !writing_ini_)
-		pref_thread_ = std::thread(&Preferences::read_settings, this);
+		pref_thread_ = std::thread(&PreferencesDialog::read_settings, this);
 }
 
-void Preferences::render()
+void PreferencesDialog::render()
 {
 	if (!writing_ini_ && !reading_ini_)
 	{
@@ -40,15 +40,15 @@ void Preferences::render()
 	ImGui::End();
 }
 
-void Preferences::save_settings()
+void PreferencesDialog::save_settings()
 {
 	EXPORT_DIR = export_dir_str_;
 
 	if (!reading_ini_ && !writing_ini_)
-		pref_thread_ = std::thread(&Preferences::write_settings, this);
+		pref_thread_ = std::thread(&PreferencesDialog::write_settings, this);
 }
 
-void Preferences::read_settings()
+void PreferencesDialog::read_settings()
 {
 	reading_ini_ = true;
 	const mINI::INIFile file(PREFERENCES_FILE);
@@ -61,23 +61,23 @@ void Preferences::read_settings()
 		write_settings();
 		return;
 	}
-	Console::log("Preferences ini read...");
+	Console::log("PreferencesDialog ini read...");
 
 	EXPORT_DIR = ini["preferences"]["EXPORT_DIR"];
 
 	write_to_buffers();
 
-	Status::set_status("Preferences Read");
+	Status::set_status("PreferencesDialog Read");
 	reading_ini_ = false;
 }
 
-void Preferences::write_to_buffers()
+void PreferencesDialog::write_to_buffers()
 {
 	export_dir_str_ = EXPORT_DIR.u8string();
 }
 
 
-void Preferences::write_settings()
+void PreferencesDialog::write_settings()
 {
 	writing_ini_ = true;
 	const mINI::INIFile file(PREFERENCES_FILE);
@@ -90,7 +90,7 @@ void Preferences::write_settings()
 	}
 	else
 	{
-		Console::log("Preferences ini read...");
+		Console::log("PreferencesDialog ini read...");
 	}
 
 	ini["preferences"]["EXPORT_DIR"] = EXPORT_DIR.u8string();
@@ -105,6 +105,6 @@ void Preferences::write_settings()
 		file.write(ini);
 		Console::log("Ini updated");
 	}
-	Status::set_status("Preferences Saved!");
+	Status::set_status("PreferencesDialog Saved!");
 	writing_ini_ = false;
 }

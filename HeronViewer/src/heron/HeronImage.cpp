@@ -88,7 +88,7 @@ void HeronImage::read_image(const std::string& filename)
 	fi_bitmap = FreeImage_Rescale(fi_bitmap, width_, height_);
 	FIBITMAP* lr_fi_bitmap = FreeImage_Rescale(fi_bitmap, lr_width_, lr_height_);
 
-	dispatch_size_ = glm::ivec2((width_ / 32) + 1, (height_ / 32) + 1);
+	dispatch_size_ = glm::ivec2((width_ / 32.0f) + 1, (height_ / 32.0f) + 1);
 	Console::log(
 		"COMPUTE DISPATCH SIZE: " + std::to_string(dispatch_size_.x) + " , " + std::to_string(dispatch_size_.y));
 
@@ -111,7 +111,7 @@ void HeronImage::read_image(const std::string& filename)
 	image_loaded_ = true;
 }
 
-void HeronImage::export_image(const char* file_loc, const gl_image& image)
+void HeronImage::export_image(const char* file_loc, const gl_image& image, export_data export_data)
 {
 	exporting_ = true;
 	Console::log("Exporting to: " + std::string(file_loc));
@@ -125,14 +125,23 @@ void HeronImage::export_image(const char* file_loc, const gl_image& image)
 	image.get_data_via_pbo(&pbo, export_data_);
 	Console::log("export time: " + std::to_string(glfwGetTime() - start));
 
-	renderer_ = std::thread(&HeronImage::render_image, this, file_loc);
+	renderer_ = std::thread(&HeronImage::render_image, this, file_loc, export_data);
 }
 
-void HeronImage::render_image(const char* file_loc)
+void HeronImage::render_image(const char* file_loc, const export_data export_data)
 {
 	const double start = glfwGetTime();
-	stbi_write_jpg(file_loc, width_, height_, (bpp_ / 8), export_data_, 100);
+	const export_type type = export_data.type;
+	switch(type)
+	{
+		case EXPORT_JPEG:
+			stbi_write_jpg(file_loc, width_, height_, (bpp_ / 8), export_data_, export_data.quality);
+			break;
+		case EXPORT_PNG:
+			stbi_write_png(file_loc, width_, height_, bpp_/8, export_data_, width_ * (bpp_ / 8));
+			break;
+	}
 	free(export_data_);
-	Console::log("stbi_write_jpg time: " + std::to_string(glfwGetTime() - start));
+	Console::log("stbi time: " + std::to_string(glfwGetTime() - start));
 	exporting_ = false;
 }

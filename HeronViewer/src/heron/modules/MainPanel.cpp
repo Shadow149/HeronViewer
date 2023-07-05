@@ -33,8 +33,8 @@ void MainPanel::render()
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::MenuItem(Preferences::instance()->name.c_str())) {
-				Preferences::instance()->toggle_show();
+			if (ImGui::MenuItem(PreferencesDialog::instance()->name.c_str())) {
+				PreferencesDialog::instance()->toggle_show();
 			}
 			ImGui::EndMenu();
 		}

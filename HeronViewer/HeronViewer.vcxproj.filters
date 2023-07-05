@@ -117,7 +117,7 @@
     <ClCompile Include="src\heron\modules\Overlay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\heron\modules\Preferences.cpp">
+    <ClCompile Include="src\heron\modules\PreferencesDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\heron\modules\Status.cpp">
@@ -139,6 +139,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\heron\HeronImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\heron\modules\ExportDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\heron\modules\Preview.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1133,7 +1139,7 @@
     <ClInclude Include="include\heron\modules\Overlay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\heron\modules\Preferences.h">
+    <ClInclude Include="include\heron\modules\PreferencesDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\heron\modules\Status.h">
@@ -1158,6 +1164,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\heron\HeronImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\heron\modules\ExportDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\heron\modules\Preview.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

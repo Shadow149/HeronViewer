@@ -8,7 +8,7 @@
 #include "Histogram.h"
 #include "Console.h"
 #include "Overlay.h"
-#include "Preferences.h"
+#include "PreferencesDialog.h"
 
 class FileDialog;
 

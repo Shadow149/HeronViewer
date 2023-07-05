@@ -19,16 +19,16 @@
 
 #define PREFERENCES_FILE "preferences.ini"
 
-class Preferences : public Module
+class PreferencesDialog : public Module
 {
 public:
-	static Preferences* instance();
+	static PreferencesDialog* instance();
 	void init() override;
 	void render() override;
 	void cleanup() override {};
 
 private:
-	explicit Preferences(const std::string& n = "Preferences", const bool v = false) : Module(n, v, false) {}
+	explicit PreferencesDialog(const std::string& n = "PreferencesDialog", const bool v = false) : Module(n, v, false) {}
 
 	void save_settings();
 	void write_settings();
@@ -38,7 +38,7 @@ private:
 public:
 	std::experimental::filesystem::path EXPORT_DIR;
 private:
-	static Preferences* pref_;
+	static PreferencesDialog* pref_;
 
 	bool reading_ini_ = false, writing_ini_ = false;
 	std::thread pref_thread_;

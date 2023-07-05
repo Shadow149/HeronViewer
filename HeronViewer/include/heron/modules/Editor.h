@@ -4,7 +4,7 @@
 #include "Utils.h"
 #include "Status.h"
 #include "mini/ini.h"
-#include "Preferences.h"
+#include "PreferencesDialog.h"
 
 #define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 #include <experimental/filesystem>
@@ -75,7 +75,6 @@ public:
 private:
 	void update_sharpen_kernel();
 	void toggle_bw_label();
-	void export_image();
 
 	void set_from_config_file();
 	void write_ini();

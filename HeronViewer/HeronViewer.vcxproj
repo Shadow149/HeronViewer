@@ -145,6 +145,8 @@ copy /y "$(ProjectDir)lib\freeimagelib\FreeImage.dll" "$(OutDir)FreeImage.dll"</
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\heron\modules\Preview.cpp" />
+    <ClCompile Include="src\heron\modules\ExportDialog.cpp" />
     <ClCompile Include="src\heron\HeronImage.cpp" />
     <ClCompile Include="include\glm\detail\glm.cpp" />
     <ClCompile Include="src\glad\glad\glad.c" />
@@ -161,7 +163,7 @@ copy /y "$(ProjectDir)lib\freeimagelib\FreeImage.dll" "$(OutDir)FreeImage.dll"</
     <ClCompile Include="src\heron\modules\MainPanel.cpp" />
     <ClCompile Include="src\heron\modules\Module.cpp" />
     <ClCompile Include="src\heron\modules\Overlay.cpp" />
-    <ClCompile Include="src\heron\modules\Preferences.cpp" />
+    <ClCompile Include="src\heron\modules\PreferencesDialog.cpp" />
     <ClCompile Include="src\heron\modules\Status.cpp" />
     <ClCompile Include="src\heron\Widgets.cpp" />
     <ClCompile Include="src\heron\Window.cpp" />
@@ -187,6 +189,7 @@ copy /y "$(ProjectDir)lib\freeimagelib\FreeImage.dll" "$(OutDir)FreeImage.dll"</
     <ClCompile Include="src\heron\opengl\gl_texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\heron\modules\ExportDialog.h" />
     <ClInclude Include="include\heron\HeronImage.h" />
     <ClInclude Include="include\freeimage\FreeImage.h" />
     <ClInclude Include="include\glad\glad\glad.h" />
@@ -488,7 +491,7 @@ copy /y "$(ProjectDir)lib\freeimagelib\FreeImage.dll" "$(OutDir)FreeImage.dll"</
     <ClInclude Include="include\heron\modules\MainPanel.h" />
     <ClInclude Include="include\heron\modules\Module.h" />
     <ClInclude Include="include\heron\modules\Overlay.h" />
-    <ClInclude Include="include\heron\modules\Preferences.h" />
+    <ClInclude Include="include\heron\modules\PreferencesDialog.h" />
     <ClInclude Include="include\heron\modules\Status.h" />
     <ClInclude Include="include\heron\Widgets.h" />
     <ClInclude Include="include\heron\Window.h" />
@@ -526,6 +529,7 @@ copy /y "$(ProjectDir)lib\freeimagelib\FreeImage.dll" "$(OutDir)FreeImage.dll"</
     <ClInclude Include="include\heron\modules\Vectorscope.h" />
     <ClInclude Include="include\heron\modules\Waveform.h" />
     <ClInclude Include="include\heron\opengl\gl_texture.h" />
+    <ClInclude Include="include\heron\modules\Preview.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\glm\detail\func_common.inl" />

@@ -53,6 +53,11 @@ void Image::set_changes(SliderValues* slider_values)
 	changed_ = true; // TODO implement this properly
 }
 
+void Image::set_changed()
+{
+	changed_ = true;
+}
+
 unsigned Image::get_height() const
 {
 	if (vals_->show_low_res)
@@ -115,9 +120,9 @@ void Image::render_to_frame_buffer() const
 	glViewport(0, 0, preview_size_.x, preview_size_.y);
 }
 
-void Image::export_image(const std::string::const_pointer c_str)
+void Image::export_image(const std::string::const_pointer c_str, const export_data export_data)
 {
-	h_image_.export_image(c_str, comp_texture_);
+	h_image_.export_image(c_str, comp_texture_, export_data);
 }
 
 void Image::clear_background(const bool* black_bckgrd)

@@ -1,5 +1,6 @@
 ﻿#include "Editor.h"
 
+#include "ExportDialog.h"
 #include "Heron.h"
 
 
@@ -9,7 +10,7 @@ bool slider_float_reset(T& data, T reset_value, const char* label, float* v, con
                         const ImU32 left_colour = ImColor(50, 50, 50),
                         const ImU32 right_colour = ImColor(220, 220, 220))
 {
-	const bool change = ImGui::SliderFloat(label, v, v_min, v_max, format, flags, left_colour, right_colour);
+	const bool change = ImGui::SliderFloat((std::string(label) + "##" + std::to_string(btn_id++)).c_str(), v, v_min, v_max, format, flags, left_colour, right_colour);
 	ImGui::SameLine();
 	if (ImGui::Button(("R##" + std::to_string(btn_id++)).c_str()))
 	{
@@ -80,20 +81,10 @@ void Editor::render()
 		Status::set_status("Saving...");
 	}
 	ImGui::SameLine();
-	if (img_->is_exporting())
+	if (ImGui::Button("Export"))
 	{
-		ImGui::Button("Exporting...");
-		Status::set_status("Exporting...");
-		ImGui::SameLine();
-		spinner("EXPORTING...", ImGui::CalcTextSize("Exporting...").y / 2, 3,
-		        ImGui::GetColorU32(ImVec4(255, 255, 255, 255)));
-	}
-	else
-	{
-		if (ImGui::Button("Export to JPG"))
-		{
-			export_image();
-		}
+		ExportDialog::instance()->set_file_name(file_name_);
+		ExportDialog::instance()->toggle_show();
 	}
 
 	ImGui::Separator();
@@ -297,7 +288,7 @@ void Editor::render()
 	slider_changed_ |= slider_float_reset(vals_.scope_brightness, 2.0f, "Scope Brightness", &vals_.scope_brightness, 0,
 	                                      10);
 
-	if (ImGui::IsWindowFocused() && mouse_in_window_ && ImGui::IsMouseReleased(0) && !new_values_set_)
+	if (ImGui::IsWindowFocused() && ImGui::IsMouseReleased(0) && !new_values_set_)
 	{
 		new_values_set_ = true;
 		vals_.show_low_res = false;
@@ -320,15 +311,6 @@ void Editor::render()
 	}
 
 	btn_id = 0;
-}
-
-void Editor::export_image()
-{
-	const std::experimental::filesystem::path p = strip_extension(file_name_);
-	std::experimental::filesystem::path dir = Preferences::instance()->EXPORT_DIR;
-	dir /= p;
-	export_dir_ = dir.u8string() + "-edit.jpg";
-	img_->export_image(export_dir_.c_str());
 }
 
 void Editor::write_ini()

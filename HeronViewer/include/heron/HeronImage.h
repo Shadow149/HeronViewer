@@ -10,6 +10,18 @@ enum
 	LOW_RES_IMG_MAX = 1000
 };
 
+typedef enum
+{
+	EXPORT_PNG,
+	EXPORT_JPEG,
+} export_type;
+
+
+struct export_data
+{
+	export_type type;
+	int quality;
+};
 
 class HeronImage
 {
@@ -28,7 +40,7 @@ public:
 	}
 
 	void load_image(std::string& filename);
-	void export_image(const char* file_loc, const gl_image& image);
+	void export_image(const char* file_loc, const gl_image& image, export_data export_data);
 	void finish_export();
 	template<typename T>
 	static void resize_image(GLsizei width, GLsizei height, GLsizei max_side,
@@ -66,7 +78,7 @@ public:
 
 private:
 	void read_image(const std::string& filename);
-	void render_image(const char* file_loc);
+	void render_image(const char* file_loc, const export_data export_data);
 
 private:
 	bool loading_;

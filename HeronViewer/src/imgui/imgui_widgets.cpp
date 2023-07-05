@@ -2771,12 +2771,12 @@ bool ImGui::SliderBehaviorT(const ImRect& bb, ImGuiID id, ImGuiDataType data_typ
             if (!g.IO.MouseDown[0])
             {
                 ClearActiveID();
-            }
+            }/*
             else if (g.IO.MouseDoubleClicked[0])
             {
                 printf("double\n");
                 clicked_t = 0;
-            }
+            }*/
             else
             {
                 const float mouse_abs_pos = g.IO.MousePos[axis];

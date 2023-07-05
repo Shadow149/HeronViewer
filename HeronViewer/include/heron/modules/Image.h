@@ -45,7 +45,7 @@ public:
 
 	void init() override;
 	void render_to_frame_buffer() const;
-	void export_image(std::string::const_pointer c_str);
+	void export_image(const std::string::const_pointer c_str, export_data export_data);
 	static void clear_background(const bool* black_bckgrd);
 	void set_viewpoint();
 	void glrender(const bool* clip, const bool* b4, const bool* black_bckgrd);
@@ -56,6 +56,7 @@ public:
 	void unload();
 	void get_image(std::string& filename);
 	void set_changes(SliderValues* slider_values);
+	void set_changed();
 	unsigned get_height() const;
 	unsigned get_width() const;
 	bool get_changed() const;
@@ -80,6 +81,11 @@ public:
 	{
 		return waveform_.get_id();
 	}
+	unsigned get_image_id() const
+	{
+		return comp_texture_.get_id();
+	};
+
 
 	bool is_loaded() const { return h_image_.is_loaded(); }
 	bool is_exporting() const { return h_image_.is_exporting(); };

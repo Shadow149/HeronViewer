@@ -2,8 +2,10 @@
 
 #include <stb/stb_image.h>
 
+#include "ExportDialog.h"
 #include "FileDialog.h"
 #include "Graph.h"
+#include "Preview.h"
 #include "Vectorscope.h"
 #include "Waveform.h"
 
@@ -129,16 +131,20 @@ void Heron::init_modules()
 	image_ = new Image("Image", &hist_);
 	hist_ = new Histogram(image_, "Histogram");
 	editor_ = new Editor(image_, "Editor");
+	ExportDialog::instance()->set_image(image_);
+
 	modules_.push_back(new MainPanel(this, "Main"));
 	modules_.push_back(file_dialog_);
 	modules_.push_back(editor_);
 	modules_.push_back(hist_);
 	modules_.push_back(new Vectorscope(image_, "Vectorscope"));
 	modules_.push_back(new Waveform(image_, "Waveform"));
+	modules_.push_back(new Preview(image_, "Preview"));
 	modules_.push_back(new Curve(image_, "Curve"));
 	modules_.push_back(new Console("Console"));
 	modules_.push_back(new Overlay("Overlay"));
-	modules_.push_back(Preferences::instance());
+	modules_.push_back(ExportDialog::instance());
+	modules_.push_back(PreferencesDialog::instance());
 	modules_.push_back(new Graph("Node Editor"));
 	modules_.push_back(image_);
 
