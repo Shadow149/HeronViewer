@@ -76,17 +76,17 @@ void Heron::scroll_callback(GLFWwindow* window, const double xoffset, const doub
 	}
 }
 
-void Heron::set_image_path(const std::string s)
+void Heron::set_image_path(const std::string& s)
 {
 	img_file_path_ = s;
 }
 
-void Heron::load_image(const std::string file_path, const std::string file_name)
+void Heron::load_image(const std::string& file_path, const std::string& file_name)
 {
 	unload_image();
 	Console::log("Change Image : " + file_path);
 	img_file_ = file_path;
-	image_->image_loader = std::thread(&Image::get_image, image_, img_file_.c_str());
+	image_->get_image(img_file_);
 	editor_->update_file(file_name, file_path);
 	editor_->loaded(true);
 }

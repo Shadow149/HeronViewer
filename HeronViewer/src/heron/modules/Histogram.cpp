@@ -3,12 +3,6 @@
 
 void Histogram::init()
 {
-	const unsigned char* data = img_->get_data();
-
-	if (!data)
-	{
-		return;
-	}
 	for (auto& n : hist_)
 	{
 		for (unsigned& i : n)

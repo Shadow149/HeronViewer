@@ -49,7 +49,7 @@ public:
 
 	void init() override;
 	void render() override;
-	void cleanup() override;
+	void cleanup() override {};
 	void reset();
 
 	void set_changes()

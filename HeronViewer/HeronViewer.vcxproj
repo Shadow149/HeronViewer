@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\freeimage;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glad;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glm;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imgui;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\ImGuiFileDialog;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imnodes;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\implot;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\mini;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\stb;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\common;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\freeimage;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glad;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glm;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imgui;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\ImGuiFileDialog;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imnodes;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\implot;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\mini;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\stb;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\common;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\modules;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\opengl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,7 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\freeimage;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glad;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glm;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imgui;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\ImGuiFileDialog;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imnodes;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\implot;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\mini;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\stb;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\common;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\freeimage;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glad;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\glm;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imgui;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\ImGuiFileDialog;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\imnodes;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\implot;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\mini;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\stb;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\common;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\modules;C:\Users\Alfred Roberts\Documents\projects\HeronViewer\HeronViewer\include\heron\opengl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -145,6 +145,7 @@ copy /y "$(ProjectDir)lib\freeimagelib\FreeImage.dll" "$(OutDir)FreeImage.dll"</
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\heron\HeronImage.cpp" />
     <ClCompile Include="include\glm\detail\glm.cpp" />
     <ClCompile Include="src\glad\glad\glad.c" />
     <ClCompile Include="src\heron\common\Utils.cpp" />
@@ -183,8 +184,10 @@ copy /y "$(ProjectDir)lib\freeimagelib\FreeImage.dll" "$(OutDir)FreeImage.dll"</
     <ClCompile Include="src\stb\std_image.cpp" />
     <ClCompile Include="src\heron\modules\Vectorscope.cpp" />
     <ClCompile Include="src\heron\modules\Waveform.cpp" />
+    <ClCompile Include="src\heron\opengl\gl_texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\heron\HeronImage.h" />
     <ClInclude Include="include\freeimage\FreeImage.h" />
     <ClInclude Include="include\glad\glad\glad.h" />
     <ClInclude Include="include\glad\KHR\khrplatform.h" />
@@ -522,6 +525,7 @@ copy /y "$(ProjectDir)lib\freeimagelib\FreeImage.dll" "$(OutDir)FreeImage.dll"</
     <ClInclude Include="include\stb\stb_image_write.h" />
     <ClInclude Include="include\heron\modules\Vectorscope.h" />
     <ClInclude Include="include\heron\modules\Waveform.h" />
+    <ClInclude Include="include\heron\opengl\gl_texture.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\glm\detail\func_common.inl" />

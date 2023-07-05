@@ -2,231 +2,69 @@
 #include "Histogram.h"
 #include "Widgets.h"
 
-void Image::update_preview_size()
-{
-	if (width_ > height_)
-		preview_size_ = ImVec2(RENDER_WIDTH * (static_cast<float>(width_) / height_), RENDER_WIDTH);
-	else
-		preview_size_ = ImVec2(RENDER_WIDTH, RENDER_WIDTH * (static_cast<float>(height_) / width_));
-}
 
 void Image::unload()
 {
-	if (!data_)
-	{
-		Console::log("No Image to unload");
-		return;
-	}
-	Console::log("Unloading Image");
-	glBindTexture(GL_TEXTURE_2D, texture_);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-	glBindTexture(GL_TEXTURE_2D, imgui_preview_texture_);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, imgui_preview_texture_, 0);
-	image_loaded = false;
+	h_image_.unload();
 	histogram_loaded = false;
 }
 
-void Image::get_image(const char* filename)
+void Image::get_image(std::string& filename)
 {
-	histogram_loaded = false;
-	loading_ = true;
-	Console::log("Loading Image... " + std::string(filename));
-
-	if (bitmap_)
-		FreeImage_Unload(bitmap_);
-	if (data_)
-		free(data_);
-	if (data_low_res_)
-		free(data_low_res_);
-
-	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
-	fif = FreeImage_GetFileType(filename, 0);
-
-	if (fif == FIF_UNKNOWN)
-		fif = FreeImage_GetFIFFromFilename(filename);
-	if (fif == FIF_UNKNOWN)
-	{
-		Console::log("IMAGE LOAD ERROR - UNKNOWN FILE TYPE");
-		thread_image_loaded_loaded_ = true;
-		return;
-	}
-
-	if (FreeImage_FIFSupportsReading(fif))
-	{
-		if (fif == FIF_RAW)
-			bitmap_ = FreeImage_Load(fif, filename, RAW_DISPLAY);
-		else
-			bitmap_ = FreeImage_Load(fif, filename);
-	}
-
-	if (!bitmap_)
-	{
-		Console::log("IMAGE LOAD ERROR - IMAGE FAILED TO LOAD");
-		thread_image_loaded_loaded_ = true;
-		return;
-	}
-
-	const unsigned bitmap_bpp = FreeImage_GetBPP(bitmap_);
-	Console::log("Bitmap bpp: " + std::to_string(bitmap_bpp));
-
-	FreeImage_FlipVertical(bitmap_);
-	bitmap_ = FreeImage_ConvertTo24Bits(bitmap_);
-
-	FreeImage_AdjustGamma(bitmap_, 2.5);
-
-	width_ = static_cast<GLsizei>(FreeImage_GetWidth(bitmap_));
-	height_ = static_cast<GLsizei>(FreeImage_GetHeight(bitmap_));
-	bpp_ = static_cast<GLsizei>(FreeImage_GetBPP(bitmap_));
-
-	Console::log("Bitmap (TEMP) bpp: " + std::to_string(bpp_));
-
-	GLsizei small_img_height, small_img_width;
-	if (width_ > height_ && width_ > SMALL_IMG_MAX)
-	{
-		small_img_width = SMALL_IMG_MAX;
-		small_img_height = SMALL_IMG_MAX * (static_cast<double>(height_) / width_);
-	}
-	else if (height_ > SMALL_IMG_MAX)
-	{
-		small_img_width = SMALL_IMG_MAX * (static_cast<double>(width_) / height_);
-		small_img_height = SMALL_IMG_MAX;
-	}
-	else
-	{
-		small_img_width = width_;
-		small_img_height = height_;
-	}
-	width_ = small_img_width;
-	height_ = small_img_height;
-
-	width_small_ = width_ / 4;
-	height_small_ = height_ / 4;
-	bitmap_ = FreeImage_Rescale(bitmap_, width_, height_);
-
-	x_ = (width_ / 32) + 1;
-	Console::log("IMAGE DIMENSIONS SIZE: " + std::to_string(width_) + " , " + std::to_string(height_));
-	y_ = (height_ / 32) + 1;
-	Console::log(
-		"COMPUTE DISPATCH SIZE: " + std::to_string(x_) + " , " + std::to_string(y_) + " = " + std::to_string(x_ * y_) +
-		" WORK GROUPS");
-
-	data_ = static_cast<unsigned char*>(malloc(width_ * height_ * bpp_ * sizeof(unsigned char)));
-	Console::log("memcpy image bits");
-	memcpy(data_, FreeImage_GetBits(bitmap_), width_ * height_ * (bpp_ / 8));
-
-	data_low_res_ = static_cast<unsigned char*>(malloc(width_small_ * height_small_ * bpp_ * sizeof(unsigned char)));
-	bitmap_ = FreeImage_Rescale(bitmap_, width_small_, height_small_);
-	memcpy(data_low_res_, FreeImage_GetBits(bitmap_), width_small_ * height_small_ * (bpp_ / 8));
-	Console::log("memcpy finished");
-
-	thread_image_loaded_loaded_ = true;
-	loading_ = false;
-	Console::log("Image Loaded!");
+	h_image_.load_image(filename);
 }
 
 void Image::bind_image()
 {
-	update_preview_size();
-	if (data_)
+	const GLsizei width = h_image_.get_width();
+	const GLsizei height = h_image_.get_height();
+	const GLsizei lr_width = h_image_.get_lr_width();
+	const GLsizei lr_height = h_image_.get_lr_height();
+	const unsigned char* img_data = h_image_.get_img_data();
+	const unsigned char* lr_img_data = h_image_.get_lr_img_data();
+
+	HeronImage::resize_image<float>(width, height, RENDER_WIDTH,
+		preview_size_.x, preview_size_.y);
+
+
+	if (img_data)
 	{
-		glBindTexture(GL_TEXTURE_2D, texture_);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width_, height_, 0, GL_RGB, GL_UNSIGNED_BYTE, data_);
+		texture_.init(width, height, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, img_data);
 	}
 	else
 	{
 		Console::log("Failed to load texture");
 	}
-	if (data_low_res_)
+	if (lr_img_data)
 	{
-		glBindTexture(GL_TEXTURE_2D, texture_low_res_);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width_small_, height_small_, 0, GL_RGB, GL_UNSIGNED_BYTE, data_low_res_);
+		texture_low_res_.init(lr_width, lr_height, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, lr_img_data);
 	}
-	glBindTexture(GL_TEXTURE_2D, imgui_preview_texture_);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, static_cast<GLsizei>(preview_size_.x), static_cast<GLsizei>(preview_size_.y),
-	             0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, imgui_preview_texture_, 0);
 
-	glBindTexture(GL_TEXTURE_2D, comp_texture_);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width_, height_, 0, GL_RGBA, GL_FLOAT, nullptr);
-	glBindImageTexture(0, comp_texture_, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+	framebuffer_.init_texture(static_cast<GLsizei>(preview_size_.x), static_cast<GLsizei>(preview_size_.y), GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
-	glBindTexture(GL_TEXTURE_2D, comp_texture_small_);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width_small_, height_small_, 0, GL_RGBA, GL_FLOAT, nullptr);
-	glBindImageTexture(2, comp_texture_small_, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-}
+	comp_texture_.init(width, height, GL_RGBA32F, GL_RGBA, GL_FLOAT, nullptr);
+	comp_texture_small_.init(lr_width, lr_height, GL_RGBA32F, GL_RGBA, GL_FLOAT, nullptr);
 
-void Image::exportImage(const char* file_loc)
-{
-	exporting_ = true;
-	Console::log("Exporting to: " + std::string(file_loc));
-
-	GLenum error = 0;
-
-
-	export_data_ = static_cast<GLubyte*>(malloc(width_ * height_ * (bpp_ / 8) * sizeof(GLfloat)));
-	memset(export_data_, 0, width_ * height_ * (bpp_ / 8));
-	glGenBuffers(1, &pbo_);
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo_);
-	glBufferData(GL_PIXEL_PACK_BUFFER, width_ * height_ * (bpp_ / 8) * sizeof(GLfloat), nullptr, GL_STREAM_READ);
-
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, comp_texture_);
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo_);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-
-	const double start = glfwGetTime();
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-	Console::log("glGetTexImage time: " + std::to_string(glfwGetTime() - start));
-	const auto* d = static_cast<GLfloat*>(glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
-	std::memcpy(export_data_, d, sizeof(GLfloat) * width_ * height_ * (bpp_ / 8));
-
-	renderer_ = std::thread(&Image::render_image, this, file_loc);
-
-	GLubyte foo = export_data_[2000];
-	foo = export_data_[2010];
-
-	update_preview_size();
-
-	bind_image();
-}
-
-void Image::render_image(const char* file_loc)
-{
-	rendering = true;
-	const double start = glfwGetTime();
-	stbi_write_jpg(file_loc, width_, height_, (bpp_ / 8), export_data_, 100);
-	free(export_data_);
-	Console::log("stbi_write_jpg time: " + std::to_string(glfwGetTime() - start));
-	rendering = false;
 }
 
 void Image::set_changes(SliderValues* slider_values)
 {
-	vals_ = slider_values;
-
-	// TODO implement this properly
-	changed_ = true;
-}
-
-unsigned char* Image::get_data() const
-{
-	return data_;
+	vals_ = slider_values; 
+	changed_ = true; // TODO implement this properly
 }
 
 unsigned Image::get_height() const
 {
 	if (vals_->show_low_res)
-		return height_small_;
-	return height_;
+		return h_image_.get_lr_height();
+	return h_image_.get_height();
 }
 
 unsigned Image::get_width() const
 {
 	if (vals_->show_low_res)
-		return width_small_;
-	return width_;
+		return h_image_.get_lr_width();
+	return h_image_.get_width();
 }
 
 bool Image::get_changed() const
@@ -249,150 +87,22 @@ void Image::init()
 	view_ = glm::translate(view_, glm::vec3(0.0f, -0.1f, -3.0f));
 	projection_ = glm::ortho(-1.0f + zoom_, 1.0f - zoom_, -1.0f + zoom_, 1.0f - zoom_, 0.1f, 1000.0f);
 
-	// set up vertex data (and buffer(s)) and configure vertex attributes
-	// ------------------------------------------------------------------
-	constexpr float vertices[] = {
-		// positions          // colors           // texture coords
-		1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-		1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-		-1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f // top left 
-	};
-	const unsigned indices[] = {
-		0, 1, 3, // first triangle
-		1, 2, 3 // second triangle
-	};
+	quad_.gen();
 
-	// TODO make this a function? vbo?
-	glGenVertexArrays(1, &vao_);
-	glGenBuffers(1, &vbo_);
-	glGenBuffers(1, &ebo_);
+	texture_.gen(0, 0, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	texture_low_res_.gen(0, 0, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	framebuffer_.gen(0, 0, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
-	glBindVertexArray(vao_);
+	comp_texture_.gen(0, 0, GL_RGBA32F, GL_RGBA, GL_FLOAT, nullptr);
+	comp_texture_small_.gen(0, 0, GL_RGBA32F, GL_RGBA, GL_FLOAT, nullptr);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	vectorscope_.gen(255, 255, GL_RGBA32F, GL_RGBA, GL_FLOAT, nullptr);
+	waveform_.gen(512, 255, GL_RGBA32F, GL_RGBA, GL_FLOAT, nullptr);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), static_cast<void*>(nullptr));
-	glEnableVertexAttribArray(0);
-	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	// texture coord attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
-	glGenTextures(1, &texture_);
-	glBindTexture(GL_TEXTURE_2D, texture_);
-	// all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	// This is required on WebGL for non power-of-two textures
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-	glGenTextures(1, &texture_low_res_);
-	glBindTexture(GL_TEXTURE_2D, texture_low_res_);
-	// all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	// This is required on WebGL for non power-of-two textures
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-	// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
-	glGenFramebuffers(1, &framebuffer_);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
-
-	// The texture we're going to render to
-	glGenTextures(1, &imgui_preview_texture_);
-
-	// "Bind" the newly created texture : all future texture functions will modify this texture
-	glBindTexture(GL_TEXTURE_2D, imgui_preview_texture_);
-
-	// Give an empty image to OpenGL ( the last "0" )
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	// This is required on WebGL for non power-of-two textures
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
-
-	// Set "renderedTexture" as our colour attachement #0
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, imgui_preview_texture_, 0);
-
-
-	// Set the list of draw buffers.
-	constexpr GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
-	glDrawBuffers(1, draw_buffers); // "1" is the size of DrawBuffers
-
-
-	glGenTextures(1, &comp_texture_);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, comp_texture_);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 0, 0, 0, GL_RGBA, GL_FLOAT, nullptr);
-	glBindImageTexture(0, comp_texture_, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-
-	glGenTextures(1, &comp_texture_small_);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, comp_texture_small_);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 0, 0, 0, GL_RGBA, GL_FLOAT, nullptr);
-	glBindImageTexture(2, comp_texture_small_, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-
-	glGenTextures(1, &vectorscope_);
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, vectorscope_);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 255, 255, 0, GL_RGBA, GL_FLOAT, nullptr);
-	glBindImageTexture(4, vectorscope_, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-
-	glGenTextures(1, &waveform_);
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, waveform_);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 512, 255, 0, GL_RGBA, GL_FLOAT, nullptr);
-	glBindImageTexture(5, waveform_, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-
-	glGenBuffers(1, &ssbo_);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * 4 * sizeof(unsigned), nullptr, GL_DYNAMIC_COPY);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo_);
-
-	glGenBuffers(1, &ssbo_orig_);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_orig_);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, 256 * sizeof(unsigned), nullptr, GL_DYNAMIC_COPY);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo_orig_);
-
-	glGenBuffers(1, &waveform_acc_);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, waveform_acc_);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, 512 * 255 * sizeof(unsigned), nullptr, GL_DYNAMIC_COPY);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, waveform_acc_);
-
-	glGenBuffers(1, &vectorscope_acc_);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, vectorscope_acc_);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, 255 * 255 * sizeof(unsigned), nullptr, GL_DYNAMIC_COPY);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, vectorscope_acc_);
+	ssbo_.gen(256 * 4 * sizeof(unsigned));
+	ssbo_orig_.gen(256 * sizeof(unsigned));
+	waveform_acc_.gen(512 * 255 * sizeof(unsigned));
+	vectorscope_acc_.gen(255 * 255 * sizeof(unsigned));
 
 
 	shaderLoadTime = Overlay::register_metric();
@@ -401,52 +111,65 @@ void Image::init()
 
 void Image::render_to_frame_buffer() const
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
+	framebuffer_.bind();
 	glViewport(0, 0, preview_size_.x, preview_size_.y);
 }
+
+void Image::export_image(const std::string::const_pointer c_str)
+{
+	h_image_.export_image(c_str, comp_texture_);
+}
+
+void Image::clear_background(const bool* black_bckgrd)
+{
+	if (!*black_bckgrd)
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	else
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void Image::set_viewpoint()
+{
+	const GLsizei width = h_image_.get_width();
+	const GLsizei height = h_image_.get_height();
+	view_ = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+	model_ = glm::mat4(1.0f);
+	if (size.x > size.y)
+	{
+		scale(glm::vec3(size.y / height));
+		translate(glm::vec3(-(size.x / width) * (static_cast<float>(width) / height), -(size.y / height),
+			0.0f));
+	}
+	else
+	{
+		scale(glm::vec3(size.x / width));
+		translate(glm::vec3(-(size.x / width), -(size.y / height) * (static_cast<float>(height) / width),
+		                    0.0f));
+	}
+}
+
 void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 {
-	if (!visible) { return; }
-	if (loading_) return;
+	if (!visible || h_image_.is_loading()) return;
 
-	if (thread_image_loaded_loaded_)
+	if (h_image_.finished_loading())
 	{
 		Console::log("Image loaded to main thread");
 		bind_image();
 		if (image_loader.joinable())
 			image_loader.join();
 		(*hist_)->init();
-		thread_image_loaded_loaded_ = false;
-		image_loaded = true;
-		changed_ = true;
-		view_ = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-		model_ = glm::mat4(1.0f);
-		if (size.x > size.y)
-		{
-			scale(glm::vec3(size.y / height_));
-			translate(glm::vec3(-(size.x / width_) * (static_cast<float>(width_) / height_), -(size.y / height_),
-			                    0.0f));
-		}
-		else
-		{
-			scale(glm::vec3(size.x / width_));
-			translate(glm::vec3(-(size.x / width_), -(size.y / height_) * (static_cast<float>(height_) / width_),
-			                    0.0f));
-		}
+		set_viewpoint();
 		std::fill_n(cdf, 256, 1.0f / 8.0f);
+		changed_ = true;
 	}
 
 
-	if (renderer_.joinable() && !rendering)
+	if (h_image_.finished_exporting())
 	{
-		Console::log("Image rendered, join to main thread");
-		Status::set_status("Image Exported!");
-		renderer_.join();
+		h_image_.finish_export();
 	}
-
-	const double start = glfwGetTime();
-	render_to_frame_buffer();
-	*shaderLoadTime = "Framebuffer render time: " + std::to_string(glfwGetTime() - start);
 
 	const bool low_b4 = vals_->show_low_res;
 
@@ -461,25 +184,21 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 		need_texture_change_ = false;
 	}
 
-	if ((!get_changed() && !scrolling_ && !scope_rerender_) || !image_loaded)
+	if ((!get_changed() && !scrolling_ && !scope_rerender_) || !h_image_.is_loaded())
 	{
 		scrolling_ = false;
 		vals_->show_low_res = low_b4;
 		return;
 	}
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, comp_texture_);
+	const double start = glfwGetTime();
+	render_to_frame_buffer();
+	*shaderLoadTime = "Framebuffer render time: " + std::to_string(glfwGetTime() - start);
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture_);
-
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, comp_texture_small_);
-
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, texture_low_res_);
-
+	comp_texture_.bind();
+	texture_.bind();
+	comp_texture_small_.bind();
+	texture_low_res_.bind();
 
 	process_compute_shader_.use();
 	process_compute_shader_.setBool("low_res", vals_->show_low_res);
@@ -519,65 +238,46 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 
 	process_compute_shader_.setFloatArray("cdf", cdf, 256);
 	process_compute_shader_.setBool("histogram_loaded", histogram_loaded);
-	glDispatchCompute(x_, y_, 1);
 
-	if ((get_changed() && image_loaded) || (!get_changed() && image_loaded && scope_rerender_))
+	const glm::ivec2 dispatch_size = h_image_.get_dispatch_size();
+	glDispatchCompute(dispatch_size.x, dispatch_size.y, 1);
+
+	if (get_changed() || (!get_changed() && scope_rerender_))
 	{
 		glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_);
-		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+
+		ssbo_.clear(GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT);
 		std::fill_n(histogram, 256 * 4, 0);
 
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_orig_);
-		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+		ssbo_orig_.clear(GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT);
 		std::fill_n(hist_orig, 256, 0);
 
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, waveform_acc_);
-		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+		waveform_acc_.clear(GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT);
+		vectorscope_acc_.clear(GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT);
 
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, vectorscope_acc_);
-		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, comp_texture_);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture_);
-
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, comp_texture_small_);
-
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, texture_low_res_);
-
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, vectorscope_);
-
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, waveform_);
+		vectorscope_.bind();
+		waveform_.bind();
 
 		hist_compute_shader_.use();
 		hist_compute_shader_.setBool("low_res", vals_->show_low_res);
 		hist_compute_shader_.setBool("histogram_loaded", histogram_loaded);
 		hist_compute_shader_.setFloat("var_mult", vals_->scope_brightness);
 
-
-		glDispatchCompute(x_, y_, 1);
+		glDispatchCompute(dispatch_size.x, dispatch_size.y, 1);
 
 		glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
-
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_);
-		glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 256 * 4 * sizeof(unsigned), static_cast<GLvoid*>(histogram));
+		ssbo_.get_data(histogram);
 		glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
 		if (!histogram_loaded)
 		{
-			glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo_orig_);
-			glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 256 * sizeof(unsigned), static_cast<GLvoid*>(hist_orig));
+			ssbo_orig_.get_data(hist_orig);
 			glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
 			float cum = 0;
 			for (int i = 0; i < 256; i++)
 			{
-				cum += static_cast<float>(hist_orig[i]) / static_cast<float>(width_ * height_);
+				cum += static_cast<float>(hist_orig[i]) / static_cast<float>(h_image_.get_size());
 				cdf[i] = cum;
 			}
 		}
@@ -586,24 +286,10 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 		if (!get_changed() && scope_rerender_)
 			scope_rerender_ = false;
 	}
-	glBindTexture(GL_TEXTURE_2D, 0);
-
 
 	glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
-
-	if (!*black_bckgrd)
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	else
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	// bind Texture
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, comp_texture_);
-
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, comp_texture_small_);
+	clear_background(black_bckgrd);
 
 	shader_.use();
 	shader_.setBool("low_res", vals_->show_low_res);
@@ -611,13 +297,11 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 	shader_.setMat4("view", view_);
 	shader_.setMat4("projection", projection_);
 
-	shader_.setFloat("texelWidth", 1.0f / width_);
-	shader_.setFloat("texelHeight", 1.0f / height_);
+	shader_.setFloat("texelWidth", 1.0f / h_image_.get_width());
+	shader_.setFloat("texelHeight", 1.0f / h_image_.get_height());
 
-
-	glBindVertexArray(vao_);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	quad_.draw();
+	glBindTexture(GL_TEXTURE_2D, 0); //unbind
 
 	scrolling_ = false;
 	vals_->show_low_res = low_b4;
@@ -632,21 +316,19 @@ void Image::render()
 	ImGui::Begin(name.c_str(), &visible, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 	size = ImGui::GetWindowSize();
 	update_mouse_in_window();
-	if (loading_)
+	if (h_image_.is_loading())
 	{
 		ImGui::SetCursorPos(size / 2 - ImVec2(50, 50));
 		spinner("LOADING...", 100, 10, ImGui::GetColorU32(ImVec4(255, 255, 255, 255)));
 	}
-	else ImGui::Image((ImTextureID)imgui_preview_texture_, preview_size_);
+	else ImGui::Image((ImTextureID)framebuffer_.get_texture_id(), preview_size_);
 	ImGui::End();
 	*imageRender = "ImGui Window Render Time: " + std::to_string(glfwGetTime() - start);
 }
 
 void Image::cleanup()
 {
-	glDeleteVertexArrays(1, &vao_);
-	glDeleteBuffers(1, &vbo_);
-	glDeleteBuffers(1, &ebo_);
+	quad_.cleanup();
 }
 
 float Image::calc_curve(float t, const int channel) const

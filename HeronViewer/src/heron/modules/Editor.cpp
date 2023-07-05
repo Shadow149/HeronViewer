@@ -23,12 +23,12 @@ bool slider_float_reset(T& data, T reset_value, const char* label, float* v, con
 void Editor::update_sharpen_kernel()
 {
 	float a[9], b[9], c[9], d[9], e[9];
-	scalarMul(1.0f / 16.0f, blur_kernel_, a, 3);
-	scalarMul(vals_.blur, a, b, 3);
-	subMat(id_, b, c, 3);
-	scalarMul(vals_.sharp, c, d, 3);
-	addMat(id_, d, e, 3);
-	normalMat(e, vals_.sharp_kernel, 3);
+	scalar_mul(1.0f / 16.0f, blur_kernel_, a, 3);
+	scalar_mul(vals_.blur, a, b, 3);
+	sub_mat(id_, b, c, 3);
+	scalar_mul(vals_.sharp, c, d, 3);
+	add_mat(id_, d, e, 3);
+	normal_mat(e, vals_.sharp_kernel, 3);
 }
 
 void Editor::toggle_bw_label()
@@ -47,7 +47,7 @@ void Editor::init()
 
 void Editor::render()
 {
-	if (img_->image_loaded && !config_set_)
+	if (img_->is_loaded() && !config_set_)
 	{
 		config_set_ = true;
 		set_from_config_file();
@@ -80,7 +80,7 @@ void Editor::render()
 		Status::set_status("Saving...");
 	}
 	ImGui::SameLine();
-	if (img_->rendering)
+	if (img_->is_exporting())
 	{
 		ImGui::Button("Exporting...");
 		Status::set_status("Exporting...");
@@ -324,17 +324,17 @@ void Editor::render()
 
 void Editor::export_image()
 {
-	const std::experimental::filesystem::path p = stripExtension(file_name_);
+	const std::experimental::filesystem::path p = strip_extension(file_name_);
 	std::experimental::filesystem::path dir = Preferences::instance()->EXPORT_DIR;
 	dir /= p;
 	export_dir_ = dir.u8string() + "-edit.jpg";
-	img_->exportImage(export_dir_.c_str());
+	img_->export_image(export_dir_.c_str());
 }
 
 void Editor::write_ini()
 {
 	ini_writing_ = true;
-	const mINI::INIFile file(stripExtension(file_path_) + ".ini");
+	const mINI::INIFile file(strip_extension(file_path_) + ".ini");
 	mINI::INIStructure ini;
 	const bool read_suc = file.read(ini);
 	if (!read_suc)
@@ -342,7 +342,7 @@ void Editor::write_ini()
 		Console::log("Ini doesn't exist, creating one...");
 	}
 
-	Console::log("Writing ini to " + stripExtension(file_path_) + ".ini");
+	Console::log("Writing ini to " + strip_extension(file_path_) + ".ini");
 
 	ini["version"]["number"] = HERON_VERSION;
 
@@ -407,7 +407,7 @@ void Editor::write_ini()
 void Editor::read_ini()
 {
 	ini_reading_ = true;
-	const mINI::INIFile file(stripExtension(file_path_) + ".ini");
+	const mINI::INIFile file(strip_extension(file_path_) + ".ini");
 	mINI::INIStructure ini;
 	const bool read_suc = file.read(ini);
 	if (!read_suc)
@@ -418,7 +418,7 @@ void Editor::read_ini()
 		return;
 	}
 
-	Console::log("Reading ini " + stripExtension(file_path_) + ".ini");
+	Console::log("Reading ini " + strip_extension(file_path_) + ".ini");
 
 	std::string ini_ver;
 
@@ -509,9 +509,6 @@ void Editor::set_from_config_file()
 	ini_writer_ = std::thread(&Editor::read_ini, this);
 }
 
-void Editor::cleanup()
-{
-}
 
 void Editor::reset()
 {

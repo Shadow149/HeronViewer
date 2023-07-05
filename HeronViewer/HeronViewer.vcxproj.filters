@@ -135,6 +135,12 @@
     <ClCompile Include="src\heron\modules\Waveform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\heron\opengl\gl_texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\heron\HeronImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\freeimage\FreeImage.h">
@@ -1146,6 +1152,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\heron\modules\Waveform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\heron\opengl\gl_texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\heron\HeronImage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

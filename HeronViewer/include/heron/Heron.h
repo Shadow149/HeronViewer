@@ -26,10 +26,10 @@ public:
 	void on_window_load();
 	void render() override;
 	void unload_image() const;
-	void load_image(std::string file_path, std::string file_name);
+	void load_image(const std::string& file_path, const std::string& file_name);
 
 	void save_image() const;
-	void set_image_path(std::string s);
+	void set_image_path(const std::string& s);
 
 private:
 	void process_input(GLFWwindow* window);
