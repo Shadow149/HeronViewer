@@ -35,15 +35,14 @@ bool ExportDialog::export_button(const char* label) const
 {
 	if (p_img_->is_exporting())
 	{
-		//ImGui::Button("Exporting...");
-		//Status::set_status("Exporting...");
-		//ImGui::SameLine();
-		//spinner("EXPORTING...", ImGui::CalcTextSize("Exporting...").y / 2, 3,
-		//        ImGui::GetColorU32(ImVec4(255, 255, 255, 255)));
+		ImGui::Button("Exporting...");
+		Status::set_status("Exporting...");
+		ImGui::SameLine();
+		spinner("EXPORTING...", ImGui::CalcTextSize("Exporting...").y / 2, 3,
+		        ImGui::GetColorU32(ImVec4(255, 255, 255, 255)));
 	}
 	else
 	{
-
 		if (ImGui::Button(label)) return true;
 		return false;
 	}

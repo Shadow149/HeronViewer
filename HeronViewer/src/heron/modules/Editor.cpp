@@ -95,7 +95,7 @@ void Editor::render()
 		vals_.bw = !vals_.bw;
 	}
 	ImGui::SameLine();
-	ImGui::Checkbox("Invert", &vals_.inv);
+	slider_changed_ |= ImGui::Checkbox("Invert", &vals_.inv);
 
 	slider_changed_ |= slider_float_reset(vals_.wb, 7200.0f, "White Balance", &vals_.wb, 1667, 25000, "%.0f", 0,
 	                                      ImColor(242, 126, 36), ImColor(36, 173, 242));

@@ -1005,6 +1005,8 @@ void ClickInteractionUpdate(ImNodesEditorContext& editor)
         const ImPinData& start_pin =
             editor.Pins.Pool[editor.ClickInteraction.LinkCreation.StartPinIdx];
 
+        if (start_pin.Type == ImNodesAttributeType_Input) break;
+
         const ImOptionalIndex maybe_duplicate_link_idx =
             GImNodes->HoveredPinIdx.HasValue()
                 ? FindDuplicateLink(

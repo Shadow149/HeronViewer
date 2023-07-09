@@ -6,6 +6,12 @@
 void Image::unload()
 {
 	h_image_.unload();
+
+	texture_.gen(0, 0, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	texture_low_res_.gen(0, 0, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	comp_texture_.gen(0, 0, GL_RGBA32F, GL_RGBA, GL_FLOAT, nullptr);
+	comp_texture_small_.gen(0, 0, GL_RGBA32F, GL_RGBA, GL_FLOAT, nullptr);
+
 	histogram_loaded = false;
 }
 
@@ -246,6 +252,7 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 
 	const glm::ivec2 dispatch_size = h_image_.get_dispatch_size();
 	glDispatchCompute(dispatch_size.x, dispatch_size.y, 1);
+
 
 	if (get_changed() || (!get_changed() && scope_rerender_))
 	{

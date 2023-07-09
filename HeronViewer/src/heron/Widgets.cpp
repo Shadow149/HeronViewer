@@ -179,9 +179,11 @@ bool draw_color_selector(const char* label, const float height, float* r, float*
 	ImGui::GetWindowDrawList()->AddCircleFilled(ImVec2(pos.x, pos.y), 3.0f, ImColor(255, 255, 255));
 
 	bool changed = false;
+	bool reset = false;
 	if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(0))
 	{
 		*r = *g = *b = 1;
+		reset = true;
 	}
 	else if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
 	{
@@ -226,5 +228,5 @@ bool draw_color_selector(const char* label, const float height, float* r, float*
 
 
 	ImGui::PopID();
-	return changed;
+	return changed | reset;
 }

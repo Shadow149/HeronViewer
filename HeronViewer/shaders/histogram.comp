@@ -163,7 +163,7 @@ void main() {
         atomicAdd(vec_els[c.x + c.y * 255], 1);
 
 
-        ivec2 cc = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 512), int(255 - clamp(binIndex, 0, 255)));
+        ivec2 cc = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 512), int(255 - clamp(int(binIndex), 0, 255)));
         atomicAdd(wave_els[cc.x + cc.y * 512], 1);
 
 
@@ -193,7 +193,7 @@ void main() {
         vec2 hsv = vec_pos - ivec2(128);
         vec3 hsv_ = vec3(cart2polar(vec2(hsv.x/ 255.0f, hsv.y / 255.0f)),1);
         vec4 col = vec4(hsv2rgb(vec3((hsv_.y ) / 6.28318530718 , hsv_.x*2, hsv_.z)),1);
-        imageStore(vectorscope_texture, vec_pos, col * (vec_count/float(texSize.x * texSize.y) * var_mult * 2000));
+        imageStore(vectorscope_texture, vec_pos, col * clamp((vec_count/float(texSize.x * texSize.y) * var_mult * 2000), 0.0, 1.3));
     }
     
 }

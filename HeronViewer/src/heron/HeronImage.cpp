@@ -10,7 +10,6 @@
 
 void HeronImage::load_image(std::string& filename)
 {
-	std::cout << filename << std::endl;
 	image_loader_ = std::thread(&HeronImage::read_image, this, filename);
 }
 
@@ -23,11 +22,15 @@ void HeronImage::finish_export()
 
 void HeronImage::unload()
 {
-	if (img_data_)
+	if (img_data_) {
 		free(img_data_);
+		img_data_ = nullptr;
+	}
 	else if (!image_loaded_) { Console::log("No Image to unload"); return; }
-	if (lr_img_data_)
+	if (lr_img_data_) {
 		free(lr_img_data_);
+		lr_img_data_ = nullptr;
+	}
 	image_loaded_ = false;
 	if (image_loader_.joinable()) image_loader_.join();
 	Console::log("Unloading Image");
@@ -142,6 +145,7 @@ void HeronImage::render_image(const char* file_loc, const export_data export_dat
 			break;
 	}
 	free(export_data_);
+	export_data_ = nullptr;
 	Console::log("stbi time: " + std::to_string(glfwGetTime() - start));
 	exporting_ = false;
 }
