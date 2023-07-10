@@ -42,6 +42,7 @@ public:
 	{
 		this->hist_ = hist;
 	}
+	~Image() override;
 
 	void init() override;
 	void render_to_frame_buffer() const;

@@ -23,12 +23,20 @@ class PreferencesDialog : public Module
 {
 public:
 	static PreferencesDialog* instance();
+	static void destroy()
+	{
+		if (pref_ == nullptr)
+			return;
+		pref_->pref_thread_.detach();
+		delete pref_;
+	}
+
 	void init() override;
 	void render() override;
 	void cleanup() override {};
 
 private:
-	explicit PreferencesDialog(const std::string& n = "PreferencesDialog", const bool v = false) : Module(n, v, false) {}
+	explicit PreferencesDialog(const std::string& n = "Preferences", const bool v = false) : Module(n, v, false) {}
 
 	void save_settings();
 	void write_settings();

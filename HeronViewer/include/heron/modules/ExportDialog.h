@@ -23,6 +23,12 @@ class ExportDialog : public Module
 {
 public:
 	static ExportDialog* instance();
+	static void destroy()
+	{
+		if (export_ == nullptr)
+			return;
+		delete export_;
+	}
 	void init() override;
 	void export_image(const std::string file_name, const export_data export_data);
 	void render() override;

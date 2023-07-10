@@ -92,6 +92,11 @@ void Image::recompile_shader()
 	Console::log("Shader Recompiled!");
 }
 
+Image::~Image()
+{
+	h_image_.unload();
+}
+
 void Image::init()
 {
 	model_ = glm::translate(model_, glm::vec3(0, 0, 0));

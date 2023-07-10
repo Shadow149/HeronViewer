@@ -166,6 +166,12 @@ void Heron::on_window_load()
 	           "landscape.png");
 }
 
+Heron::~Heron()
+{
+	PreferencesDialog::destroy();
+	ExportDialog::destroy();
+}
+
 std::string Heron::get_file_dialog_key()
 {
 	return file_dialog_->name;
@@ -239,5 +245,6 @@ void Heron::render()
 		m->cleanup();
 	}
 
+	glfwDestroyWindow(window_);
 	glfwTerminate();
 }

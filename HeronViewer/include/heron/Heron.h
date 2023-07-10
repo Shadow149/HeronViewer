@@ -20,6 +20,7 @@ public:
 	Heron() : Window(1600, 900){}
 
 	Heron(const int w, const int h) : Window(w, h){}
+	~Heron() override;
 
 	std::string get_file_dialog_key();
 	std::vector<Module*> get_modules();

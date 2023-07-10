@@ -1,12 +1,21 @@
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
 #include "Heron.h"
 #pragma comment(lib, "dxgi")
 
 int main()
 {
-	Heron heron(1600, 900);
-	if (heron.init() == -1)
+	_CrtSetBreakAlloc(14962);
 	{
-		return -1;
+		Heron heron(1600, 900);
+		if (heron.init() == -1)
+		{
+			return -1;
+		}
+		heron.render();
 	}
-	heron.render();
+
+	_CrtDumpMemoryLeaks();
 }
