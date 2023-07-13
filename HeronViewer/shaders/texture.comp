@@ -311,8 +311,9 @@ vec4 convolution3x3(ivec2 origin, float kernel[9]) {
 float edit_channel(float v, int chr) {
 	vec4 result = vec4(0);
 	float t = pow(2,expo[chr]) * v * (1 + whites[chr]);
-	float val = (4 * pow((1-t),3) * t * (0.25 + low[chr] - contrast[chr])) + (6 * pow((1-t),2) * pow(t,2) * (0.5 + mid[chr])) + (4 * (1-t) * pow(t,3) * (0.75 + high[chr] + contrast[chr])) + (pow(t,4) * 1);
-	return pow(gain[chr] * (((1 - lift[chr]) * val) + lift[chr]), gamma[chr]);
+	float val = (4 * pow((1-t),3) * t * (0.25 + low[chr])) + (6 * pow((1-t),2) * pow(t,2) * (0.5 + mid[chr])) + (4 * (1-t) * pow(t,3) * (0.75 + high[chr])) + (pow(t,4) * 1);
+	float contrast = contrast[chr] * ((sin(2*3.14*t)) / 4.0f);
+	return pow(gain[chr] * (((1 - lift[chr]) * val) + lift[chr]), gamma[chr]) + contrast;
 ;
 }
 

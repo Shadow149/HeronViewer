@@ -23,6 +23,7 @@
 
 #include <thread>
 
+#include "cat_item.h"
 #include "gl_texture.h"
 #include "HeronImage.h"
 #include "shader_c.h"
@@ -55,7 +56,7 @@ public:
 	void bind_image();
 
 	void unload();
-	void get_image(std::string& filename);
+	void get_image();
 	void set_changes(SliderValues* slider_values);
 	void set_changed();
 	unsigned get_height() const;
@@ -117,12 +118,12 @@ private:
 	float scale_factor_ = 1.0f;
 
 	HeronImage h_image_;
-	GLubyte* export_data_{};
 
 	bool changed_ = false;
 	bool scope_rerender_ = true;
 	bool need_texture_change_ = false;
 	bool scrolling_ = false;
+	bool need_prev_write_ = false;
 
 
 	Shader shader_ = Shader("./shaders/texture.vert", "./shaders/texture.frag");

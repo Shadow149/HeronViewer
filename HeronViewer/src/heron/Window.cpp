@@ -40,20 +40,20 @@ int Window::init() {
 	Console::log("OpenGL init complete!");
 
 	Console::log("=== CONTEXT INFO ===");
-	Console::log("VERSION: " + std::string((char*)glGetString(GL_VERSION)));
-	Console::log("VENDOR: " + std::string((char*)(glGetString(GL_VENDOR))));
-	Console::log("RENDERER: " + std::string((char*)(glGetString(GL_RENDERER))));
+	Console::log("VERSION: %s", (char*)glGetString(GL_VERSION));
+	Console::log("VENDOR: %s", (char*)(glGetString(GL_VENDOR)));
+	Console::log("RENDERER: %s", (char*)(glGetString(GL_RENDERER)));
 	Console::log("===");
 
 	GLint foo = 0;
 	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_COUNT, &foo);
-	Console::log("MAX WORK GROUPS: " + std::to_string(foo));
+	Console::log("MAX WORK GROUPS: %d", foo);
 	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_SIZE, &foo);
-	Console::log("MAX WORK GROUP SIZE: " + std::to_string(foo));
+	Console::log("MAX WORK GROUP SIZE: %d", foo);
 	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &foo);
-	Console::log("MAX INVS: " + std::to_string(foo));
+	Console::log("MAX INVS: %d", foo);
 	glGetIntegerv(GL_MAX_COMPUTE_SHARED_MEMORY_SIZE, &foo);
-	Console::log("MAX SHARED MEMORY: " + std::to_string(foo));
+	Console::log("MAX SHARED MEMORY: %d", foo);
 
 	return 1;
 }

@@ -57,11 +57,9 @@ public:
 		img_->set_changes(&vals_);
 	}
 
-	void update_file(const std::string& fn, const std::string& fp)
+	void update_file()
 	{
 		config_set_ = false;
-		file_name_ = fn;
-		file_path_ = fp;
 	}
 
 	void loaded(const bool l)
@@ -84,7 +82,6 @@ private:
 	Image* img_;
 	std::thread ini_writer_;
 
-	std::string file_name_, file_path_;
 	std::string export_dir_;
 
 

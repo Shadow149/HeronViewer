@@ -1,7 +1,8 @@
 #pragma once
+
+#pragma pack(push, 1) // exact fit - no padding
 struct SliderValues
 {
-
 	bool show_low_res;
 
 	const char* bw_label;
@@ -47,3 +48,4 @@ struct SliderValues
 
 	float scope_brightness;
 };
+#pragma pack(pop) // back to whatever the previous packing mode was

@@ -1,6 +1,7 @@
 #pragma once
 #include <thread>
 
+#include "cat_item.h"
 #include "gl_texture.h"
 #include "glm.hpp"
 
@@ -39,12 +40,9 @@ public:
 	{
 	}
 
-	void load_image(std::string& filename);
+	void load_image(cat_item item);
 	void export_image(const char* file_loc, const gl_image& image, export_data export_data);
 	void finish_export();
-	template<typename T>
-	static void resize_image(GLsizei width, GLsizei height, GLsizei max_side,
-		T& target_width, T& target_height);
 
 	glm::ivec2 get_dispatch_size() const { return dispatch_size_; }
 	bool is_loading() const { return loading_; }
@@ -81,6 +79,8 @@ private:
 	void render_image(const char* file_loc, const export_data export_data);
 
 private:
+	std::string file_location_;
+
 	bool loading_;
 	bool finished_loading_;
 	bool exporting_;
@@ -99,24 +99,3 @@ private:
 
 	glm::ivec2 dispatch_size_;
 };
-
-template<typename T>
-void HeronImage::resize_image(const GLsizei width, const GLsizei height,
-	const GLsizei max_side, T& target_width, T& target_height)
-{
-	if (width > height && width > max_side)
-	{
-		target_width = max_side;
-		target_height = static_cast<GLsizei>(max_side * (static_cast<double>(height) / width));
-	}
-	else if (height > max_side)
-	{
-		target_width = static_cast<GLsizei>(max_side * (static_cast<double>(width) / height));
-		target_height = max_side;
-	}
-	else
-	{
-		target_width = width;
-		target_height = height;
-	}
-}

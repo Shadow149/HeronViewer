@@ -49,7 +49,7 @@ void FileDialog::render()
 			const std::string file_path = ImGuiFileDialog::Instance()->GetCurrentPath();
 			const std::string file_name = ImGuiFileDialog::Instance()->GetCurrentFileName();
 			escape_ = escaped(file_path_name);
-			Console::log("Opening: " + escape_);
+			Console::log("Opening: %s", escape_.c_str());
 			heron_window_->set_image_path(file_path);
 			heron_window_->load_image(escape_, file_name);
 		}

@@ -7,7 +7,7 @@
 
 int main()
 {
-	_CrtSetBreakAlloc(14962);
+	//_CrtSetBreakAlloc(14962);
 	{
 		Heron heron(1600, 900);
 		if (heron.init() == -1)

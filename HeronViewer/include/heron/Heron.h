@@ -7,6 +7,7 @@
 #include "Curve.h"
 #include "Histogram.h"
 #include "Console.h"
+#include "Gallery.h"
 #include "Overlay.h"
 #include "PreferencesDialog.h"
 
@@ -27,10 +28,11 @@ public:
 	void on_window_load();
 	void render() override;
 	void unload_image() const;
-	void load_image(const std::string& file_path, const std::string& file_name);
+	void load_image(const std::string& file_path, const std::string& file_name) const;
 
 	void save_image() const;
 	void set_image_path(const std::string& s);
+	void load_item(cat_item item) const;
 
 private:
 	void process_input(GLFWwindow* window);
@@ -50,6 +52,7 @@ private:
 	Image* image_ = nullptr;
 	Histogram* hist_ = nullptr;
 	Editor* editor_ = nullptr;
+	Gallery* gallery_ = nullptr;
 	std::vector<Module*> modules_;
 
 	std::string img_file_path_;

@@ -1,6 +1,11 @@
 #include "Image.h"
+
+#include "catalog.h"
+#include "cat_item.h"
 #include "Histogram.h"
+#include "serialise.h"
 #include "Widgets.h"
+
 
 
 void Image::unload()
@@ -15,9 +20,9 @@ void Image::unload()
 	histogram_loaded = false;
 }
 
-void Image::get_image(std::string& filename)
+void Image::get_image()
 {
-	h_image_.load_image(filename);
+	h_image_.load_image(*catalog::instance()->get_current_item());
 }
 
 void Image::bind_image()
@@ -29,7 +34,7 @@ void Image::bind_image()
 	const unsigned char* img_data = h_image_.get_img_data();
 	const unsigned char* lr_img_data = h_image_.get_lr_img_data();
 
-	HeronImage::resize_image<float>(width, height, RENDER_WIDTH,
+	resize_image<float>(width, height, RENDER_WIDTH,
 		preview_size_.x, preview_size_.y);
 
 
@@ -50,6 +55,9 @@ void Image::bind_image()
 
 	comp_texture_.init(width, height, GL_RGBA32F, GL_RGBA, GL_FLOAT, nullptr);
 	comp_texture_small_.init(lr_width, lr_height, GL_RGBA32F, GL_RGBA, GL_FLOAT, nullptr);
+
+	catalog::instance()->get_current_item()->hprev_width = lr_width;
+	catalog::instance()->get_current_item()->hprev_height = lr_height;
 
 }
 
@@ -179,6 +187,7 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 		set_viewpoint();
 		std::fill_n(cdf, 256, 1.0f / 8.0f);
 		changed_ = true;
+		need_prev_write_ = true;
 	}
 
 
@@ -189,6 +198,8 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 
 	const bool low_b4 = vals_->show_low_res;
 
+	if (get_changed())	need_prev_write_ = true;
+
 	vals_->show_low_res |= scrolling_;
 	if ((vals_->show_low_res) && !need_texture_change_)
 	{
@@ -198,6 +209,25 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 	{
 		scope_rerender_ = true;
 		need_texture_change_ = false;
+
+		if (need_prev_write_) {
+			Console::log("Getting low res");
+			auto* export_data = static_cast<GLfloat*>(malloc(h_image_.get_lr_width() * h_image_.get_lr_height() * 4 * sizeof(GLfloat)));
+			memset(export_data, 0, h_image_.get_lr_width() * h_image_.get_lr_height() * 4);
+			const double start = glfwGetTime();
+			gl_pbo pbo{};
+			pbo.gen(h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat));
+			comp_texture_small_.get_data_via_pbo(&pbo, export_data);
+			Console::log("Export time: %f", glfwGetTime() - start);
+
+			// TODO s_write unnessassarily copies data into another buffer...
+			if (s_prev_write(export_data, catalog::instance()->get_current_item()->hprev_location, h_image_.get_lr_width() * h_image_.get_lr_height() * 4 * sizeof(GLfloat)) < 0)
+			{
+				Console::log("Unable to update preview...");
+			}
+			free(export_data);
+			need_prev_write_ = false;
+		}
 	}
 
 	if ((!get_changed() && !scrolling_ && !scope_rerender_) || !h_image_.is_loaded())
@@ -351,11 +381,12 @@ void Image::cleanup()
 float Image::calc_curve(float t, const int channel) const
 {
 	t *= pow(2.0f, vals_->expo[channel]) * (1.0f + vals_->whites[channel]);
-	const float g = (4.0f * pow((1.0f - t), 3.0f) * t * (0.25f + vals_->low[channel] - vals_->contrast[channel]))
+	const float g = (4.0f * pow((1.0f - t), 3.0f) * t * (0.25f + vals_->low[channel]))
 		+ (6.0f * pow((1 - t), 2.0f) * pow(t, 2.0f) * (0.5f + vals_->mid[channel]))
-		+ (4.0f * (1.0f - t) * pow(t, 3.0f) * (0.75f + vals_->high[channel] + vals_->contrast[channel]))
+		+ (4.0f * (1.0f - t) * pow(t, 3.0f) * (0.75f + vals_->high[channel]))
 		+ (pow(t, 4.0f) * 1.0f);
-	return pow(vals_->gain[channel] * ((1.0 - vals_->lift[channel]) * g + vals_->lift[channel]), vals_->gamma[channel]);
+	const float contrast = vals_->contrast[channel] * ((sin(2*3.14*t)) / 4.0f);
+	return pow(vals_->gain[channel] * ((1.0 - vals_->lift[channel]) * g + vals_->lift[channel]), vals_->gamma[channel]) + contrast;
 }
 
 void Image::scale(const glm::vec3 s)

@@ -4,6 +4,7 @@
 
 #include "ExportDialog.h"
 #include "FileDialog.h"
+#include "Gallery.h"
 #include "Graph.h"
 #include "Preview.h"
 #include "Vectorscope.h"
@@ -83,14 +84,31 @@ void Heron::set_image_path(const std::string& s)
 	img_file_path_ = s;
 }
 
-void Heron::load_image(const std::string& file_path, const std::string& file_name)
+void Heron::load_item(const cat_item item) const
 {
 	unload_image();
-	Console::log("Change Image : " + file_path);
-	img_file_ = file_path;
-	image_->get_image(img_file_);
-	editor_->update_file(file_name, file_path);
+	catalog::instance()->add_image(item);
+
+	image_->get_image();
+	editor_->update_file(); // TODO probably not needed
+
 	editor_->loaded(true);
+}
+
+void Heron::load_image(const std::string& file_path, const std::string& file_name) const
+{
+	cat_item item{};
+	strcpy_s(item.file_location, file_path.c_str());
+	strcpy_s(item.file_name, file_name.c_str());
+
+	const size_t hash = std::hash<std::string>{}(strip_extension(file_name));
+
+	strcpy_s(item.hconf_location, ("HeronCatalog/configs/" + std::to_string(hash) + ".hconf").c_str());
+	strcpy_s(item.hprev_location, ("HeronCatalog/previews/" + std::to_string(hash) + ".hprev").c_str());
+
+	Console::log("Change Image : %s", file_path.c_str());
+
+	load_item(item);
 }
 
 void Heron::unload_image() const
@@ -131,6 +149,7 @@ void Heron::init_modules()
 	image_ = new Image("Image", &hist_);
 	hist_ = new Histogram(image_, "Histogram");
 	editor_ = new Editor(image_, "Editor");
+	gallery_ = new Gallery(this);
 	ExportDialog::instance()->set_image(image_);
 
 	modules_.push_back(new MainPanel(this, "Main"));
@@ -146,6 +165,7 @@ void Heron::init_modules()
 	modules_.push_back(ExportDialog::instance());
 	modules_.push_back(PreferencesDialog::instance());
 	modules_.push_back(new Graph("Node Editor"));
+	modules_.push_back(gallery_);
 	modules_.push_back(image_);
 
 	fps_metric_ = Overlay::register_metric();
@@ -244,6 +264,8 @@ void Heron::render()
 	{
 		m->cleanup();
 	}
+
+	catalog::instance()->write_catalog();
 
 	glfwDestroyWindow(window_);
 	glfwTerminate();

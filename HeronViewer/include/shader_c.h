@@ -38,7 +38,7 @@ public:
         }
         catch (std::ifstream::failure& e)
         {
-            Console::log("ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " + (std::string)e.what());
+            Console::log("ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: %s", e.what());
         }
         const char* cShaderCode = computeCode.c_str();
         // 2. compile shaders
@@ -156,7 +156,9 @@ private:
             if (!success)
             {
                 glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-                Console::log("ERROR::SHADER_COMPILATION_ERROR of type: " + type + "\n" + infoLog + "\n -- --------------------------------------------------- -- ");
+                Console::log("------------------------");
+                Console::log("ERROR::SHADER_COMPILATION_ERROR of type: %s \n %s", type.c_str(), infoLog);
+                Console::log("------------------------");
             }
         }
         else
@@ -165,7 +167,9 @@ private:
             if (!success)
             {
                 glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-                Console::log("ERROR::PROGRAM_LINKING_ERROR of type: " + type + "\n" + infoLog + "\n -- --------------------------------------------------- -- ");
+                Console::log("------------------------");
+                Console::log("ERROR::PROGRAM_LINKING_ERROR of type: %s \n %s", type.c_str(), infoLog);
+                Console::log("------------------------");
             }
         }
     }
