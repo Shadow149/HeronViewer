@@ -497,7 +497,9 @@ copy /y "$(ProjectDir)lib\freeimagelib\FreeImage.dll" "$(OutDir)FreeImage.dll"</
     <ClInclude Include="include\heron\modules\MainPanel.h" />
     <ClInclude Include="include\heron\modules\Module.h" />
     <ClInclude Include="include\heron\modules\Overlay.h" />
+    <ClInclude Include="include\heron\modules\Panel.h" />
     <ClInclude Include="include\heron\modules\PreferencesDialog.h" />
+    <ClInclude Include="include\heron\modules\renderable.h" />
     <ClInclude Include="include\heron\modules\Status.h" />
     <ClInclude Include="include\heron\serialise.h" />
     <ClInclude Include="include\heron\Widgets.h" />

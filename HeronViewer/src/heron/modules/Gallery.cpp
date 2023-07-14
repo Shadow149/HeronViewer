@@ -11,7 +11,7 @@ bool load_texture_from_preview(const cat_item item, GLuint* out_texture)
 {
 
     // TODO hard coded 3!
-    const unsigned size = item.hprev_height * item.hprev_width * 4 * sizeof(GLfloat);
+    const unsigned size = item.hprev_height * item.hprev_width * 3 * sizeof(GLfloat);
     auto* image_data = static_cast<GLfloat*>(malloc(size));
     if (s_prev_read(image_data, item.hprev_location, size) < 0)
         return false;
@@ -25,7 +25,7 @@ bool load_texture_from_preview(const cat_item item, GLuint* out_texture)
     return true;
 }
 
-void Gallery::init()
+void Gallery::init_panel()
 {
     for (const auto& item : catalog_->get())
     {
@@ -35,11 +35,11 @@ void Gallery::init()
     }
 }
 
-void Gallery::render()
+void Gallery::render_panel()
 {
-	ImGui::Begin(name.c_str());
-
-    int max_width = ImGui::GetWindowWidth();
+    ImGui::SliderInt("Scale", &cells_per_width_, 2, 15);
+	const float max_width = ImGui::GetWindowWidth();
+    const auto cell_size = ImVec2(max_width / cells_per_width_, max_width / cells_per_width_);
     int n = 0;
     ImVec2 pos = ImGui::GetCursorPos();
     for (const auto& item : catalog_->get())
@@ -47,10 +47,8 @@ void Gallery::render()
         char buf[255];
         const cat_item c_item = item.second;
 
-    	const auto cell_size = ImVec2(200, 200);
         auto prev_size = ImVec2(200, 200);
-        resize_image(c_item.hprev_width, c_item.hprev_height, 200, prev_size.x, prev_size.y);
-
+        resize_image(c_item.hprev_width, c_item.hprev_height, cell_size.x, prev_size.x, prev_size.y);
 
         sprintf_s(buf, "##%d", item.first);
 
@@ -62,11 +60,10 @@ void Gallery::render()
 		}
         ImGui::SameLine();
         ImGui::SetCursorPos(ImVec2(pos.x, pos.y));
-        //ImGui::SetItemAllowOverlap();
         ImGui::Image((ImTextureID)catalog_textures_[item.first], prev_size);
         ImGui::PopID();
         n++;
-        if (pos.x + cell_size.x < max_width)
+        if (pos.x + cell_size.x + 20 < max_width)
         {
             ImGui::SameLine();
             pos.x += cell_size.x + 20;
@@ -78,5 +75,4 @@ void Gallery::render()
         }
     }
 
-	ImGui::End();
 }

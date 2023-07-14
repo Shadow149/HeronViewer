@@ -28,7 +28,7 @@ void PreferencesDialog::render()
 
 	if (!visible) { return; }
 
-	if (ImGui::Begin(name.c_str(), &visible))
+	if (ImGui::Begin(name.c_str()))
 	{
 		ImGui::InputText("Export Directory", &export_dir_str_);
 

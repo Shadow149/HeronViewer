@@ -1190,6 +1190,12 @@
     <ClInclude Include="include\heron\modules\Gallery.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\heron\modules\Panel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\heron\modules\renderable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\glm\doc\api\a00001_source.html" />

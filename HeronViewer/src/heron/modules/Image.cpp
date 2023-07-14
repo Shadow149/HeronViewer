@@ -212,8 +212,8 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 
 		if (need_prev_write_) {
 			Console::log("Getting low res");
-			auto* export_data = static_cast<GLfloat*>(malloc(h_image_.get_lr_width() * h_image_.get_lr_height() * 4 * sizeof(GLfloat)));
-			memset(export_data, 0, h_image_.get_lr_width() * h_image_.get_lr_height() * 4);
+			auto* export_data = static_cast<GLfloat*>(malloc(h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat)));
+			memset(export_data, 0, h_image_.get_lr_width() * h_image_.get_lr_height() * 3);
 			const double start = glfwGetTime();
 			gl_pbo pbo{};
 			pbo.gen(h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat));
@@ -221,7 +221,7 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 			Console::log("Export time: %f", glfwGetTime() - start);
 
 			// TODO s_write unnessassarily copies data into another buffer...
-			if (s_prev_write(export_data, catalog::instance()->get_current_item()->hprev_location, h_image_.get_lr_width() * h_image_.get_lr_height() * 4 * sizeof(GLfloat)) < 0)
+			if (s_prev_write(export_data, catalog::instance()->get_current_item()->hprev_location, h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat)) < 0)
 			{
 				Console::log("Unable to update preview...");
 			}

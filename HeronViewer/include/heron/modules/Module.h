@@ -4,11 +4,12 @@
 #include"imgui.h"
 #include"imgui_impl_glfw.h"
 #include"imgui_impl_opengl3.h"
+#include "renderable.h"
 
 //#define SHOW_FPS
 
 
-class Module
+class Module : public renderable
 {
 public:
 	virtual ~Module() = default;
@@ -20,9 +21,6 @@ public:
 		show_module_option = s;
 	}
 
-	virtual void init() = 0;
-	virtual void render() = 0;
-	virtual void cleanup() = 0;
 	virtual void set_style();
 	void toggle_show() { visible = !visible; }
 	void update_mouse_in_window();

@@ -51,9 +51,7 @@ bool ExportDialog::export_button(const char* label) const
 
 void ExportDialog::render()
 {
-	if (!visible) { return; }
-
-	if (ImGui::Begin(name.c_str(), &visible))
+	if (ImGui::Begin(name.c_str()))
 	{
 		if (ImGui::BeginTabBar("ExportTab"))
 		{

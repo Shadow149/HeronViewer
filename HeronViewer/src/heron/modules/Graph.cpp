@@ -85,7 +85,7 @@ void Graph::set_init_pos()
 
 void Graph::render()
 {
-	ImGui::Begin(name.c_str(), &visible);
+	ImGui::Begin(name.c_str());
 
 	if (!start_pos_set_) {
 		set_init_pos();

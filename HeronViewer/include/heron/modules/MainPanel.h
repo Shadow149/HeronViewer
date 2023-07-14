@@ -2,22 +2,23 @@
 #include "Module.h"
 #include "Heron.h"
 #include "Status.h"
+#include "Panel.h"
 
 #include"imgui.h"
 #include"imgui_impl_glfw.h"
 #include"imgui_impl_opengl3.h"
 #include"ImGuiFileDialog.h"
 
-class MainPanel : public Module
+class MainPanel final : public Panel
 {
 public:
-	MainPanel(Window* h, const std::string n, const bool v = true) : Module(n, v, false)
+	explicit MainPanel(Window* h) : Panel("Main")
 	{
 		heron_window_ = h;
 	}
-	void init() override;
-	void render() override;
-	void cleanup() override;
+	void init_panel() override;
+	void render_panel() override;
+	void cleanup_panel() override;
 
 private:
 	Window* heron_window_;

@@ -39,7 +39,8 @@ void Histogram::render()
 	}
 	mean /= 256 / 2;
 
-	ImGui::Begin(name.c_str(), &visible);
+	ImGui::SetNextWindowBgAlpha(0.50f); // Transparent background
+	ImGui::Begin(name.c_str());
 	const ImVec2 size = ImGui::GetWindowSize();
 	ImPlot::GetStyle().PlotMinSize = ImVec2(0, 0);
 	ImPlot::GetStyle().PlotDefaultSize = ImVec2(-1, size.y - 30);

@@ -60,7 +60,7 @@ void Editor::render()
 	}
 
 
-	ImGui::Begin(name.c_str(), &visible);
+	ImGui::Begin(name.c_str());
 	update_mouse_in_window();
 
 

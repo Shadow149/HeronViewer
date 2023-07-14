@@ -25,7 +25,7 @@ void Curve::render()
 	}
 
 	ImGui::SetNextWindowBgAlpha(0.50f); // Transparent background
-	ImGui::Begin(name.c_str(), &visible);
+	ImGui::Begin(name.c_str());
 	// TODO make this better
 	const ImVec2 size = ImGui::GetWindowSize();
 	ImGui::SetWindowSize(ImVec2(size.x, size.x + 40));

@@ -87,6 +87,7 @@ void Heron::set_image_path(const std::string& s)
 void Heron::load_item(const cat_item item) const
 {
 	unload_image();
+	ImGui::SetWindowFocus(editor_panel_->name.c_str());
 	catalog::instance()->add_image(item);
 
 	image_->get_image();
@@ -145,28 +146,33 @@ void Heron::init_glfw()
 
 void Heron::init_modules()
 {
+	editor_panel_ = reinterpret_cast<Panel*>(new MainPanel(this));
+	gallery_panel_ = reinterpret_cast<Panel*>(new Gallery(this));
+
 	file_dialog_ = new FileDialog(this, "File Dialog");
 	image_ = new Image("Image", &hist_);
 	hist_ = new Histogram(image_, "Histogram");
 	editor_ = new Editor(image_, "Editor");
-	gallery_ = new Gallery(this);
 	ExportDialog::instance()->set_image(image_);
 
-	modules_.push_back(new MainPanel(this, "Main"));
-	modules_.push_back(file_dialog_);
-	modules_.push_back(editor_);
-	modules_.push_back(hist_);
-	modules_.push_back(new Vectorscope(image_, "Vectorscope"));
-	modules_.push_back(new Waveform(image_, "Waveform"));
-	modules_.push_back(new Preview(image_, "Preview"));
-	modules_.push_back(new Curve(image_, "Curve"));
-	modules_.push_back(new Console("Console"));
-	modules_.push_back(new Overlay("Overlay"));
-	modules_.push_back(ExportDialog::instance());
-	modules_.push_back(PreferencesDialog::instance());
-	modules_.push_back(new Graph("Node Editor"));
-	modules_.push_back(gallery_);
-	modules_.push_back(image_);
+	editor_panel_->register_module(file_dialog_);
+	editor_panel_->register_module(editor_);
+	editor_panel_->register_module(hist_);
+	editor_panel_->register_module(new Vectorscope(image_, "Vectorscope"));
+	editor_panel_->register_module(new Waveform(image_, "Waveform"));
+	editor_panel_->register_module(new Preview(image_, "Preview"));
+	editor_panel_->register_module(new Curve(image_, "Curve"));
+	editor_panel_->register_module(new Console("Console"));
+	editor_panel_->register_module(new Overlay("Overlay"));
+	editor_panel_->register_module(ExportDialog::instance());
+	editor_panel_->register_module(PreferencesDialog::instance());
+	editor_panel_->register_module(new Graph("Node Editor"));
+	editor_panel_->register_module(image_);
+
+
+	panels_.push_back(editor_panel_);
+	panels_.push_back(gallery_panel_);
+
 
 	fps_metric_ = Overlay::register_metric();
 	frame_time_ = Overlay::register_metric();
@@ -176,7 +182,7 @@ void Heron::init_modules()
 
 std::vector<Module*> Heron::get_modules()
 {
-	return modules_;
+	return editor_panel_->get_modules();
 }
 
 void Heron::on_window_load()
@@ -220,9 +226,9 @@ void Heron::render()
 	init_modules();
 	init_im_gui();
 
-	for (Module* m : modules_)
+	for (Panel* p : panels_)
 	{
-		m->init();
+		p->init();
 	}
 
 	on_window_load();
@@ -243,11 +249,9 @@ void Heron::render()
 
 		im_gui_render_init();
 
-		for (Module* m : modules_)
+		for (Panel* p : panels_)
 		{
-			//m->setStyle();
-			if (!m->visible) continue; // TODO remove check in individual render funcs
-			m->render();
+			p->render();
 		}
 
 		im_gui_render();
@@ -260,9 +264,9 @@ void Heron::render()
 
 	im_gui_clean_up();
 
-	for (Module* m : modules_)
+	for (Panel* p : panels_)
 	{
-		m->cleanup();
+		p->cleanup();
 	}
 
 	catalog::instance()->write_catalog();

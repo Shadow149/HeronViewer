@@ -1,23 +1,12 @@
 #include "MainPanel.h"
 
 
-void MainPanel::init()
+void MainPanel::init_panel()
 {
 }
 
-void MainPanel::render()
+void MainPanel::render_panel()
 {
-	ImGui::Begin("Main", &visible, ImGuiWindowFlags_MenuBar |
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoScrollbar |
-		ImGuiWindowFlags_NoDecoration |
-		ImGuiWindowFlags_NoTitleBar |
-		ImGuiTabBarFlags_NoTooltip
-	);
-
-	ImGui::GetStyle().CellPadding = ImVec2(0, 0);
-
 	if (ImGui::BeginMenuBar())
 	{
 		if (ImGui::BeginMenu("File"))
@@ -66,10 +55,8 @@ void MainPanel::render()
 		ImGui::EndMenuBar();
 
 	}
-
-	ImGui::End();
 }
 
-void MainPanel::cleanup()
+void MainPanel::cleanup_panel()
 {
 }

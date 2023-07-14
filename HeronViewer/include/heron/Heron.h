@@ -9,6 +9,7 @@
 #include "Console.h"
 #include "Gallery.h"
 #include "Overlay.h"
+#include "Panel.h"
 #include "PreferencesDialog.h"
 
 class FileDialog;
@@ -52,8 +53,10 @@ private:
 	Image* image_ = nullptr;
 	Histogram* hist_ = nullptr;
 	Editor* editor_ = nullptr;
-	Gallery* gallery_ = nullptr;
-	std::vector<Module*> modules_;
+
+	std::vector<Panel*> panels_;
+	Panel* editor_panel_ = nullptr;
+	Panel* gallery_panel_ = nullptr;
 
 	std::string img_file_path_;
 	std::string img_file_;
