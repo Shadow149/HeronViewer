@@ -63,7 +63,7 @@ void HeronImage::read_image(const std::string& filename)
 	if (FreeImage_FIFSupportsReading(fif))
 	{
 		if (fif == FIF_RAW)
-			fi_bitmap = FreeImage_Load(fif, file_c_str, RAW_DISPLAY);
+			fi_bitmap = FreeImage_Load(fif, file_c_str, RAW_DEFAULT);
 		else
 			fi_bitmap = FreeImage_Load(fif, file_c_str);
 	}
@@ -77,8 +77,9 @@ void HeronImage::read_image(const std::string& filename)
 	const unsigned fi_bitmap_bpp = FreeImage_GetBPP(fi_bitmap);
 	Console::log("Bitmap bpp: %d", fi_bitmap_bpp);
 	FreeImage_FlipVertical(fi_bitmap);
-	fi_bitmap = FreeImage_ConvertTo24Bits(fi_bitmap);
-	FreeImage_AdjustGamma(fi_bitmap, 2.5);
+	//fi_bitmap = FreeImage_ConvertTo24Bits(fi_bitmap);
+	fi_bitmap = FreeImage_TmoDrago03(fi_bitmap);
+	//FreeImage_AdjustGamma(fi_bitmap, 2.2);
 
 	width_ = static_cast<GLsizei>(FreeImage_GetWidth(fi_bitmap));
 	height_ = static_cast<GLsizei>(FreeImage_GetHeight(fi_bitmap));
