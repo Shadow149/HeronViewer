@@ -8,10 +8,12 @@ class catalog
 {
 public:
 	static catalog* instance();
-	void add_image(cat_item item);
+	bool add_image(cat_item item);
 	int write_catalog() const;
 	std::map<size_t, cat_item> get();
 	cat_item* get_current_item();
+	bool image_already_loaded(const cat_item& item) const;
+	static size_t calc_item_hash(cat_item item);
 
 private:
 	catalog();

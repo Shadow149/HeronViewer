@@ -10,10 +10,11 @@ class Gallery :
 {
 public:
 	Gallery(Heron* h_window, const std::string& n = "Gallery")
-		: Panel(n), h_window_(h_window), catalog_(catalog::instance())
+		: Panel(n, true), h_window_(h_window), catalog_(catalog::instance())
 	{
 	}
 	void init_panel() override;
+	void on_focus() override;
 	void render_panel() override;
 	void cleanup_panel() override {}
 private:

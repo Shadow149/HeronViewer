@@ -55,6 +55,7 @@ public:
 	void cleanup() override;
 	void bind_image();
 
+	void save_preview();
 	void unload();
 	void get_image();
 	void set_changes(SliderValues* slider_values);
@@ -90,7 +91,8 @@ public:
 
 
 	bool is_loaded() const { return h_image_.is_loaded(); }
-	bool is_exporting() const { return h_image_.is_exporting(); };
+	bool is_exporting() const { return h_image_.is_exporting(); }
+	bool is_unsaved() const { return unsaved_; }
 
 
 public:
@@ -123,8 +125,7 @@ private:
 	bool scope_rerender_ = true;
 	bool need_texture_change_ = false;
 	bool scrolling_ = false;
-	bool need_prev_write_ = false;
-
+	bool unsaved_ = false;
 
 	Shader shader_ = Shader("./shaders/texture.vert", "./shaders/texture.frag");
 	ComputeShader process_compute_shader_ = ComputeShader("./shaders/texture.comp");

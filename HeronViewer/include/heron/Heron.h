@@ -28,10 +28,11 @@ public:
 	std::vector<Module*> get_modules();
 	void on_window_load();
 	void render() override;
-	void unload_image() const;
 	void load_image(const std::string& file_path, const std::string& file_name) const;
+	void unload_image() const;
 
 	void save_image() const;
+	bool write_image_caches() const;
 	void set_image_path(const std::string& s);
 	void load_item(cat_item item) const;
 

@@ -6,7 +6,11 @@
 </p>
 
 <p align="center">
- <img alt="Release" src="https://img.shields.io/badge/release-0.1.0.1-blue"/>
+ <img alt="Release" src="https://img.shields.io/badge/Release-v0.1.0.1-2CAD31.svg?style=for-the-badge"/>
+ <img src="https://img.shields.io/badge/Visual%20Studio-5C2D91.svg?style=for-the-badge&logo=visual-studio&logoColor=white">
+ <img src="https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white">
+
+</p>
 
 ## Contents
 
@@ -20,7 +24,16 @@
 
 ## About
 
+Heron is an open source, free to use, raw image editor prioritising performance and ease of use, written in C++.
+
 ## Features
+
+- Tone-curve based editing
+- Intuitive colour wheels for advanced colour grading
+- OpenGL shader based editing for ultra-fast performance
+- Histogram, vectorscope and waveform graphics
+- Automatic settings saving
+- Local catalog to store edited photos
 
 ## Usage
 

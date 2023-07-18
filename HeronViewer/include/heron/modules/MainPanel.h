@@ -12,7 +12,7 @@
 class MainPanel final : public Panel
 {
 public:
-	explicit MainPanel(Window* h) : Panel("Main")
+	explicit MainPanel(Window* h) : Panel("Main", false)
 	{
 		heron_window_ = h;
 	}

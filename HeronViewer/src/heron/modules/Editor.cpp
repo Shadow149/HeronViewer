@@ -95,9 +95,10 @@ void Editor::render()
 	ImGui::Separator();
 
 
-	if (slider_changed_ |= ImGui::Button(vals_.bw ? COLOR_LABEL : BW_LABEL))
+	if (ImGui::Button(vals_.bw ? COLOR_LABEL : BW_LABEL))
 	{
 		vals_.bw = !vals_.bw;
+		slider_changed_ |= true;
 	}
 	ImGui::SameLine();
 	slider_changed_ |= ImGui::Checkbox("Invert", &vals_.inv);

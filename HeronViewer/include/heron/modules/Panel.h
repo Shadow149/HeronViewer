@@ -13,7 +13,7 @@ class Panel : public renderable
 {
 public:
 	virtual ~Panel() = default;
-	explicit Panel(std::string name) : name(std::move(name)) {}
+	explicit Panel(std::string name, const bool focus) : name(std::move(name)), focus(focus) {}
 
 	void init() override {
 		init_modules();
@@ -33,6 +33,16 @@ public:
 		)) {
 
 			ImGui::GetStyle().CellPadding = ImVec2(0, 0);
+
+			if (!ImGui::IsWindowFocused())
+			{
+				focus = false;
+			}
+			if (ImGui::IsWindowFocused() && !focus)
+			{
+				focus = true;
+				on_focus();
+			}
 
 			render_panel();
 			render_modules();
@@ -56,6 +66,12 @@ public:
 	{
 		return modules_;
 	}
+
+public:
+	bool focus;
+
+protected:
+	virtual void on_focus() {}
 
 private:
 

@@ -86,14 +86,20 @@ void Heron::set_image_path(const std::string& s)
 
 void Heron::load_item(const cat_item item) const
 {
-	unload_image();
+	gallery_panel_->focus = false;
+	editor_panel_->focus = true;
+
 	ImGui::SetWindowFocus(editor_panel_->name.c_str());
-	catalog::instance()->add_image(item);
+	if (!catalog::instance()->image_already_loaded(item)) {
+		catalog::instance()->add_image(item);
+		unload_image();
 
-	image_->get_image();
-	editor_->update_file(); // TODO probably not needed
+		image_->get_image();
+		editor_->update_file(); // TODO probably not needed
 
-	editor_->loaded(true);
+		editor_->loaded(true);
+	}
+
 }
 
 void Heron::load_image(const std::string& file_path, const std::string& file_name) const
@@ -114,6 +120,8 @@ void Heron::load_image(const std::string& file_path, const std::string& file_nam
 
 void Heron::unload_image() const
 {
+	//editor_->update_config_file();
+	editor_->write_ini(); // TODO not threaded as a test
 	image_->unload();
 	editor_->reset();
 	editor_->loaded(false);
@@ -187,9 +195,9 @@ std::vector<Module*> Heron::get_modules()
 
 void Heron::on_window_load()
 {
-	Console::log("PRELOADING IMAGE...");
-	load_image("./images/landscape.png",
-	           "landscape.png");
+	//Console::log("PRELOADING IMAGE...");
+	//load_image("./images/landscape.png",
+	//           "landscape.png");
 }
 
 Heron::~Heron()
@@ -206,6 +214,17 @@ std::string Heron::get_file_dialog_key()
 void Heron::save_image() const
 {
 	editor_->update_config_file();
+}
+
+bool Heron::write_image_caches() const
+{
+	if (image_->is_unsaved())
+	{
+		editor_->write_ini();
+		image_->save_preview();
+		return true;
+	}
+	return false;
 }
 
 void Heron::calc_time()
@@ -261,6 +280,7 @@ void Heron::render()
 		glfwSwapBuffers(window_);
 		glfwPollEvents();
 	}
+	unload_image();
 
 	im_gui_clean_up();
 

@@ -69,13 +69,13 @@ public:
 
 	void update_config_file();
 	void undo();
+	void write_ini();
 
 private:
 	void update_sharpen_kernel();
 	void toggle_bw_label();
 
 	void set_from_config_file();
-	void write_ini();
 	void read_ini();
 
 private:

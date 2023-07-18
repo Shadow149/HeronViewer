@@ -56,7 +56,7 @@ s_error_t read_serialize_catalog(std::map<size_t, cat_item>& data, const char* l
 		char item_buffer[sizeof(cat_item)];
 		memcpy(item_buffer, buffer + i * sizeof(cat_item), sizeof(cat_item));
 		const cat_item item = *reinterpret_cast<cat_item*>(item_buffer);
-		size_t hash = std::hash<std::string>{}(std::string(item.file_location));
+		size_t hash = catalog::calc_item_hash(item);
 		data[hash] = item;
 	}
 	Console::log("Serialised file read");
@@ -77,15 +77,21 @@ catalog::catalog()
 	read_catalog(); // TODO put this on a thread
 }
 
-void catalog::add_image(const cat_item item)
+size_t catalog::calc_item_hash(const cat_item item)
 {
-	current_item_key_ = std::hash<std::string>{}(std::string(item.file_location));
-	if (catalog_map_.count(std::hash<std::string>{}(std::string(item.file_location)))) {
+	return std::hash<std::string>{}(std::string(item.file_location));
+}
+
+bool catalog::add_image(const cat_item item)
+{
+	current_item_key_ = calc_item_hash(item);
+	if (catalog_map_.count(calc_item_hash(item))) {
 		Console::log("Item in catalog, no need to import...");
-		return;
+		return false;
 	}
 	updated_ = true;
-	catalog_map_[std::hash<std::string>{}(std::string(item.file_location))] = item;
+	catalog_map_[calc_item_hash(item)] = item;
+	return true;
 }
 
 int catalog::write_catalog() const
@@ -110,6 +116,11 @@ std::map<size_t, cat_item> catalog::get()
 cat_item* catalog::get_current_item()
 {
 	return &catalog_map_[current_item_key_];
+}
+
+bool catalog::image_already_loaded(const cat_item& item) const
+{
+	return calc_item_hash(item) == current_item_key_;
 }
 
 int catalog::read_catalog()

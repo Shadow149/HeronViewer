@@ -35,8 +35,15 @@ void Gallery::init_panel()
     }
 }
 
+void Gallery::on_focus()
+{
+    if (h_window_->write_image_caches()) // TODO do smart texture update
+        init_panel();
+}
+
 void Gallery::render_panel()
 {
+
     ImGui::SliderInt("Scale", &cells_per_width_, 2, 15);
 	const float max_width = ImGui::GetWindowWidth();
     const auto cell_size = ImVec2(max_width / cells_per_width_, max_width / cells_per_width_);

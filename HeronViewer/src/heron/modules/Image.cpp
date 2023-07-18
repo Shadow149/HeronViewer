@@ -7,9 +7,32 @@
 #include "Widgets.h"
 
 
+void Image::save_preview()
+{
+	unsaved_ = false;
+	Console::log("Getting low res");
+	auto* export_data = static_cast<GLfloat*>(malloc(h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat)));
+	memset(export_data, 0, h_image_.get_lr_width() * h_image_.get_lr_height() * 3);
+	const double start = glfwGetTime();
+	gl_pbo pbo{};
+	pbo.gen(h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat));
+	comp_texture_small_.get_data_via_pbo(&pbo, export_data);
+	Console::log("Preview export time: %f", glfwGetTime() - start);
+
+	if (s_prev_write(export_data, catalog::instance()->get_current_item()->hprev_location, h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat)) < 0)
+	{
+		Console::log("Unable to update preview...");
+	}
+	free(export_data);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+}
 
 void Image::unload()
 {
+
+	if (unsaved_)
+		save_preview();
+
 	h_image_.unload();
 
 	texture_.gen(0, 0, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
@@ -187,9 +210,9 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 		set_viewpoint();
 		std::fill_n(cdf, 256, 1.0f / 8.0f);
 		changed_ = true;
-		need_prev_write_ = true;
 	}
 
+	if (get_changed()) unsaved_ = true;
 
 	if (h_image_.finished_exporting())
 	{
@@ -197,8 +220,6 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 	}
 
 	const bool low_b4 = vals_->show_low_res;
-
-	if (get_changed())	need_prev_write_ = true;
 
 	vals_->show_low_res |= scrolling_;
 	if ((vals_->show_low_res) && !need_texture_change_)
@@ -209,25 +230,6 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 	{
 		scope_rerender_ = true;
 		need_texture_change_ = false;
-
-		if (need_prev_write_) {
-			Console::log("Getting low res");
-			auto* export_data = static_cast<GLfloat*>(malloc(h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat)));
-			memset(export_data, 0, h_image_.get_lr_width() * h_image_.get_lr_height() * 3);
-			const double start = glfwGetTime();
-			gl_pbo pbo{};
-			pbo.gen(h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat));
-			comp_texture_small_.get_data_via_pbo(&pbo, export_data);
-			Console::log("Export time: %f", glfwGetTime() - start);
-
-			// TODO s_write unnessassarily copies data into another buffer...
-			if (s_prev_write(export_data, catalog::instance()->get_current_item()->hprev_location, h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat)) < 0)
-			{
-				Console::log("Unable to update preview...");
-			}
-			free(export_data);
-			need_prev_write_ = false;
-		}
 	}
 
 	if ((!get_changed() && !scrolling_ && !scope_rerender_) || !h_image_.is_loaded())
