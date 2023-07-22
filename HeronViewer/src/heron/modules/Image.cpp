@@ -10,6 +10,7 @@
 void Image::save_preview()
 {
 	unsaved_ = false;
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	Console::log("Getting low res");
 	auto* export_data = static_cast<GLfloat*>(malloc(h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat)));
 	memset(export_data, 0, h_image_.get_lr_width() * h_image_.get_lr_height() * 3);
@@ -24,7 +25,6 @@ void Image::save_preview()
 		Console::log("Unable to update preview...");
 	}
 	free(export_data);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 }
 
 void Image::unload()
@@ -212,7 +212,8 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 		changed_ = true;
 	}
 
-	if (get_changed()) unsaved_ = true;
+	if (get_changed()) 
+		unsaved_ = true;
 
 	if (h_image_.finished_exporting())
 	{

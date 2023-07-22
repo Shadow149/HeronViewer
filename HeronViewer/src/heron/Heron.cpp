@@ -218,7 +218,7 @@ void Heron::save_image() const
 
 bool Heron::write_image_caches() const
 {
-	if (image_->is_unsaved())
+	if (image_->is_unsaved() && image_->is_loaded())
 	{
 		editor_->write_ini();
 		image_->save_preview();
