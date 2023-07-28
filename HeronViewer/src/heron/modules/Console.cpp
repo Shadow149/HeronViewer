@@ -36,6 +36,7 @@ void Console::log(const char* format, ...)
 	strcat_s(log_str_, "> ");
 	strcat_s(log_str_, buffer);
 	strcat_s(log_str_, "\n");
+	line_pos_ += 3;
 
 	if (line_pos_ > MAX_LINES)
 	{

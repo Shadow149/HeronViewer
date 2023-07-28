@@ -53,11 +53,11 @@ void Editor::init()
 
 void Editor::render()
 {
-	if (img_->is_loaded() && !config_set_)
-	{
-		config_set_ = true;
-		set_from_config_file();
-	}
+	//if (img_->is_loaded() && !config_set_)
+	//{
+	//	config_set_ = true;
+	//	set_from_config_file();
+	//}
 
 
 	ImGui::Begin(name.c_str());
@@ -332,6 +332,7 @@ void Editor::write_ini()
 	}
 
 	Status::set_status("Saved!");
+	Console::log("Written to .hconf file %s", catalog::instance()->get_current_item()->hconf_location);
 
 	ini_writing_ = false;
 }

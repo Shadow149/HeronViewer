@@ -17,14 +17,14 @@ inline s_error_t s_prev_write(GLfloat* buffer, const char* location, const unsig
 		Console::log("Error opening settings file for writing");
 		return -1;
 	}
-	Console::log("Writing to file: %s", location);
+	//Console::log("Writing to file: %s", location);
 	const int w_err = _write(fd, buffer, size);
 
 	if (w_err < 0) {
 		Console::log("Error writing serialised file");
 		return -1;
 	}
-	Console::log("Serialised file written");
+	//Console::log("Serialised file written");
 	return 0;
 }
 
@@ -37,9 +37,9 @@ inline s_error_t s_prev_read(GLfloat* buffer, const char* location, const unsign
 		Console::log("Error opening serialised file for reading");
 		return -1;
 	}
-	Console::log("Reading hprev file: %s", location);
+	//Console::log("Reading hprev file: %s", location);
 	_read(fd, buffer, size);
-	Console::log("Serialised file read");
+	//Console::log("Serialised file read");
 	return 0;
 }
 

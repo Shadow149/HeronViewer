@@ -91,13 +91,14 @@ void Heron::load_item(const cat_item item) const
 
 	ImGui::SetWindowFocus(editor_panel_->name.c_str());
 	if (!catalog::instance()->image_already_loaded(item)) {
-		catalog::instance()->add_image(item);
 		unload_image();
+		catalog::instance()->add_image(item);
 
 		image_->get_image();
-		editor_->update_file(); // TODO probably not needed
+		//editor_->update_file(); // TODO probably not needed
 
-		editor_->loaded(true);
+		editor_->loaded(true); // TODO is this needed??
+		editor_->set_from_config_file();
 	}
 
 }
