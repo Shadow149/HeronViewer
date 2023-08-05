@@ -1,5 +1,7 @@
 #include "catalog.h"
 
+#include <limits>
+
 #include "Console.h"
 #include "serialise.h"
 #include "Status.h"
@@ -7,63 +9,69 @@
 
 catalog* catalog::instance_;
 
-
 // Returns 0 as success, -1 for fail
-s_error_t serialize_catalog(const std::map<size_t, cat_item>& data, const char* location)
+s_error_t serialize_catalog(const std::map<std::size_t, cat_item>& data, const char* location)
 {
 	auto* buffer = static_cast<char*>(malloc(sizeof(cat_item) * data.size()));
 
-	int fd;
-	const errno_t err = _sopen_s(&fd, location, _O_WRONLY | _O_CREAT, _SH_DENYNO, _S_IREAD | _S_IWRITE);
-	if (fd < 0) {
-		Console::log("Error opening settings file for writing");
+	std::ofstream fd;
+	fd.open(location, std::ios::binary);
+	if (fd.fail()) {
+		printf("Error opening settings file for writing\n");
 		free(buffer);
 		return -1;
 	}
-	Console::log("Writing to file: %s", location);
+	printf("Writing to file: %s\n", location);
 
 	int i = 0;
 	for (auto& item : data) {
+		printf("writing an item to catalog\n");
 		memcpy(buffer + (i++ * sizeof(cat_item)), &item.second, sizeof(cat_item));
 	}
-	const int w_err = _write(fd, buffer, sizeof(cat_item) * data.size());
+	fd.write(buffer, sizeof(cat_item) * data.size());
 
-	if (w_err < 0) {
-		Console::log("Error writing serialised file");
+	if (fd.fail()) {
+		printf("Error writing serialised file\n");
 		free(buffer);
 		return -1;
 	}
-	Console::log("Serialised file written");
+	printf("Serialised file written\n");
 	free(buffer);
 	return 0;
 }
 
-s_error_t read_serialize_catalog(std::map<size_t, cat_item>& data, const char* location)
+s_error_t read_serialize_catalog(std::map<std::size_t, cat_item>& data, const char* location)
 {
 
-	int fd;
-	errno_t err = _sopen_s(&fd, location, O_RDONLY, _SH_DENYNO, _S_IREAD | _S_IWRITE);
-	if (fd < 0) {
-		Console::log("Error opening serialised file for reading");
+	std::ifstream fd;
+	fd.open(location, std::ios::binary);
+	if (fd.fail()) {
+		printf("Error opening serialised file for reading\n");
 		return -1;
 	}
-	Console::log("Reading hconf file: %s", location);
+	printf("Reading hconf file: %s\n", location);
 
-	char buffer[60000]; // TODO could be too small...
 
-	const int bytes = _read(fd, buffer, sizeof(buffer));
-	for (int i = 0; i < bytes / sizeof(cat_item); i ++) {
+	fd.ignore( std::numeric_limits<std::streamsize>::max() );
+	std::streamsize pos = fd.gcount();
+	fd.clear();   //  Since ignore will have set eof.
+	int length = pos;
+	std::vector<char> buffer(length);
+
+    fd.seekg(0, std::ios::beg);
+    fd.read(buffer.data(), length);
+
+	for (int i = 0; i < length / sizeof(cat_item); i ++) {
+		printf("Getting catalog item\n");
 		char item_buffer[sizeof(cat_item)];
-		memcpy(item_buffer, buffer + i * sizeof(cat_item), sizeof(cat_item));
+		memcpy(item_buffer, buffer.data() + i * sizeof(cat_item), sizeof(cat_item));
 		const cat_item item = *reinterpret_cast<cat_item*>(item_buffer);
-		size_t hash = catalog::calc_item_hash(item);
+		std::size_t hash = catalog::calc_item_hash(item);
 		data[hash] = item;
 	}
-	Console::log("Serialised file read");
+	printf("Serialised file read\n");
 	return 0;
 }
-
-
 
 catalog* catalog::instance()
 {
@@ -77,7 +85,7 @@ catalog::catalog()
 	read_catalog(); // TODO put this on a thread
 }
 
-size_t catalog::calc_item_hash(const cat_item item)
+std::size_t catalog::calc_item_hash(const cat_item item)
 {
 	return std::hash<std::string>{}(std::string(item.file_location));
 }
@@ -108,7 +116,7 @@ int catalog::write_catalog() const
 	return 0;
 }
 
-std::map<size_t, cat_item> catalog::get()
+std::map<std::size_t, cat_item> catalog::get()
 {
 	return catalog_map_;
 }

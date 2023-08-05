@@ -1,5 +1,6 @@
 #include "Heron.h"
 
+#include <string.h>
 #include <stb/stb_image.h>
 
 #include "ExportDialog.h"
@@ -106,13 +107,13 @@ void Heron::load_item(const cat_item item) const
 void Heron::load_image(const std::string& file_path, const std::string& file_name) const
 {
 	cat_item item{};
-	strcpy_s(item.file_location, file_path.c_str());
-	strcpy_s(item.file_name, file_name.c_str());
+	strcpy(item.file_location, file_path.c_str());
+	strcpy(item.file_name, file_name.c_str());
 
 	const size_t hash = std::hash<std::string>{}(strip_extension(file_name));
 
-	strcpy_s(item.hconf_location, ("HeronCatalog/configs/" + std::to_string(hash) + ".hconf").c_str());
-	strcpy_s(item.hprev_location, ("HeronCatalog/previews/" + std::to_string(hash) + ".hprev").c_str());
+	strcpy(item.hconf_location, ("HeronCatalog/configs/" + std::to_string(hash) + ".hconf").c_str());
+	strcpy(item.hprev_location, ("HeronCatalog/previews/" + std::to_string(hash) + ".hprev").c_str());
 
 	Console::log("Change Image : %s", file_path.c_str());
 
@@ -142,10 +143,10 @@ void Heron::static_drop_callback(GLFWwindow* window, const int path_count, const
 
 void Heron::init_glfw()
 {
-	// GLFWimage images[1];
-	// images[0].pixels = stbi_load("heron.jpg", &images[0].width, &images[0].height, 0, 4); //rgba channels 
-	// glfwSetWindowIcon(window, 1, images);
-	// stbi_image_free(images[0].pixels);
+	GLFWimage images[1];
+	images[0].pixels = stbi_load("heron.jpg", &images[0].width, &images[0].height, 0, 4); //rgba channels 
+	glfwSetWindowIcon(window_, 1, images);
+	stbi_image_free(images[0].pixels);
 
 	glfwSetWindowUserPointer(window_, this);
 	glfwSetFramebufferSizeCallback(window_, framebuffer_size_callback);

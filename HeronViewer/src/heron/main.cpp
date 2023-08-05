@@ -1,6 +1,9 @@
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
+
+#ifdef _WIN32
 #include <crtdbg.h>
+#endif
 
 #include "Heron.h"
 #pragma comment(lib, "dxgi")
@@ -16,6 +19,7 @@ int main()
 		}
 		heron.render();
 	}
-
+#ifdef _WIN32
 	_CrtDumpMemoryLeaks();
+#endif
 }

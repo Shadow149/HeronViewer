@@ -3,3 +3,17 @@ x64
 HeronCatalog
 .vscode
 preferences.ini
+Heron
+
+*.hconf
+*.hcatalog
+
+
+# Cmake files
+CMakeFiles/
+cmake*
+CMake*
+CPack*
+CTest*
+DartConfiguration.tcl
+~CMakeLists.txt

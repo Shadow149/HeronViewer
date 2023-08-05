@@ -49,6 +49,8 @@ Heron is an open source, free to use, raw image editor prioritising performance 
 
 ## Download
 
+Binaries coming soon...
+
 ## Building from source
 
 ### Requirements
@@ -62,11 +64,29 @@ Heron is an open source, free to use, raw image editor prioritising performance 
 
 ### Windows
 
-...
+Open & run visual studio solution
 
 ### Linux
 
-...
+Update repos - `apt-get update`
+
+Cmake 3+ - `apt install cmake pkg-config`
+
+OpenGL 4+ - `apt-get install mesa-utils libglu1-mesa-dev freeglut3-dev mesa-common-dev`
+
+GLFW 3 - `apt-get install libglew-dev libglfw3-dev libglm-dev`
+
+Freeimage - `apt-get install libfreeimage3 libfreeimage-dev`
+
+To build, run:
+```bash
+cmake; make
+```
+
+To run:
+```bash
+./heron
+```
 
 ## Documentation
 

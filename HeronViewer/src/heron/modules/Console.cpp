@@ -27,15 +27,15 @@ void Console::log(const char* format, ...)
 	char buffer[BUFFER_MAX];
 	va_list list;
 	va_start(list, format);
-	if (vsprintf_s(buffer, BUFFER_MAX, format, list) < 0)
+	if (vsprintf(buffer, format, list) < 0)
 	{
 		printf("Failed to log correctly\n");
 		return;
 	}
 
-	strcat_s(log_str_, "> ");
-	strcat_s(log_str_, buffer);
-	strcat_s(log_str_, "\n");
+	strcat(log_str_, "> ");
+	strcat(log_str_, buffer);
+	strcat(log_str_, "\n");
 	line_pos_ += 3;
 
 	if (line_pos_ > MAX_LINES)

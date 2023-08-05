@@ -1,5 +1,6 @@
 #include "gl_texture.h"
 
+#include <cstring>
 
 void gl_quad::gen()
 {

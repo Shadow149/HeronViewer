@@ -57,7 +57,7 @@ void Gallery::render_panel()
         auto prev_size = ImVec2(200, 200);
         resize_image(c_item.hprev_width, c_item.hprev_height, cell_size.x, prev_size.x, prev_size.y);
 
-        sprintf_s(buf, "##%d", item.first);
+        sprintf(buf, "##%d", item.first);
 
         ImGui::PushID(n);
         ImGui::SetCursorPos(ImVec2(pos.x, pos.y));

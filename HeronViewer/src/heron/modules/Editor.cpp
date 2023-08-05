@@ -3,7 +3,6 @@
 #include "ExportDialog.h"
 #include "Heron.h"
 
-#include <io.h>
 #include <fcntl.h>
 
 #include "catalog.h"
