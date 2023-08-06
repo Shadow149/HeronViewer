@@ -25,7 +25,7 @@ s_error_t serialize_catalog(const std::map<std::size_t, cat_item>& data, const c
 
 	int i = 0;
 	for (auto& item : data) {
-		printf("writing an item to catalog\n");
+		printf("Writing an item to catalog: %s\n", item.second.file_location);
 		memcpy(buffer + (i++ * sizeof(cat_item)), &item.second, sizeof(cat_item));
 	}
 	fd.write(buffer, sizeof(cat_item) * data.size());
@@ -62,12 +62,12 @@ s_error_t read_serialize_catalog(std::map<std::size_t, cat_item>& data, const ch
     fd.read(buffer.data(), length);
 
 	for (int i = 0; i < length / sizeof(cat_item); i ++) {
-		printf("Getting catalog item\n");
 		char item_buffer[sizeof(cat_item)];
 		memcpy(item_buffer, buffer.data() + i * sizeof(cat_item), sizeof(cat_item));
 		const cat_item item = *reinterpret_cast<cat_item*>(item_buffer);
 		std::size_t hash = catalog::calc_item_hash(item);
 		data[hash] = item;
+		printf("Getting catalog to catalog: %s\n", item.file_location);
 	}
 	printf("Serialised file read\n");
 	return 0;
@@ -92,6 +92,7 @@ std::size_t catalog::calc_item_hash(const cat_item item)
 
 bool catalog::add_image(const cat_item item)
 {
+	printf("Adding catalog item: %s\n", item.file_location);
 	current_item_key_ = calc_item_hash(item);
 	if (catalog_map_.count(calc_item_hash(item))) {
 		Console::log("Item in catalog, no need to import...");

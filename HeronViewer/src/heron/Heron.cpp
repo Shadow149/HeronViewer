@@ -92,7 +92,9 @@ void Heron::load_item(const cat_item item) const
 
 	ImGui::SetWindowFocus(editor_panel_->name.c_str());
 	if (!catalog::instance()->image_already_loaded(item)) {
-		unload_image();
+		// TODO move image loaded status to somewhere else...
+		if (image_->is_loaded())
+			unload_image();
 		catalog::instance()->add_image(item);
 
 		image_->get_image();
@@ -143,10 +145,10 @@ void Heron::static_drop_callback(GLFWwindow* window, const int path_count, const
 
 void Heron::init_glfw()
 {
-	GLFWimage images[1];
-	images[0].pixels = stbi_load("heron.jpg", &images[0].width, &images[0].height, 0, 4); //rgba channels 
-	glfwSetWindowIcon(window_, 1, images);
-	stbi_image_free(images[0].pixels);
+	// GLFWimage images[1];
+	// images[0].pixels = stbi_load("heron.jpg", &images[0].width, &images[0].height, 0, 4); //rgba channels 
+	// glfwSetWindowIcon(window_, 1, images);
+	// stbi_image_free(images[0].pixels);
 
 	glfwSetWindowUserPointer(window_, this);
 	glfwSetFramebufferSizeCallback(window_, framebuffer_size_callback);
