@@ -9,6 +9,7 @@
 
 void Image::save_preview()
 {
+	if (h_image_.is_loading()) return; // Dont save preview if there is nothing to save!
 	unsaved_ = false;
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	Console::log("Getting low res");
@@ -46,6 +47,7 @@ void Image::unload()
 void Image::get_image()
 {
 	h_image_.load_image(*catalog::instance()->get_current_item());
+	unsaved_ = true;
 }
 
 void Image::bind_image()
