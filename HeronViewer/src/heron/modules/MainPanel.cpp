@@ -49,7 +49,7 @@ void MainPanel::render_panel()
 		const std::string status_text = Status::get_status() + " \t\t Version: " + HERON_VERSION;
 
 		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(status_text.c_str()).x);
-		ImGui::SetCursorPosY(ImGui::CalcTextSize(Status::get_status().c_str()).y / 4.0f);
+		// ImGui::SetCursorPosY(ImGui::CalcTextSize(Status::get_status().c_str()).y / 4.0f);
 		ImGui::Text(status_text.c_str());
 		
 		ImGui::EndMenuBar();

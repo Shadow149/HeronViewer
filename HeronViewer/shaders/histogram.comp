@@ -186,7 +186,11 @@ void main() {
     if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y) {
         ivec2 wave_pos = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 512 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
         int count = int(wave_els[wave_pos.x + wave_pos.y * 512]);
-        imageStore(waveform_texture, wave_pos, vec4(1) * count/float(texSize.x * texSize.y) * var_mult * 20000);
+        if (wave_pos.y <= 0.0 || wave_pos.y >= 254) {
+            imageStore(waveform_texture, wave_pos, vec4(1,0.7,0,1));
+        } else {
+            imageStore(waveform_texture, wave_pos, vec4(1) * count/float(texSize.x * texSize.y) * var_mult * 20000);
+        }
 
         ivec2 vec_pos = ivec2( int( (float(pixelCoord.x)/float(texSize.x)) * 255 ), int( (float(pixelCoord.y)/float(texSize.y)) * 255 ));
         int vec_count = int(vec_els[vec_pos.x + vec_pos.y * 255]);

@@ -21,28 +21,34 @@ void Heron::process_input(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_RELEASE)
 	{
+		if (clip_) image_->set_changed();
 		clip_ = false;
 	}
 	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
 	{
+		if (b4_) image_->set_changed();
 		b4_ = false;
 	}
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !key_pressed_)
 	{
 		black_bckgrd_ = !black_bckgrd_;
 		key_pressed_ = true;
+		image_->set_changed();
 	}
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE && key_pressed_)
 	{
+		if (key_pressed_) image_->set_changed();
 		key_pressed_ = false;
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
 	{
 		clip_ = true;
+		image_->set_changed();
 	}
 	if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
 	{
 		b4_ = true;
+		image_->set_changed();
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
 	{
