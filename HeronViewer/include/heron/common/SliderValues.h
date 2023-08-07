@@ -19,6 +19,7 @@ struct SliderValues
 	float lift[4];
 	float gamma[4];
 	float gain[4];
+	float offset[4];
 
 	float hues[8];
 	float sats[8];

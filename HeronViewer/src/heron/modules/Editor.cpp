@@ -126,6 +126,7 @@ void Editor::render()
 				slider_changed_ |= slider_float_reset(vals_.lift[n], 0.0f, "Lift", &(vals_.lift[n]), -1, 1);
 				slider_changed_ |= slider_float_reset(vals_.gamma[n], 1.0f, "Gamma", &(vals_.gamma[n]), 0, 2);
 				slider_changed_ |= slider_float_reset(vals_.gain[n], 1.0f, "Gain", &(vals_.gain[n]), -1, 2);
+				slider_changed_ |= slider_float_reset(vals_.offset[n], 1.0f, "Offset", &(vals_.offset[n]), -1, 2);
 
 
 				ImGui::EndTabItem();
@@ -156,6 +157,8 @@ void Editor::render()
 	slider_changed_ |= draw_color_selector("Gain", ImGui::GetWindowWidth() / 3, &vals_.gain[1], &vals_.gain[2],
 	                                     &vals_.gain[3], false, 0);
 
+	slider_changed_ |= draw_color_selector("Offset", ImGui::GetWindowWidth() / 3, &vals_.offset[1], &vals_.offset[2],
+	                                     &vals_.offset[3], false, 0);
 
 	ImGui::Separator();
 
@@ -399,6 +402,7 @@ void Editor::reset()
 	std::fill_n(vals_.lift, 4, 0.0f);
 	std::fill_n(vals_.gamma, 4, 1.0f);
 	std::fill_n(vals_.gain, 4, 1.0f);
+	std::fill_n(vals_.offset, 4, 1.0f);
 
 	std::fill_n(vals_.hues, 8, 0.0f);
 	std::fill_n(vals_.sats, 8, 0.0f);

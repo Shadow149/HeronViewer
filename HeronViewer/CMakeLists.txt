@@ -57,6 +57,19 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
+file(COPY shaders DESTINATION .)
+file(COPY images DESTINATION .)
+file(COPY fonts DESTINATION .)
+
+file(COPY preferences.ini DESTINATION .)
+file(COPY imgui.ini DESTINATION .)
+file(COPY heron.jpg DESTINATION .)
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/HeronCatalog)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/HeronCatalog/previews)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/HeronCatalog/configs)
+
+
 # sudo apt-get install libao-dev libmpg123-dev
 # sudo apt-get install libglu1-mesa-dev freeglut3-dev mesa-common-dev 
 # sudo apt-get install libglfw3-dev (not libglfw3? )     

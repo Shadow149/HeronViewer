@@ -78,14 +78,14 @@ GLFW 3 - `apt-get install libglew-dev libglfw3-dev libglm-dev`
 
 Freeimage - `apt-get install libfreeimage3 libfreeimage-dev`
 
-To build, run:
+To build from root dir, run:
 ```bash
-cmake; make
+cmake --build build
 ```
 
-To run:
+To run (MUST BE FROM BUILD DIR):
 ```bash
-./heron
+./Heron
 ```
 
 ## Documentation
