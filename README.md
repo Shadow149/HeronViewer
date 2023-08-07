@@ -1,9 +1,12 @@
+<div align="center" id="user-content-toc">
+  <ul><summary>
+    <h1>Heron</h1><br>
+  </summary></ul>
+</div>
 <p align="center">
   <img alt="HeronViewer preview" src="./docs/preview.png" width="450" />
-  <h1 align="center">Heron<br>
-  <font size="4">Heron Edits Raw with Opengl Natively</font>
-  </h1>
 </p>
+<h3 align="center" style="font-size: 10px;">Heron Edits Raw with Opengl Natively</h3>
 
 <p align="center">
  <img alt="Release" src="https://img.shields.io/badge/Release-v0.1.0.1-2CAD31.svg?style=for-the-badge"/>
