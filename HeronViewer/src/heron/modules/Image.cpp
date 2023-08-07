@@ -13,15 +13,15 @@ void Image::save_preview()
 	unsaved_ = false;
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	Console::log("Getting low res");
-	auto* export_data = static_cast<GLfloat*>(malloc(h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat)));
-	memset(export_data, 0, h_image_.get_lr_width() * h_image_.get_lr_height() * 3);
+	auto* export_data = static_cast<GLfloat*>(malloc(h_image_.get_lr_width() * h_image_.get_lr_height() * 4 * sizeof(GLfloat)));
+	memset(export_data, 0, h_image_.get_lr_width() * h_image_.get_lr_height() * 4);
 	const double start = glfwGetTime();
 	gl_pbo pbo{};
-	pbo.gen(h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat));
+	pbo.gen(h_image_.get_lr_width() * h_image_.get_lr_height() * 4 * sizeof(GLfloat));
 	comp_texture_small_.get_data_via_pbo(&pbo, export_data);
 	Console::log("Preview export time: %f", glfwGetTime() - start);
 
-	if (s_prev_write(export_data, catalog::instance()->get_current_item()->hprev_location, h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat)) < 0)
+	if (s_prev_write(export_data, catalog::instance()->get_current_item()->hprev_location, h_image_.get_lr_width() * h_image_.get_lr_height() * 4 * sizeof(GLfloat)) < 0)
 	{
 		Console::log("Unable to update preview...");
 	}

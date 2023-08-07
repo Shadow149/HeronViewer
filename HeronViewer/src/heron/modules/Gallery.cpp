@@ -11,13 +11,12 @@ bool load_texture_from_preview(const cat_item item, GLuint* out_texture)
 {
 
     // TODO hard coded 3!
-    const unsigned size = item.hprev_height * item.hprev_width * 3 * sizeof(GLfloat);
+    const unsigned size = item.hprev_height * item.hprev_width * 4 * sizeof(GLfloat);
     auto* image_data = static_cast<GLfloat*>(malloc(size));
     if (s_prev_read(image_data, item.hprev_location, size) < 0)
         return false;
 
     gl_texture texture(-1);
-    // FOR COOL GLITCHY EFFECT: GL_RGB, GL_RGB, GL_UNSIGNED_BYTE
     texture.gen(item.hprev_width, item.hprev_height, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, image_data);
     free(image_data);
 

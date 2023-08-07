@@ -24,6 +24,7 @@ void Console::cleanup()
 
 void Console::log(const char* format, ...)
 {
+	// TODO this segfaults if too long...
 	char buffer[BUFFER_MAX];
 	va_list list;
 	va_start(list, format);

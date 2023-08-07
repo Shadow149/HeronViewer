@@ -100,10 +100,33 @@ float calcLum(vec4 v) {
     return calcLum(v.xyz);
 }
 
-vec4 clamp_pix(vec4 v) {
-	return vec4(clamp(v.x,0.0,1.0), clamp(v.y,0.0,1.0), clamp(v.z,0.0,1.0), 1);
+// #ifndef saturate
+// #define saturate(v) clamp(v,0.,1.)
+// //      clamp(v,0.,1.)
+// #endif
+
+float saturate_(float v) {
+	if (v <= 0.0) v = 0.;
+	else if (v >= 1.0) v = 1.;
+	return v;
 }
 
+vec3 saturate_(vec3 v) {
+	if (v.x <= 0.0) v.x = 0.;
+	else if (v.x >= 1.0) v.x = 1.;
+
+	if (v.y <= 0.0) v.y = 0.;
+	else if (v.y >= 1.0) v.y = 1.;
+
+	if (v.z <= 0.0) v.z = 0.;
+	else if (v.z >= 1.0) v.z = 1.;
+
+	return v;
+}
+
+vec4 saturate_(vec4 v) {
+	return vec4(saturate_(v.xyz), v.w);
+}
 
 vec3 rgb2xyz(vec3 v) {
 	mat3 m = mat3(vec3(0.412453,0.212671,0.019334), vec3(0.357580,0.715160,0.119193), vec3(0.180423,0.072169,0.950227));
@@ -135,14 +158,9 @@ vec3 xyY2xyz(vec3 v) {
 }
 
 
-#ifndef saturate
-#define saturate(v) clamp(v,0.,1.)
-//      clamp(v,0.,1.)
-#endif
-
 vec3 hue2rgb(float hue){
 	hue=fract(hue);
-	return saturate(vec3(
+	return saturate_(vec3(
 		abs(hue*6.-3.)-1.,
 		2.-abs(hue*6.-2.),
 		2.-abs(hue*6.-4.)
@@ -246,17 +264,17 @@ vec4 shift_hues(vec4 v) {
 	
 	// Sats
 
-	hsv_.y = clamp(hsv_.y + sats[0] * exp(-(pow(hsv_.x,2)/0.002)), 0, 1); // Reds
-	hsv_.y = clamp(hsv_.y + sats[0] * exp(-(pow(hsv_.x - 1,2)/0.002)), 0, 1); // Reds
-	hsv_.y = clamp(hsv_.y + sats[1] * exp(-(pow(hsv_.x - 0.09,2)/0.001)), 0, 1); // Orange
-	hsv_.y = clamp(hsv_.y + sats[2] * exp(-(pow(hsv_.x - 0.16,2)/0.001)), 0, 1); // Yellow
-	hsv_.y = clamp(hsv_.y + sats[3] * exp(-(pow(hsv_.x - 0.3,2)/0.007)), 0, 1); // Green
-	hsv_.y = clamp(hsv_.y + sats[4] * exp(-(pow(hsv_.x - 0.48,2)/0.005)), 0, 1); // Cyan
+	hsv_.y = saturate_(hsv_.y + sats[0] * exp(-(pow(hsv_.x,2)/0.002))); // Reds
+	hsv_.y = saturate_(hsv_.y + sats[0] * exp(-(pow(hsv_.x - 1,2)/0.002))); // Reds
+	hsv_.y = saturate_(hsv_.y + sats[1] * exp(-(pow(hsv_.x - 0.09,2)/0.001))); // Orange
+	hsv_.y = saturate_(hsv_.y + sats[2] * exp(-(pow(hsv_.x - 0.16,2)/0.001))); // Yellow
+	hsv_.y = saturate_(hsv_.y + sats[3] * exp(-(pow(hsv_.x - 0.3,2)/0.007))); // Green
+	hsv_.y = saturate_(hsv_.y + sats[4] * exp(-(pow(hsv_.x - 0.48,2)/0.005))); // Cyan
 
-	hsv_.y = clamp(hsv_.y + sats[5] * exp(-(pow(hsv_.x - 0.65,2)/0.007)), 0, 1); // Blue
+	hsv_.y = saturate_(hsv_.y + sats[5] * exp(-(pow(hsv_.x - 0.65,2)/0.007))); // Blue
 
-	hsv_.y = clamp(hsv_.y + sats[6] * exp(-(pow(hsv_.x - 0.722,2)/0.01)), 0, 1); // Purple
-	hsv_.y = clamp(hsv_.y + sats[7] * exp(-(pow(hsv_.x - 0.846,2)/0.01)), 0, 1); // Pink
+	hsv_.y = saturate_(hsv_.y + sats[6] * exp(-(pow(hsv_.x - 0.722,2)/0.01))); // Purple
+	hsv_.y = saturate_(hsv_.y + sats[7] * exp(-(pow(hsv_.x - 0.846,2)/0.01))); // Pink
 
 	
 	// Lums
@@ -316,11 +334,10 @@ vec4 convolution3x3(ivec2 origin, float kernel[9]) {
 
 float edit_channel(float v, int chr) {
 	vec4 result = vec4(0);
-	float t = pow(2,expo[chr]) * v * (1 + whites[chr]);
-	float val = (4 * pow((1-t),3) * t * (0.25 + low[chr])) + (6 * pow((1-t),2) * pow(t,2) * (0.5 + mid[chr])) + (4 * (1-t) * pow(t,3) * (0.75 + high[chr])) + (pow(t,4) * 1);
-	float contrast = contrast[chr] * ((sin(2*3.14*t)) / 4.0f);
-	return pow(gain[chr] * (((1 - lift[chr]) * val) + lift[chr]), gamma[chr]) + contrast;
-;
+	float t = saturate_(pow(2,expo[chr]) * v * (1 + whites[chr]));
+	float val = saturate_((4 * pow((1-t),3) * t * (0.25 + low[chr])) + (6 * pow((1-t),2) * pow(t,2) * (0.5 + mid[chr])) + (4 * (1-t) * pow(t,3) * (0.75 + high[chr])) + (pow(t,4) * 1));
+	float contrast = saturate_(contrast[chr] * ((sin(2*3.14*t)) / 4.0f));
+	return saturate_(pow(gain[chr] * saturate_(((1 - lift[chr]) * val) + lift[chr]), gamma[chr]) + contrast);
 }
 
 float edit_channel_lum(float v) {
@@ -329,13 +346,13 @@ float edit_channel_lum(float v) {
 
 vec4 edit_channels(vec4 pix) {
 	float sat_before = rgb2hsl(pix.rgb).y;
-	vec3 res = vec3(edit_channel(pix[2], 1),edit_channel(pix[1], 2),edit_channel(pix[0], 3));
-	vec3 lum = vec3(edit_channel_lum(res[0]),edit_channel_lum(res[1]),edit_channel_lum(res[2]));
+	vec3 res = (vec3(edit_channel(pix[2], 1),edit_channel(pix[1], 2),edit_channel(pix[0], 3)));
+	vec3 lum = (vec3(edit_channel_lum(res[0]),edit_channel_lum(res[1]),edit_channel_lum(res[2])));
 	vec3 hsv_after = rgb2hsl(lum.rgb);
 	float sat_after = hsv_after.y;
 	float sat_diff = sat_after - sat_before;
 	hsv_after.y = sat_before + (sat_diff * sat_ref);
-	return vec4(hsl2rgb(hsv_after),1);
+	return vec4(saturate_(lum),1);
 }
 
 vec4 pixelTransform(vec4 pix, ivec2 coord, ivec2 tex_size) {
@@ -350,11 +367,11 @@ vec4 pixelTransform(vec4 pix, ivec2 coord, ivec2 tex_size) {
 	}
 
 	
-	result = clamp_pix(convolution3x3(coord, sharp_kernel));
-	result = clamp_pix(edit_channels(result));
-	result = clamp_pix(apply_offset(result));
-	result = clamp_pix(apply_wb(result));
-	result = clamp_pix(apply_sat(result));
+	result = saturate_(convolution3x3(coord, sharp_kernel));
+	result = saturate_(edit_channels(result));
+	result = saturate_(apply_offset(result));
+	result = saturate_(apply_wb(result));
+	result = saturate_(apply_sat(result));
 
 	if (inv)
 		result = vec4(-result.xyz + 1,0);
@@ -392,7 +409,7 @@ vec4 pixelTransform(vec4 pix, ivec2 coord, ivec2 tex_size) {
 		result += noise_;
 	}
 
-    return result;
+    return saturate_(result);
 }
 
 void main() {
