@@ -17,7 +17,7 @@ bool load_texture_from_preview(const cat_item item, GLuint* out_texture)
         return false;
 
     gl_texture texture(-1);
-    texture.gen(item.hprev_width, item.hprev_height, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, image_data);
+    texture.gen(item.hprev_width, item.hprev_height, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, image_data, 9729, 1);
     free(image_data);
 
     *out_texture = texture.get_id();

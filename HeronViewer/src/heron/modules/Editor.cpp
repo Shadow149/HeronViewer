@@ -78,13 +78,6 @@ void Editor::render()
 		Status::set_status("Settings Reset!");
 	}
 	ImGui::SameLine();
-
-	if (ImGui::Button("Save Settings"))
-	{
-		update_config_file();
-		Status::set_status("Saving...");
-	}
-	ImGui::SameLine();
 	if (ImGui::Button("Export"))
 	{
 		ExportDialog::instance()->set_file_name(std::string(catalog::instance()->get_current_item()->file_name));

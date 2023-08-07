@@ -81,16 +81,17 @@ void gl_ssbo::gen(const GLsizeiptr buffer_size, const GLenum usage, const void* 
 }
 
 void gl_texture::gen(const GLsizei w, const GLsizei h, const GLint internal_format, const GLenum format,
-	const GLenum type, const void* data, const GLint filter)
+	const GLenum type, const void* data, const GLint filter, const int alignment)
 {
 	glGenTextures(1, &id_);
-	init(w, h, internal_format, format, type, data, filter);
+	init(w, h, internal_format, format, type, data, filter, alignment);
 }
 
 void gl_texture::init(const GLsizei w, const GLsizei h, const GLint internal_format, const GLenum format,
-	const GLenum type, const void* data, const GLint filter)
+	const GLenum type, const void* data, const GLint filter, const int alignment)
 {
 	glBindTexture(GL_TEXTURE_2D, id_);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
@@ -105,9 +106,9 @@ void gl_texture::bind() const
 }
 
 void gl_image::init(const GLsizei w, const GLsizei h, const GLint internal_format, const GLenum format,
-	const GLenum type, const void* data, const GLint filter)
+	const GLenum type, const void* data, const GLint filter, const int alignment)
 {
-	gl_texture::init(w, h, internal_format, format, type, data, filter);
+	gl_texture::init(w, h, internal_format, format, type, data, filter, alignment);
 	// TODO param for r/w
 	glBindImageTexture(binding_, id_, 0, GL_FALSE, 0, GL_READ_WRITE, internal_format);
 }
@@ -126,33 +127,33 @@ void gl_image::get_data_via_pbo(const gl_pbo* p_pbo, void* dst) const
 }
 
 void gl_framebuffer_texture::init(const GLsizei w, const GLsizei h, const GLint internal_format, const GLenum format,
-	const GLenum type, const void* data, const GLint filter)
+	const GLenum type, const void* data, const GLint filter, const int alignment)
 {
-	gl_texture::init(w, h, internal_format, format, type, data, filter);
+	gl_texture::init(w, h, internal_format, format, type, data, filter, alignment);
 	// WARNING - always attaching to GL_COLOR_ATTACHMENT0 <-- 0th colour attachment
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, id_, 0);
 }
 
 void gl_framebuffer::gen(const GLsizei w, const GLsizei h, const GLint internal_format, const GLenum format,
-	const GLenum type, const void* data, const GLint filter)
+	const GLenum type, const void* data, const GLint filter, const int alignment)
 {
 	glGenFramebuffers(1, &id_);
-	init(w, h, internal_format, format, type, data, filter);
+	init(w, h, internal_format, format, type, data, filter, alignment);
 	constexpr GLenum draw_buffers[1] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, draw_buffers);
 }
 
 void gl_framebuffer::init(const GLsizei w, const GLsizei h, const GLint internal_format, const GLenum format,
-	const GLenum type, const void* data, const GLint filter)
+	const GLenum type, const void* data, const GLint filter, const int alignment)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, id_);
-	framebuffer_texture_.gen(w, h, internal_format, format, type, data, filter);
+	framebuffer_texture_.gen(w, h, internal_format, format, type, data, filter, alignment);
 }
 
 void gl_framebuffer::init_texture(const GLsizei w, const GLsizei h, const GLint internal_format, const GLenum format,
-	const GLenum type, const void* data, const GLint filter)
+	const GLenum type, const void* data, const GLint filter, const int alignment)
 {
-	framebuffer_texture_.init(w, h, internal_format, format, type, data, filter);
+	framebuffer_texture_.init(w, h, internal_format, format, type, data, filter, alignment);
 }
 
 void gl_framebuffer::bind() const

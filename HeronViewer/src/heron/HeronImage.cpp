@@ -63,7 +63,7 @@ void HeronImage::read_image(const std::string& filename)
 	{
 		if (fif == FIF_RAW) {
 			fi_bitmap = FreeImage_Load(fif, file_c_str, RAW_DEFAULT);
-			fi_bitmap = FreeImage_TmoDrago03(fi_bitmap, 2.5);
+			// fi_bitmap = FreeImage_TmoDrago03(fi_bitmap, 2.5);
 			fi_bitmap = FreeImage_ConvertTo24Bits(fi_bitmap);
 			FreeImage_AdjustGamma(fi_bitmap, 5);
 		}
