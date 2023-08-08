@@ -30,6 +30,8 @@ public:
 	HeronImage() :
 		loading_(false),
 		finished_loading_(false),
+		exporting_(false),
+		image_loaded_(false),
 		img_data_(nullptr),
 		lr_img_data_(nullptr),
 		height_(0),

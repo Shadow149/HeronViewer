@@ -28,7 +28,7 @@ void PreferencesDialog::render()
 
 	if (!visible) { return; }
 
-	if (ImGui::Begin(name.c_str()))
+	if (ImGui::Begin(name.c_str(), &visible, ImGuiWindowFlags_MenuBar))
 	{
 		ImGui::InputText("Export Directory", &export_dir_str_);
 
