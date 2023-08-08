@@ -57,17 +57,47 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
-file(COPY shaders DESTINATION .)
-file(COPY images DESTINATION .)
-file(COPY fonts DESTINATION .)
-file(COPY icon DESTINATION .)
+add_custom_target(
+        copy_shaders ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_SOURCE_DIR}/shaders
+                ${CMAKE_CURRENT_BINARY_DIR}/shaders)
+add_custom_target(
+        copy_images ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_SOURCE_DIR}/images
+                ${CMAKE_CURRENT_BINARY_DIR}/images)
+add_custom_target(
+        copy_fonts ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_SOURCE_DIR}/fonts
+                ${CMAKE_CURRENT_BINARY_DIR}/fonts)
+add_custom_target(
+        copy_icons ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_SOURCE_DIR}/icon
+                ${CMAKE_CURRENT_BINARY_DIR}/icon)
 
-file(COPY preferences.ini DESTINATION .)
-file(COPY imgui.ini DESTINATION .)
+add_custom_target(
+        copy_prefs ALL
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_SOURCE_DIR}/preferences.ini
+                ${CMAKE_CURRENT_BINARY_DIR}/preferences.ini)
+add_custom_target(
+        copy_imgui ALL
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_SOURCE_DIR}/imgui.ini
+                ${CMAKE_CURRENT_BINARY_DIR}/imgui.ini)
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/HeronCatalog)
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/HeronCatalog/previews)
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/HeronCatalog/configs)
+add_custom_target(
+    make_catalog ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/HeronCatalog)
+add_custom_target(
+    make_catalog_prevs ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/HeronCatalog/previews)
+add_custom_target(
+    make_catalog_configs ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/HeronCatalog/configs)
 
 
 # sudo apt-get install libao-dev libmpg123-dev
