@@ -1,5 +1,6 @@
-<div align="center" id="user-content-toc">
+<div align="center" id="user-content-toc" style="padding: 100px 0;">
   <ul><summary>
+    <img src="./HeronViewer/icon/heron_48.png"/>&nbsp;
     <h1>Heron</h1><br>
   </summary></ul>
 </div>
