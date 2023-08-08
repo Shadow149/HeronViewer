@@ -151,10 +151,14 @@ void Heron::static_drop_callback(GLFWwindow* window, const int path_count, const
 
 void Heron::init_glfw()
 {
-	// GLFWimage images[1];
-	// images[0].pixels = stbi_load("heron.jpg", &images[0].width, &images[0].height, 0, 4); //rgba channels 
-	// glfwSetWindowIcon(window_, 1, images);
-	// stbi_image_free(images[0].pixels);
+	GLFWimage images[3];
+	images[0].pixels = stbi_load("icon/heron_16.png", &images[0].width, &images[0].height, 0, 4);
+	images[1].pixels = stbi_load("icon/heron_32.png", &images[1].width, &images[1].height, 0, 4); //rgba channels 
+	images[2].pixels = stbi_load("icon/heron_48.png", &images[2].width, &images[2].height, 0, 4); //rgba channels 
+
+	glfwSetWindowIcon(window_, 3, images);
+	for (int i = 0; i < 3; i ++)
+		if (images[i].pixels) stbi_image_free(images[i].pixels);
 
 	glfwSetWindowUserPointer(window_, this);
 	glfwSetFramebufferSizeCallback(window_, framebuffer_size_callback);

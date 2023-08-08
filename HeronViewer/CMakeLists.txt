@@ -60,10 +60,10 @@ include(CPack)
 file(COPY shaders DESTINATION .)
 file(COPY images DESTINATION .)
 file(COPY fonts DESTINATION .)
+file(COPY icon DESTINATION .)
 
 file(COPY preferences.ini DESTINATION .)
 file(COPY imgui.ini DESTINATION .)
-file(COPY heron.jpg DESTINATION .)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/HeronCatalog)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/HeronCatalog/previews)
