@@ -132,9 +132,21 @@ bool hue_wheel(const float thickness, const int split, const int width, const Im
 
 	ImGui::GetWindowDrawList()->AddCircle(ImVec2(offset.x, offset.y), height / 2, ImColor(32, 32, 32), 0, 3);
 
+	return false;
+}
+
+bool hue_grid(const int width, const ImVec2 pos, ImU32 col_upr_left, ImU32 col_upr_right, ImU32 col_bot_right, ImU32 col_bot_left)
+{
+	const ImVec2 curPos = ImGui::GetCursorScreenPos();
+
+	ImDrawList* p_draw_list = ImGui::GetWindowDrawList();
+	const ImVec2 offset = curPos + ImVec2(width, width) + pos;
+
+	p_draw_list->AddRectFilledMultiColor(curPos + pos, ImVec2(offset.x, offset.y), col_upr_left, col_upr_right, col_bot_right, col_bot_left);
 
 	return false;
 }
+
 
 // color editor for 3 or 4 component colors
 bool draw_color_selector(const char* label, const float height, float* r, float* g, float* b, const bool invert, const float angle)
@@ -157,7 +169,7 @@ bool draw_color_selector(const char* label, const float height, float* r, float*
 	ImGui::RenderText(buttonStart + ImVec2(height / 2, textSize.y / 2) - textSize / 2, label);
 
 	hue_wheel(height / 2, height, height, ImVec2(0, topPadding), angle);
-
+	//hue_grid(height, ImVec2(0, topPadding), ImColor(255, 0, 0), ImColor(0, 255, 0), ImColor(0, 255, 0), ImColor(0, 0, 0));
 
 	ImGui::SetCursorScreenPos(buttonStart);
 	ImGui::InvisibleButton(label, ImVec2(height, height));
@@ -223,6 +235,61 @@ bool draw_color_selector(const char* label, const float height, float* r, float*
 	}
 
 	const auto size = ImVec2(height / 3, height + topPadding);
+	ImGui::ItemSize(size);
+	ImGui::ItemAdd(ImRect(buttonStart, buttonStart + size), ImGui::GetID(label));
+
+
+	ImGui::PopID();
+	return changed | reset;
+}
+
+// Will return x, y values between -1 and 1
+bool draw_grid_selector(const char* label, const float width, float* x, float* y, ImU32 col_upr_left, ImU32 col_upr_right, ImU32 col_bot_right, ImU32 col_bot_left){
+	ImGui::PushID(label);
+
+	const float topPadding = 20.0f;
+	float botPadding = 20.0f;
+	const ImVec2 buttonStart = ImGui::GetCursorScreenPos() + ImVec2(ImGui::GetWindowWidth() / 4, 0);
+	const vec2 center = vec2(buttonStart.x, buttonStart.y + topPadding) + vec2(width, width) * 0.5f;
+
+	const ImVec2 textSize = ImGui::CalcTextSize(label);
+	ImGui::RenderText(buttonStart + ImVec2(width / 2, textSize.y / 2) - textSize / 2, label);
+
+	hue_grid(width, ImVec2(ImGui::GetWindowWidth() / 4, topPadding), col_upr_left, col_upr_right, col_bot_right, col_bot_left);
+
+	ImGui::SetCursorScreenPos(buttonStart);
+	ImGui::InvisibleButton(label, ImVec2(width, width));
+	ImGui::SameLine();
+
+	vec2 onCircle = vec2(*x, *y);
+
+	const vec2 pos = center + onCircle * width * 0.5f;
+
+	ImGui::GetWindowDrawList()->AddCircleFilled(ImVec2(pos.x, pos.y), 4.0f, ImColor(0, 0, 0));
+	ImGui::GetWindowDrawList()->AddCircleFilled(ImVec2(pos.x, pos.y), 3.0f, ImColor(255, 255, 255));
+
+	bool changed = false;
+	bool reset = false;
+	if (ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(0))
+	{
+		*x = *y = 0;
+		reset = true;
+	}
+	else if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
+	{
+		float speed = 0.005f * exp(-2 * sqrt(*x**x + *y**y));
+		if (ImGui::GetIO().KeyShift)
+		{
+			speed = 0.001f;
+		}
+		onCircle = onCircle + vec2(ImGui::GetMouseDragDelta().x * speed, ImGui::GetMouseDragDelta().y * speed);
+		ImGui::ResetMouseDragDelta();
+		*x = clamp(onCircle.x, -1.0f, 1.0f);
+		*y = clamp(onCircle.y, -1.0f, 1.0f);
+		changed = true;
+	}
+
+	const auto size = ImVec2(width / 3, width + topPadding);
 	ImGui::ItemSize(size);
 	ImGui::ItemAdd(ImRect(buttonStart, buttonStart + size), ImGui::GetID(label));
 

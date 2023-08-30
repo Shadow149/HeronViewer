@@ -102,6 +102,12 @@ void Editor::render()
 	                                      ImColor(0, 255, 0), ImColor(255, 0, 255));
 
 
+	float n_wb = ((vals_.wb-1667) / ((25000-1667)/2)) - 1;
+	float n_tint = vals_.tint - 1.0;
+	slider_changed_ |= draw_grid_selector("Correction", ImGui::GetWindowWidth() / 3, &n_wb, &n_tint, ImColor(255, 255, 31), ImColor(31, 255, 255), ImColor(255, 31, 255), ImColor(255, 150, 10));
+	vals_.wb = ((n_wb + 1) * ((25000-1667)/2)) + 1667;
+	vals_.tint = n_tint + 1;
+
 	if (ImGui::BeginTabBar("MyTabBar"))
 	{
 		for (int n = 0; n < 4; n++)

@@ -111,9 +111,10 @@ void main() {
     barrier();
     memoryBarrier();
   
+    vec4 texColor = vec4(0);
+
     // Ensure the current invocation is within the texture bounds
     if (pixelCoord.x < texSize.x && pixelCoord.y < texSize.y) {
-        vec4 texColor = vec4(0);
         if (low_res)
             texColor = imageLoad(img_small, pixelCoord);
         else
