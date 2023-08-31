@@ -6,6 +6,6 @@
 void Waveform::render()
 {
 	ImGui::Begin(name.c_str());
-	ImGui::Image((ImTextureID)img_->get_waveform_id(), ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 60));
+	ImGui::Image((ImTextureID)img_->get_waveform_id(), ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 30));
 	ImGui::End();
 }

@@ -14,6 +14,15 @@ ImVec2 get_resize_size(GLsizei width, GLsizei height);
 template<typename T>
 void resize_image(GLsizei width, GLsizei height,
                   GLsizei max_side, T& target_width, T& target_height);
+template<typename T>
+T min(T a, T b);
+
+
+template<typename T>
+T min(T a, T b) {
+	if (a < b) return a;
+	return b;
+}
 
 template<typename T>
 void resize_image(const GLsizei width, const GLsizei height,

@@ -33,7 +33,7 @@ int Window::init() {
 		Console::log("Failed to initialize GLAD");
 		return -1;
 	}
-	glfwMaximizeWindow(window_);
+	// glfwMaximizeWindow(window_);
 
 	glfwSwapInterval(1);
 
