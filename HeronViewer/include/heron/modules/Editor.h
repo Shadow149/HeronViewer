@@ -44,6 +44,8 @@ public:
 	Editor(Image* i, const std::string& n, const bool v = true) : Module(n, v)
 	{
 		img_ = i;
+		foo_[0].x = CurveTerminator; // init data so editor knows to take it from here
+		for(int i = 0; i < 10; i ++) foo_[i].y = 0.5;
 		reset();
 	}
 
@@ -92,6 +94,9 @@ private:
 
 	SliderValues vals_ = SliderValues();
 	SliderValues prev_vals_ = SliderValues();
+	ImVec2 foo_[10];
+	int selection_idx_ = -1;
+
 	bool new_values_set_ = true;
 
 	bool ini_writing_ = false;

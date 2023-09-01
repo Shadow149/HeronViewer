@@ -108,6 +108,14 @@ void Editor::render()
 	vals_.wb = ((n_wb + 1) * ((25000-1667)/2)) + 1667;
 	vals_.tint = n_tint + 1;
 
+        
+    if (CurveEditor("Curve Editor", ImVec2(ImGui::GetWindowWidth() - 50, 150), 10, foo_, &selection_idx_, ImVec2(0,0), ImVec2(1, 1)))
+    {
+        // curve changed
+    }
+    
+    float value_you_care_about = CurveValue(0.7f, 10, foo_); // calculate value at position 0.7
+
 	if (ImGui::BeginTabBar("MyTabBar"))
 	{
 		for (int n = 0; n < 4; n++)
