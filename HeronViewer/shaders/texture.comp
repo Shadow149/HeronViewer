@@ -1,5 +1,9 @@
 #version 440 core
 
+#define SMOOTHNESS 255
+#define MAX_BEZIER_POINTS 10
+#define MAX_BEZIER_POINTS_2X 20
+
 layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
 // ----------------------------------------------------------------------------
@@ -48,10 +52,18 @@ uniform float xyz_z;
 uniform float noise;
 uniform bool noise_selected;
 
-uniform float hues[9];
-uniform float sats[9];
-uniform float lums[9];
+// Encoded vecs as [x, y, x1, y1, ...]
+uniform float hue_hue[MAX_BEZIER_POINTS_2X];
+uniform float hue_sat[MAX_BEZIER_POINTS_2X];
+uniform float hue_lum[MAX_BEZIER_POINTS_2X];
 
+uniform float sat_hue[MAX_BEZIER_POINTS_2X];
+uniform float sat_sat[MAX_BEZIER_POINTS_2X];
+uniform float sat_lum[MAX_BEZIER_POINTS_2X];
+
+uniform float lum_hue[MAX_BEZIER_POINTS_2X];
+uniform float lum_sat[MAX_BEZIER_POINTS_2X];
+uniform float lum_lum[MAX_BEZIER_POINTS_2X];
 
 uniform bool clip;
 uniform bool b4;
@@ -61,6 +73,13 @@ uniform bool inv;
 uniform float sat;
 uniform float wb;
 uniform float tint;
+
+float coefs[16] = {
+	-1.0f, 2.0f,-1.0f, 0.0f,
+	3.0f,-5.0f, 0.0f, 2.0f,
+	-3.0f, 4.0f, 1.0f, 0.0f,
+	1.0f,-1.0f, 0.0f, 0.0f
+};
 
 vec3 kelvin_table[19] = {
     vec3(255,56,0),
@@ -92,6 +111,77 @@ float rand( vec2 p )
     );
     return fract( cos( dot(p,K1) ) * 12345.6789 );
 }
+
+
+// [src] http://iquilezles.org/www/articles/minispline/minispline.htm
+// key format (for dim == 1) is (t0,x0,t1,x1 ...)
+// key format (for dim == 2) is (t0,x0,y0,t1,x1,y1 ...)
+// key format (for dim == 3) is (t0,x0,y0,z0,t1,x1,y1,z1 ...)
+float spline(const float key[MAX_BEZIER_POINTS_2X], float t)
+{
+    const int size = 2;
+
+    // find key
+    int k = 0;
+    while (key[k * size] < t)
+        k++;
+
+    const float key0 = key[(k - 1) * size];
+    const float key1 = key[k * size];
+
+    // interpolant
+    const float h = (t - key0) / (key1 - key0);
+
+    // init result
+    float v = 0.0f;
+
+    // add basis functions
+    for (int i = 0; i < 4; ++i)
+    {
+        const float b = 0.5f * (((coefs[(4 * i) + 0] * h + coefs[(4 * i) + 1]) * h + coefs[(4 * i) + 2]) * h + coefs[(4 * i) + 3]);
+
+        const int kn = clamp(k + i - 2, 0, MAX_BEZIER_POINTS - 1);
+        v += b * key[kn * size + 1];
+    }
+	return v;
+}
+
+float CurveValueSmooth(float p, const float points[MAX_BEZIER_POINTS_2X])
+{
+	// TODO ifs not really needed
+    if (p < 0)
+        return points[1]; // the first points y value
+
+    return spline(points, p);
+}
+
+
+float remap(float v, float a, float b, float c, float d)
+{
+    return (c + (d - c) * (v - a) / (b - a));
+}
+
+vec2 remap(const vec2 v, const vec2 a, const vec2 b, const vec2 c, const vec2 d)
+{
+    return vec2(remap(v.x, a.x, b.x, c.x, d.x), remap(v.y, a.y, b.y, c.y, d.y));
+}
+
+float SmoothCurveValue(float x, const vec2 rangeMin, const vec2 rangeMax, const float points[MAX_BEZIER_POINTS_2X]) {   
+
+    float px = remap(x, 0, 1, rangeMin.x, rangeMax.x);
+    float qx = remap(x + 1/float(SMOOTHNESS), 0, 1, rangeMin.x, rangeMax.x);
+
+    const float py = CurveValueSmooth(px, points);
+    const float qy = CurveValueSmooth(qx, points);
+
+    vec2 p = remap(vec2(px, py), rangeMin, rangeMax, vec2(0,0), vec2(1,1));
+    vec2 q = remap(vec2(qx, qy), rangeMin, rangeMax, vec2(0,0), vec2(1,1));
+    p.y = 1.0f - p.y;
+    q.y = 1.0f - q.y;
+
+    return py;
+}
+
 
 float calcLum(vec3 v) {
     return dot(v, vec3(0.299, 0.587, 0.114));
@@ -258,52 +348,24 @@ vec4 apply_offset(vec4 v) {
 	return v * vec4(offset_colour,1);
 }
 
-vec4 shift_hues(vec4 v) {
+vec4 shift_hsl(vec4 v) {
 	vec3 hsv_ = rgb2hsl(v.xyz);
 
-	
-	// Sats
+	// hue vs
+	hsv_.x = saturate_(hsv_.x + (SmoothCurveValue(hsv_.x, vec2(0), vec2(1), hue_hue) - 0.5) / 2); // scaling from -0.25 to 0.25
+	hsv_.y = saturate_(hsv_.y + (SmoothCurveValue(hsv_.x, vec2(0), vec2(1), hue_sat) - 0.5) * 2); // scaling from -1 to 1
+	hsv_.z = saturate_(hsv_.z + (SmoothCurveValue(hsv_.x, vec2(0), vec2(1), hue_lum) - 0.5) / 2); // scaling from -0.25 to 0.25
 
-	hsv_.y = saturate_(hsv_.y + sats[0] * exp(-(pow(hsv_.x,2)/0.002))); // Reds
-	hsv_.y = saturate_(hsv_.y + sats[0] * exp(-(pow(hsv_.x - 1,2)/0.002))); // Reds
-	hsv_.y = saturate_(hsv_.y + sats[1] * exp(-(pow(hsv_.x - 0.09,2)/0.001))); // Orange
-	hsv_.y = saturate_(hsv_.y + sats[2] * exp(-(pow(hsv_.x - 0.16,2)/0.001))); // Yellow
-	hsv_.y = saturate_(hsv_.y + sats[3] * exp(-(pow(hsv_.x - 0.3,2)/0.007))); // Green
-	hsv_.y = saturate_(hsv_.y + sats[4] * exp(-(pow(hsv_.x - 0.48,2)/0.005))); // Cyan
+	// sat vs
+	hsv_.x = saturate_(hsv_.x + (SmoothCurveValue(hsv_.y, vec2(0), vec2(1), sat_hue) - 0.5) / 2); // scaling from -0.25 to 0.25
+	hsv_.y = saturate_(hsv_.y + (SmoothCurveValue(hsv_.y, vec2(0), vec2(1), sat_sat) - 0.5) * 2); // scaling from -1 to 1
+	hsv_.z = saturate_(hsv_.z + (SmoothCurveValue(hsv_.y, vec2(0), vec2(1), sat_lum) - 0.5) / 2); // scaling from -0.25 to 0.25
 
-	hsv_.y = saturate_(hsv_.y + sats[5] * exp(-(pow(hsv_.x - 0.65,2)/0.007))); // Blue
+	// lum vs
+	hsv_.x = saturate_(hsv_.x + (SmoothCurveValue(hsv_.z, vec2(0), vec2(1), lum_hue) - 0.5) / 2); // scaling from -0.25 to 0.25
+	hsv_.y = saturate_(hsv_.y + (SmoothCurveValue(hsv_.z, vec2(0), vec2(1), lum_sat) - 0.5) * 2); // scaling from -1 to 1
+	hsv_.z = saturate_((SmoothCurveValue(hsv_.z, vec2(0), vec2(1), lum_lum))); // scaling from -1 to 1
 
-	hsv_.y = saturate_(hsv_.y + sats[6] * exp(-(pow(hsv_.x - 0.722,2)/0.01))); // Purple
-	hsv_.y = saturate_(hsv_.y + sats[7] * exp(-(pow(hsv_.x - 0.846,2)/0.01))); // Pink
-
-	
-	// Lums
-
-	hsv_.z = hsv_.z * ( 1 + lums[0] * exp(-(pow(hsv_.x,2)/(0.002*5.0) ))); // Reds
-	hsv_.z = hsv_.z * ( 1 + lums[0] * exp(-(pow(hsv_.x - 1,2)/(0.002*5.0) ))); // Reds
-	hsv_.z = hsv_.z * ( 1 + lums[1] * exp(-(pow(hsv_.x - 0.09,2)/(0.001*5.0) ))); // Orange
-	hsv_.z = hsv_.z * ( 1 + lums[2] * exp(-(pow(hsv_.x - 0.16,2)/(0.001*5.0) ))); // Yellow
-	hsv_.z = hsv_.z * ( 1 + lums[3] * exp(-(pow(hsv_.x - 0.3,2)/(0.007*5.0) ))); // Green
-	hsv_.z = hsv_.z * ( 1 + lums[4] * exp(-(pow(hsv_.x - 0.48,2)/(0.005*5.0) ))); // Cyan
-
-	hsv_.z = hsv_.z * ( 1 + lums[5] * exp(-(pow(hsv_.x - 0.65,2)/(0.007*5.0) ))); // Blue
-
-	hsv_.z = hsv_.z * ( 1 + lums[6] * exp(-(pow(hsv_.x - 0.722,2)/(0.01*5.0) ))); // Purple
-	hsv_.z = hsv_.z * ( 1 + lums[7] * exp(-(pow(hsv_.x - 0.846,2)/(0.01*5.0) ))); // Pink
-
-	// Hues
-
-	hsv_.x = hsv_.x + hues[0] * exp(-(pow(hsv_.x,2)/0.002))*0.15; // Reds
-	hsv_.x = hsv_.x + hues[0] * exp(-(pow(hsv_.x - 1,2)/0.002))*0.15; // Reds
-	hsv_.x = hsv_.x + hues[1] * exp(-(pow(hsv_.x - 0.09,2)/0.001))*0.1; // Orange
-	hsv_.x = hsv_.x + hues[2] * exp(-(pow(hsv_.x - 0.16,2)/0.001))*0.1; // Yellow
-	hsv_.x = hsv_.x + hues[3] * exp(-(pow(hsv_.x - 0.3,2)/0.007))*0.2; // Green
-	hsv_.x = hsv_.x + hues[4] * exp(-(pow(hsv_.x - 0.48,2)/0.005))*0.15; // Cyan
-
-	hsv_.x = hsv_.x + hues[5] * exp(-(pow(hsv_.x - 0.65,2)/0.007))*0.15; // Blue
-
-	hsv_.x = hsv_.x + hues[6] * exp(-(pow(hsv_.x - 0.722,2)/0.01))*0.1; // Purple
-	hsv_.x = hsv_.x + hues[7] * exp(-(pow(hsv_.x - 0.846,2)/0.01))*0.1; // Pink
 
 	return vec4(hsl2rgb(hsv_),1);
 }
@@ -337,7 +399,7 @@ float edit_channel(float v, int chr) {
 	float t = saturate_(pow(2,expo[chr]) * v * (1 + whites[chr]));
 	float val = saturate_((4 * pow((1-t),3) * t * (0.25 + low[chr])) + (6 * pow((1-t),2) * pow(t,2) * (0.5 + mid[chr])) + (4 * (1-t) * pow(t,3) * (0.75 + high[chr])) + (pow(t,4) * 1));
 	float contrast = saturate_(contrast[chr] * ((sin(2*3.14*t)) / 4.0f));
-	return saturate_(pow(gain[chr] * saturate_(((1 - lift[chr]) * val) + lift[chr]), gamma[chr]) + contrast);
+	return saturate_(pow(gain[chr] * saturate_(((1 - lift[chr]) * val) + lift[chr]), gamma[chr]) + (-contrast));
 }
 
 float edit_channel_lum(float v) {
@@ -386,7 +448,7 @@ vec4 pixelTransform(vec4 pix, ivec2 coord, ivec2 tex_size) {
 	xyz.z *= ((xyz_z) + 1);
 	result = vec4(xyz2rgb(xyz),1);
 
-	result = shift_hues(result);
+	result = shift_hsl(result);
 
 	if (bw) {
 		result = vec4(vec3(calcLum(result)), 1);

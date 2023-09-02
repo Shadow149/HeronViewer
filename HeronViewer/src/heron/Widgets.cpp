@@ -339,26 +339,6 @@ float CurveValueSmooth(float p, int maxpoints, const ImVec2* points)
     return output[0];
 }
 
-float CurveValue(float p, int maxpoints, const ImVec2* points)
-{
-    if (maxpoints < 2 || points == 0)
-        return 0;
-    if (p < 0)
-        return points[0].y;
-
-    int left = 0;
-    while (left < maxpoints && points[left].x < p && points[left].x != -1)
-        left++;
-    if (left)
-        left--;
-
-    if (left == maxpoints - 1)
-        return points[maxpoints - 1].y;
-
-    float d = (p - points[left].x) / (points[left + 1].x - points[left].x);
-
-    return points[left].y + (points[left + 1].y - points[left].y) * d;
-}
 
 static inline float ImRemap(float v, float a, float b, float c, float d)
 {
@@ -550,6 +530,19 @@ int CurveEditor(const char* label, const ImVec2& size, const int maxpoints, ImVe
 
     ImDrawList* drawList = window->DrawList;
 
+    for (i = 0; i < 10; i ++) {
+        float r0, g0, b0;
+		float r1, g1, b1;
+        float r2, g2, b2;
+		float r3, g3, b3;
+        ImGui::ColorConvertHSVtoRGB((i/10.0f), .75f, .5f, r0, g0, b0); // top left
+		ImGui::ColorConvertHSVtoRGB((i/10.0f), .75f, .5f, r1, g1, b1); // bot left
+        ImGui::ColorConvertHSVtoRGB(((i+1)/10.0f), .75f, .5f, r2, g2, b2); // top right
+		ImGui::ColorConvertHSVtoRGB(((i+1)/10.0f), .75f, .5f, r3, g3, b3); // bot right
+
+        drawList->AddRectFilledMultiColor(ImVec2(bb.Min.x + (wd / 10) * (i), bb.Min.y), ImVec2(bb.Min.x + (wd / 10) * (i+1), bb.Max.y),
+            ImColor(r0, g0, b0), ImColor(r2, g2, b2), ImColor(r3, g3, b3), ImColor(r1, g1, b1));
+    }
     // bg grid
     drawList->AddLine(ImVec2(bb.Min.x, bb.Min.y + ht / 2), ImVec2(bb.Max.x, bb.Min.y + ht / 2), gridColor1, 3);
 
@@ -562,7 +555,7 @@ int CurveEditor(const char* label, const ImVec2& size, const int maxpoints, ImVe
         drawList->AddLine(ImVec2(bb.Min.x + (wd / 10) * (i + 1), bb.Min.y), ImVec2(bb.Min.x + (wd / 10) * (i + 1), bb.Max.y), gridColor2);
     }
 
-    drawList->PushClipRect(bb.Min, bb.Max);
+    // drawList->PushClipRect(bb.Min, bb.Max);
 
     // smooth curve
     enum
@@ -588,10 +581,10 @@ int CurveEditor(const char* label, const ImVec2& size, const int maxpoints, ImVe
         p = ImRemap(p, ImVec2(0,0), ImVec2(1,1), bb.Min, bb.Max);
         q = ImRemap(q, ImVec2(0,0), ImVec2(1,1), bb.Min, bb.Max);
 
-        drawList->AddLine(p, q, ImGui::GetColorU32(ImGuiCol_PlotHistogram));
+        drawList->AddLine(p, q, ImGui::GetColorU32(ImGuiCol_PlotHistogram), 2.0f);
     }
 
-    // lines
+    // // lines
     // for (i = 1; i < pointCount; i++)
     // {
     //     ImVec2 a = ImRemap(points[i - 1], rangeMin, rangeMax, ImVec2(0, 0), ImVec2(1, 1));
@@ -615,16 +608,14 @@ int CurveEditor(const char* label, const ImVec2& size, const int maxpoints, ImVe
             p.y = 1.0f - p.y;
             p = ImRemap(p, ImVec2(0, 0), ImVec2(1, 1), bb.Min, bb.Max);
 
-            ImVec2 a = p - ImVec2(4, 4);
-            ImVec2 b = p + ImVec2(4, 4);
             if(hoveredPoint == i)
-                drawList->AddRect(a, b, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+                drawList->AddCircleFilled(p, pointRadiusInPixels, ImColor(100, 255, 255));
             else
-                drawList->AddCircle(p, pointRadiusInPixels, ImGui::GetColorU32(ImGuiCol_PlotLinesHovered));
+                drawList->AddCircleFilled(p, pointRadiusInPixels, ImColor(255, 255, 255));
         }
     }
 
-    drawList->PopClipRect();
+    // drawList->PopClipRect();
 
     // // draw the text at mouse position
     // char buf[128];
@@ -644,38 +635,38 @@ int CurveEditor(const char* label, const ImVec2& size, const int maxpoints, ImVe
     // ImGui::RenderTextClipped(ImVec2(bb.Min.x, bb.Min.y + style.FramePadding.y), bb.Max, str, NULL, NULL, ImVec2(0.5f, 0.5f));
 
     // buttons; @todo: mirror, smooth, tessellate
-    if (ImGui::BeginPopupContextItem(label))
-    {
-        if (ImGui::Selectable("Reset"))
-        {
-            points[0] = rangeMin;
-            points[1] = rangeMax;
-            points[2].x = CurveTerminator;
-        }
-        if (ImGui::Selectable("Flip"))
-        {
-            for (i = 0; i < pointCount; ++i)
-            {
-                const float yVal = 1.0f - ImRemap(points[i].y, rangeMin.y, rangeMax.y, 0, 1);
-                points[i].y = ImRemap(yVal, 0, 1, rangeMin.y, rangeMax.y);
-            }
-        }
-        if (ImGui::Selectable("Mirror"))
-        {
-            for (int i = 0, j = pointCount - 1; i < j; i++, j--)
-            {
-                ImSwap(points[i], points[j]);
-            }
-            for (i = 0; i < pointCount; ++i)
-            {
-                const float xVal = 1.0f - ImRemap(points[i].x, rangeMin.x, rangeMax.x, 0, 1);
-                points[i].x = ImRemap(xVal, 0, 1, rangeMin.x, rangeMax.x);
-            }
-        }
+    // if (ImGui::BeginPopupContextItem(label))
+    // {
+    //     if (ImGui::Selectable("Reset"))
+    //     {
+    //         points[0] = rangeMin;
+    //         points[1] = rangeMax;
+    //         points[2].x = CurveTerminator;
+    //     }
+    //     if (ImGui::Selectable("Flip"))
+    //     {
+    //         for (i = 0; i < pointCount; ++i)
+    //         {
+    //             const float yVal = 1.0f - ImRemap(points[i].y, rangeMin.y, rangeMax.y, 0, 1);
+    //             points[i].y = ImRemap(yVal, 0, 1, rangeMin.y, rangeMax.y);
+    //         }
+    //     }
+    //     if (ImGui::Selectable("Mirror"))
+    //     {
+    //         for (int i = 0, j = pointCount - 1; i < j; i++, j--)
+    //         {
+    //             ImSwap(points[i], points[j]);
+    //         }
+    //         for (i = 0; i < pointCount; ++i)
+    //         {
+    //             const float xVal = 1.0f - ImRemap(points[i].x, rangeMin.x, rangeMax.x, 0, 1);
+    //             points[i].x = ImRemap(xVal, 0, 1, rangeMin.x, rangeMax.x);
+    //         }
+    //     }
     
 
-        ImGui::EndPopup();
-    }
+    //     ImGui::EndPopup();
+    // }
 
     ImGui::PopID();
 

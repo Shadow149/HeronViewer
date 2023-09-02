@@ -134,6 +134,10 @@ private:
 
 	std::string* shaderLoadTime{};
 	std::string* imageRender{};
+	std::string* uniformTime{};
+	std::string* hist_ssbo_time{};
+	std::string* scopeRender{};
+	std::string* textureRender{};
 
 	std::thread renderer_;
 

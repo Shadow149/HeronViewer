@@ -24,6 +24,19 @@ bool slider_float_reset(T& data, T reset_value, const char* label, float* v, con
 	return change;
 }
 
+void reset_graph_values_flat(ImVec2* data, int size, float reset_value) {
+	for(int i = 0; i < size - 1; i ++) data[i].x = i/float(size-1);
+	for(int i = 0; i < size; i ++) data[i].y = reset_value;
+	data[size - 1].x = 1.0f;
+}
+
+void reset_graph_values_linear(ImVec2* data, int size, float reset_value) {
+	for(int i = 0; i < size; i ++) {
+		data[i].x = i/float(size-1);
+		data[i].y = i/float(size-1);
+	} 
+	data[size - 1].x = 1.0f;
+}
 
 void Editor::update_sharpen_kernel()
 {
@@ -108,14 +121,6 @@ void Editor::render()
 	vals_.wb = ((n_wb + 1) * ((25000-1667)/2)) + 1667;
 	vals_.tint = n_tint + 1;
 
-        
-    if (CurveEditor("Curve Editor", ImVec2(ImGui::GetWindowWidth() - 50, 150), 10, foo_, &selection_idx_, ImVec2(0,0), ImVec2(1, 1)))
-    {
-        // curve changed
-    }
-    
-    float value_you_care_about = CurveValue(0.7f, 10, foo_); // calculate value at position 0.7
-
 	if (ImGui::BeginTabBar("MyTabBar"))
 	{
 		for (int n = 0; n < 4; n++)
@@ -188,103 +193,34 @@ void Editor::render()
 	}
 
 	ImGui::Separator();
-
-	if (ImGui::CollapsingHeader("HSL Editing"))
+	if (ImGui::CollapsingHeader("Hue vs"))
 	{
-		if (ImGui::CollapsingHeader("Red"))
-		{
-			slider_changed_ |= slider_float_reset(vals_.hues[0], 0.0f, "Red Hue", &vals_.hues[0], -1, 1, "%.2f", 0,
-			                                      ImColor(224, 27, 89), ImColor(219, 106, 35));
-			slider_changed_ |= slider_float_reset(vals_.sats[0], 0.0f, "Red Saturation", &vals_.sats[0], -1, 1, "%.2f",
-			                                      0,
-			                                      ImColor(255, 255, 255), ImColor(227, 48, 48));
-			slider_changed_ |= slider_float_reset(vals_.lums[0], 0.0f, "Red Value", &vals_.lums[0], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Orange"))
-		{
-			slider_changed_ |= slider_float_reset(vals_.hues[1], 0.0f, "Orange Hue", &vals_.hues[1], -1, 1, "%.2f", 0,
-			                                      ImColor(224, 55, 25), ImColor(224, 171, 25));
-			slider_changed_ |= slider_float_reset(vals_.sats[1], 0.0f, "Orange Saturation", &vals_.sats[1], -1, 1,
-			                                      "%.2f", 0,
-			                                      ImColor(255, 255, 255), ImColor(219, 106, 35));
-			slider_changed_ |= slider_float_reset(vals_.lums[1], 0.0f, "Orange Value", &vals_.lums[1], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Yellow"))
-		{
-			slider_changed_ |= slider_float_reset(vals_.hues[2], 0.0f, "Yellow Hue", &vals_.hues[2], -1, 1, "%.2f", 0,
-			                                      ImColor(227, 140, 34), ImColor(192, 227, 34));
-			slider_changed_ |= slider_float_reset(vals_.sats[2], 0.0f, "Yellow Saturation", &vals_.sats[2], -1, 1,
-			                                      "%.2f", 0,
-			                                      ImColor(255, 255, 255), ImColor(227, 221, 34));
-			slider_changed_ |= slider_float_reset(vals_.lums[2], 0.0f, "Yellow Value", &vals_.lums[2], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Green"))
-		{
-			slider_changed_ |= slider_float_reset(vals_.hues[3], 0.0f, "Green Hue", &vals_.hues[3], -1, 1, "%.2f", 0,
-			                                      ImColor(227, 221, 34), ImColor(34, 227, 118));
-			slider_changed_ |= slider_float_reset(vals_.sats[3], 0.0f, "Green Saturation", &vals_.sats[3], -1, 1,
-			                                      "%.2f", 0,
-			                                      ImColor(255, 255, 255), ImColor(76, 227, 34));
-			slider_changed_ |= slider_float_reset(vals_.lums[3], 0.0f, "Green Value", &vals_.lums[3], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Cyan"))
-		{
-			slider_changed_ |= slider_float_reset(vals_.hues[4], 0.0f, "Cyan Hue", &vals_.hues[4], -1, 1, "%.2f", 0,
-			                                      ImColor(76, 227, 34), ImColor(34, 182, 227));
-			slider_changed_ |= slider_float_reset(vals_.sats[4], 0.0f, "Cyan Saturation", &vals_.sats[4], -1, 1, "%.2f",
-			                                      0,
-			                                      ImColor(255, 255, 255), ImColor(34, 227, 217));
-			slider_changed_ |= slider_float_reset(vals_.lums[4], 0.0f, "Cyan Value", &vals_.lums[4], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Blue"))
-		{
-			slider_changed_ |= slider_float_reset(vals_.hues[5], 0.0f, "Blue Hue", &vals_.hues[5], -1, 1, "%.2f", 0,
-			                                      ImColor(34, 166, 227), ImColor(114, 34, 227));
-			slider_changed_ |= slider_float_reset(vals_.sats[5], 0.0f, "Blue Saturation", &vals_.sats[5], -1, 1, "%.2f",
-			                                      0,
-			                                      ImColor(255, 255, 255), ImColor(34, 40, 227));
-			slider_changed_ |= slider_float_reset(vals_.lums[5], 0.0f, "Blue Value", &vals_.lums[5], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Purple"))
-		{
-			slider_changed_ |= slider_float_reset(vals_.hues[6], 0.0f, "Purple Hue", &vals_.hues[6], -1, 1, "%.2f", 0,
-			                                      ImColor(73, 34, 227), ImColor(185, 34, 227));
-			slider_changed_ |= slider_float_reset(vals_.sats[6], 0.0f, "Purple Saturation", &vals_.sats[6], -1, 1,
-			                                      "%.2f", 0,
-			                                      ImColor(255, 255, 255), ImColor(147, 34, 227));
-			slider_changed_ |= slider_float_reset(vals_.lums[6], 0.0f, "Purple Value", &vals_.lums[6], -1, 1);
-		}
-		ImGui::Separator();
-
-
-		if (ImGui::CollapsingHeader("Pink"))
-		{
-			slider_changed_ |= slider_float_reset(vals_.hues[7], 0.0f, "Pink Hue", &vals_.hues[7], -1, 1, "%.2f", 0,
-			                                      ImColor(156, 34, 227), ImColor(227, 34, 105));
-			slider_changed_ |= slider_float_reset(vals_.sats[7], 0.0f, "Pink Saturation", &vals_.sats[7], -1, 1, "%.2f",
-			                                      0,
-			                                      ImColor(255, 255, 255), ImColor(227, 34, 150));
-			slider_changed_ |= slider_float_reset(vals_.lums[7], 0.0f, "Pink Value", &vals_.lums[7], -1, 1);
-		}
+		ImGui::Text("Hue vs Hue");
+		slider_changed_ |= CurveEditor("Hue vs Hue", ImVec2(ImGui::GetWindowWidth() - 50, 150), 10, vals_.hue_hue, &selection_idx_[0], ImVec2(0,0), ImVec2(1, 1));
+		ImGui::Text("Hue vs Sat");
+		slider_changed_ |= CurveEditor("Hue vs Sat", ImVec2(ImGui::GetWindowWidth() - 50, 150), 10, vals_.hue_sat, &selection_idx_[1], ImVec2(0,0), ImVec2(1, 1));
+		ImGui::Text("Hue vs Lum");
+		slider_changed_ |= CurveEditor("Hue vs Lum", ImVec2(ImGui::GetWindowWidth() - 50, 150), 10, vals_.hue_lum, &selection_idx_[2], ImVec2(0,0), ImVec2(1, 1));
 	}
+	if (ImGui::CollapsingHeader("Sat vs"))
+	{
+		ImGui::Text("Sat vs Hue");
+		slider_changed_ |= CurveEditor("Hue vs Hue", ImVec2(ImGui::GetWindowWidth() - 50, 150), 10, vals_.sat_hue, &selection_idx_[3], ImVec2(0,0), ImVec2(1, 1));
+		ImGui::Text("Sat vs Sat");
+		slider_changed_ |= CurveEditor("Sat vs Sat", ImVec2(ImGui::GetWindowWidth() - 50, 150), 10, vals_.sat_sat, &selection_idx_[4], ImVec2(0,0), ImVec2(1, 1));
+		ImGui::Text("Sat vs Lum");
+		slider_changed_ |= CurveEditor("Sat vs Lum", ImVec2(ImGui::GetWindowWidth() - 50, 150), 10, vals_.sat_lum, &selection_idx_[5], ImVec2(0,0), ImVec2(1, 1));
+	}
+	if (ImGui::CollapsingHeader("Lum vs"))
+	{
+		ImGui::Text("Lum vs Hue");
+		slider_changed_ |= CurveEditor("Lum vs Hue", ImVec2(ImGui::GetWindowWidth() - 50, 150), 10, vals_.lum_hue, &selection_idx_[6], ImVec2(0,0), ImVec2(1, 1));
+		ImGui::Text("Lum vs Sat");
+		slider_changed_ |= CurveEditor("Lum vs Sat", ImVec2(ImGui::GetWindowWidth() - 50, 150), 10, vals_.lum_sat, &selection_idx_[7], ImVec2(0,0), ImVec2(1, 1));
+		ImGui::Text("Lum vs Lum");
+		slider_changed_ |= CurveEditor("Lum vs Lum", ImVec2(ImGui::GetWindowWidth() - 50, 150), 10, vals_.lum_lum, &selection_idx_[8], ImVec2(0,0), ImVec2(1, 1));
+	}
+
 
 
 	ImGui::Separator();
@@ -389,7 +325,6 @@ void Editor::set_from_config_file()
 	ini_writer_ = std::thread(&Editor::read_ini, this);
 }
 
-
 void Editor::reset()
 {
 	vals_.bw_label = BW_LABEL;
@@ -411,9 +346,17 @@ void Editor::reset()
 	std::fill_n(vals_.gain, 4, 1.0f);
 	std::fill_n(vals_.offset, 4, 1.0f);
 
-	std::fill_n(vals_.hues, 8, 0.0f);
-	std::fill_n(vals_.sats, 8, 0.0f);
-	std::fill_n(vals_.lums, 8, 0.0f);
+	reset_graph_values_flat(vals_.hue_hue, 10, 0.5);
+	reset_graph_values_flat(vals_.hue_sat, 10, 0.5);
+	reset_graph_values_flat(vals_.hue_lum, 10, 0.5);
+
+	reset_graph_values_flat(vals_.sat_hue, 10, 0.5);
+	reset_graph_values_flat(vals_.sat_sat, 10, 0.5);
+	reset_graph_values_flat(vals_.sat_lum, 10, 0.5);
+
+	reset_graph_values_flat(vals_.lum_hue, 10, 0.5);
+	reset_graph_values_flat(vals_.lum_sat, 10, 0.5);
+	reset_graph_values_linear(vals_.lum_lum, 10, 0.5);
 
 	vals_.sat_ref = 1;
 

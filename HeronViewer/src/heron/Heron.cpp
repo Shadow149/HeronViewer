@@ -289,7 +289,7 @@ void Heron::render()
 
 		im_gui_render();
 
-		*im_gui_render_time_ = "ImGui Render Time: " + std::to_string(glfwGetTime() - start);
+		*im_gui_render_time_ = "Panel Render Time: " + std::to_string(glfwGetTime() - start);
 
 		glfwSwapBuffers(window_);
 		glfwPollEvents();

@@ -28,5 +28,4 @@ bool spinner(const char* label, float radius, float thickness, const ImU32& colo
 // v1.00 - jari komppa's original
 static const float CurveTerminator = -10000;
 int CurveEditor(const char* label, const ImVec2& size, const int maxpoints, ImVec2* points, int* selection, const ImVec2& rangeMin = ImVec2(0, 0), const ImVec2& rangeMax = ImVec2(1, 1));
-float CurveValue(float p, int maxpoints, const ImVec2* points);
 float CurveValueSmooth(float p, int maxpoints, const ImVec2* points);

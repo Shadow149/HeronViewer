@@ -156,6 +156,10 @@ void Image::init()
 
 	shaderLoadTime = Overlay::register_metric();
 	imageRender = Overlay::register_metric();
+	uniformTime = Overlay::register_metric();
+	scopeRender = Overlay::register_metric();
+	hist_ssbo_time = Overlay::register_metric();
+	textureRender = Overlay::register_metric();
 }
 
 void Image::render_to_frame_buffer() const
@@ -242,10 +246,11 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 		return;
 	}
 
-	const double start = glfwGetTime();
+	double start = glfwGetTime();
 	render_to_frame_buffer();
 	*shaderLoadTime = "Framebuffer render time: " + std::to_string(glfwGetTime() - start);
 
+	start = glfwGetTime();
 	comp_texture_.bind();
 	texture_.bind();
 	comp_texture_small_.bind();
@@ -282,19 +287,30 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 	process_compute_shader_.setBool("noise_selected", vals_->noise_selected);
 	process_compute_shader_.setFloat("noise", vals_->noise);
 
-	process_compute_shader_.setFloatArray("hues", vals_->hues, 8);
-	process_compute_shader_.setFloatArray("sats", vals_->sats, 8);
-	process_compute_shader_.setFloatArray("lums", vals_->lums, 8);
+	process_compute_shader_.setVec2Array("hue_hue", vals_->hue_hue, 10);
+	process_compute_shader_.setVec2Array("hue_sat", vals_->hue_sat, 10);
+	process_compute_shader_.setVec2Array("hue_lum", vals_->hue_lum, 10);
+
+	process_compute_shader_.setVec2Array("sat_hue", vals_->sat_hue, 10);
+	process_compute_shader_.setVec2Array("sat_sat", vals_->sat_sat, 10);
+	process_compute_shader_.setVec2Array("sat_lum", vals_->sat_lum, 10);
+
+	process_compute_shader_.setVec2Array("lum_hue", vals_->lum_hue, 10);
+	process_compute_shader_.setVec2Array("lum_sat", vals_->lum_sat, 10);
+	process_compute_shader_.setVec2Array("lum_lum", vals_->lum_lum, 10);
 
 	process_compute_shader_.setFloatArray("sharp_kernel", vals_->sharp_kernel, 9);
 
 	process_compute_shader_.setFloatArray("cdf", cdf, 256);
 	process_compute_shader_.setBool("histogram_loaded", histogram_loaded);
 
+	*uniformTime = "Uniform set time: " + std::to_string(glfwGetTime() - start);
+
+	
 	const glm::ivec2 dispatch_size = h_image_.get_dispatch_size();
 	glDispatchCompute(dispatch_size.x, dispatch_size.y, 1);
 
-
+	start = glfwGetTime();
 	if (get_changed() || (!get_changed() && scope_rerender_))
 	{
 		glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
@@ -321,7 +337,10 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 
 		glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
+		start = glfwGetTime();
 		ssbo_.get_data(histogram);
+		*hist_ssbo_time = "Hist SSBO get time: " + std::to_string(glfwGetTime() - start);
+		
 		glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
 		if (!histogram_loaded)
 		{
@@ -340,6 +359,9 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 			scope_rerender_ = false;
 	}
 
+	*scopeRender = "Scope render time: " + std::to_string(glfwGetTime() - start);
+
+	start = glfwGetTime();
 	glMemoryBarrier(GL_ALL_BARRIER_BITS); // TODO optimise what barriers are needed
 
 	clear_background(black_bckgrd);
@@ -355,6 +377,7 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 
 	quad_.draw();
 	glBindTexture(GL_TEXTURE_2D, 0); //unbind
+	*textureRender = "Main texture render time: " + std::to_string(glfwGetTime() - start);
 
 	scrolling_ = false;
 	vals_->show_low_res = low_b4;

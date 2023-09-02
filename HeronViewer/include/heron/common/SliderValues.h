@@ -21,9 +21,17 @@ struct SliderValues
 	float gain[4];
 	float offset[4];
 
-	float hues[8];
-	float sats[8];
-	float lums[8];
+	ImVec2 hue_hue[10];
+	ImVec2 hue_sat[10];
+	ImVec2 hue_lum[10];
+
+	ImVec2 sat_hue[10];
+	ImVec2 sat_sat[10];
+	ImVec2 sat_lum[10];
+
+	ImVec2 lum_hue[10];
+	ImVec2 lum_sat[10];
+	ImVec2 lum_lum[10];
 
 	bool bw;
 	bool inv;
