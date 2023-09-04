@@ -30,8 +30,7 @@ public:
 				ImGuiWindowFlags_NoDecoration |
 				ImGuiWindowFlags_NoTitleBar |
 				ImGuiTabBarFlags_NoTooltip
-		)) {
-
+		)) {	
 			ImGui::GetStyle().CellPadding = ImVec2(0, 0);
 
 			if (!ImGui::IsWindowFocused())

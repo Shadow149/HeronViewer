@@ -185,7 +185,7 @@ void Heron::init_modules()
 	editor_panel_->register_module(new Preview(image_, "Preview"));
 	editor_panel_->register_module(new Curve(image_, "Curve"));
 	editor_panel_->register_module(new Console("Console"));
-	editor_panel_->register_module(new Overlay("Overlay"));
+	editor_panel_->register_module(new Overlay("Overlay", true));
 	editor_panel_->register_module(ExportDialog::instance());
 	editor_panel_->register_module(PreferencesDialog::instance());
 	editor_panel_->register_module(new Graph("Node Editor"));
@@ -248,7 +248,7 @@ void Heron::calc_time()
 	last_frame_ = current_frame;
 	*fps_metric_ = "Fps: " + std::to_string(1 / delta_time_);
 #ifdef SHOW_FPS
-	Overlay::updateFps(1.0f / deltaTime);
+	Overlay::update_fps(1.0f / delta_time_);
 #endif
 	*frame_time_ = "Frame Time: " + std::to_string(delta_time_);
 }

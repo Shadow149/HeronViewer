@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-//#define SHOW_FPS
+#define SHOW_FPS
 
 enum
 {
@@ -35,6 +35,9 @@ private:
 	static int fps_pointer_;
 	static std::string stats_[MAX_STATS];
 	static int pointer_;
-	ImGuiWindowFlags win_flags_ = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
-		ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+	ImGuiWindowFlags win_flags_ = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+	
+	const ImPlotAxisFlags axis_flags_ = ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_AutoFit;
+	const ImPlotFlags plot_flags_ = ImPlotFlags_NoTitle | ImPlotFlags_NoFrame | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoMouseText | ImPlotFlags_NoLegend | ImPlotFlags_AntiAliased;
+
 };

@@ -62,9 +62,9 @@ public:
 	virtual ~gl_texture() = default;
 	explicit gl_texture(const int binding) : binding_(binding){}
 
-	virtual void gen(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 4);
+	virtual void gen(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 0);
 
-	virtual void init(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 4);
+	virtual void init(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 0);
 
 	virtual void bind() const;
 
@@ -80,7 +80,7 @@ class gl_image final : public gl_texture
 public:
 	explicit gl_image(const int binding) : gl_texture(binding) {}
 
-	void init(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 4) override;
+	void init(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 0) override;
 
 	void get_data_via_pbo(const gl_pbo* p_pbo, void* dst) const;
 };
@@ -90,7 +90,7 @@ class gl_framebuffer_texture final : public gl_texture
 public:
 	explicit gl_framebuffer_texture(const int binding) : gl_texture(binding) {}
 
-	void init(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 4) override;
+	void init(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 0) override;
 	void bind() const override {}
 };
 
@@ -100,16 +100,16 @@ public:
 	virtual ~gl_framebuffer() = default;
 	explicit gl_framebuffer() : framebuffer_texture_(0) {}
 
-	void gen(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 4);
+	void gen(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 0);
 
-	void init_texture(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 4);
+	void init_texture(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 0);
 
 	GLuint get_texture_id() const { return framebuffer_texture_.get_id(); }
 
 	void bind() const;
 
 private:
-	void init(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 4);
+	void init(GLsizei w, GLsizei h, GLint internal_format, GLenum format, GLenum type, const void* data, GLint filter = GL_LINEAR, const int alignment = 0);
 
 private:
 	GLuint id_{};

@@ -16,6 +16,7 @@ bool hue_wheel(float thickness, int split, int width, ImVec2 pos, float angle = 
 bool hue_grid(const int width, const ImVec2 pos, ImU32 col_upr_left, ImU32 col_upr_right, ImU32 col_bot_right, ImU32 col_bot_left);
 bool spinner(const char* label, float radius, float thickness, const ImU32& color);
 
+void RenderDropShadow(ImTextureID tex_id, ImVec2 pos, ImVec2 size_vec, float size, ImU8 opacity);
 
 // [src] https://github.com/ocornut/imgui/issues/123
 // [src] https://github.com/ocornut/imgui/issues/55

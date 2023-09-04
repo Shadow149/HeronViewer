@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(Heron VERSION 0.1.0 LANGUAGES C CXX)
 
-# set(GCC_COVERAGE_LINK_FLAGS     "-lglfw3 -lGL -lX11 -lpthread -lXrandr -lXi -ldl -pthread -lopengl32 -lgdi32 -lstdc++fs")
-
 include(CTest)
 enable_testing()
 
@@ -24,6 +22,7 @@ include_directories(include/imnodes)
 include_directories(include/implot)
 include_directories(include/mini)
 include_directories(include/stb)
+include_directories(include/avir)
 
 file(GLOB_RECURSE heron_srcs
     "src/glad/*.cpp"
@@ -36,6 +35,9 @@ file(GLOB_RECURSE heron_srcs
     "src/stb/*.cpp"
 )
 
+include_directories(/usr/local/include)
+link_directories(/usr/local/lib)
+
 add_executable(Heron ${heron_srcs} src/glad/glad/glad.c)
 
 find_package(OpenGL REQUIRED)
@@ -45,6 +47,8 @@ include_directories( ${OPENGL_INCLUDE_DIRS} )
 target_link_libraries(Heron PRIVATE ${OPENGL_LIBRARIES})
 
 target_link_libraries(Heron PRIVATE "freeimage")
+
+target_link_libraries(Heron PRIVATE -lraw)
 
 find_package(glfw3 3.3 REQUIRED)
 target_link_libraries(Heron PRIVATE "glfw")

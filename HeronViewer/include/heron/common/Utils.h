@@ -11,16 +11,28 @@ void scalar_mul(float c, const float* ker, float* result, int size);
 void normal_mat(const float* ker, float* result, int size);
 std::string strip_extension(std::string s);
 ImVec2 get_resize_size(GLsizei width, GLsizei height);
+bool load_texture_from_file(const char* filename, GLuint* out_texture, int* out_width, int* out_height);
 template<typename T>
 void resize_image(GLsizei width, GLsizei height,
                   GLsizei max_side, T& target_width, T& target_height);
 template<typename T>
+void resize_image_max(GLsizei width, GLsizei height,
+                  GLsizei max_side, T& target_width, T& target_height);
+template<typename T>
 T min(T a, T b);
+template<typename T>
+T max(T a, T b);
 
 
 template<typename T>
 T min(T a, T b) {
 	if (a < b) return a;
+	return b;
+}
+
+template<typename T>
+T max(T a, T b) {
+	if (a > b) return a;
 	return b;
 }
 
@@ -43,4 +55,21 @@ void resize_image(const GLsizei width, const GLsizei height,
 		target_width = width;
 		target_height = height;
 	}
+}
+
+template<typename T>
+void resize_image_max(const GLsizei width, const GLsizei height,
+	const GLsizei max_side, T& target_width, T& target_height)
+{
+	if (width > height)
+	{
+		target_width = max(width, max_side);
+		target_height = static_cast<GLsizei>(target_width * (static_cast<double>(height) / width));
+	}
+	else
+	{
+		target_height = max(height, max_side);
+		target_width = static_cast<GLsizei>(target_height * (static_cast<double>(width) / height));
+	}
+	
 }

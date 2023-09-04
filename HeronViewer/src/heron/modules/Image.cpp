@@ -13,15 +13,15 @@ void Image::save_preview()
 	unsaved_ = false;
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	Console::log("Getting low res");
-	auto* export_data = static_cast<GLfloat*>(malloc(h_image_.get_lr_width() * h_image_.get_lr_height() * 4 * sizeof(GLfloat)));
-	memset(export_data, 0, h_image_.get_lr_width() * h_image_.get_lr_height() * 4);
+	auto* export_data = static_cast<GLfloat*>(malloc(h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat)));
+	memset(export_data, 0, h_image_.get_lr_width() * h_image_.get_lr_height() * 3);
 	const double start = glfwGetTime();
 	gl_pbo pbo{};
-	pbo.gen(h_image_.get_lr_width() * h_image_.get_lr_height() * 4 * sizeof(GLfloat));
+	pbo.gen(h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat));
 	comp_texture_small_.get_data_via_pbo(&pbo, export_data);
 	Console::log("Preview export time: %f", glfwGetTime() - start);
 
-	if (s_prev_write(export_data, catalog::instance()->get_current_item()->hprev_location, h_image_.get_lr_width() * h_image_.get_lr_height() * 4 * sizeof(GLfloat)) < 0)
+	if (s_prev_write(export_data, catalog::instance()->get_current_item()->hprev_location, h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat)) < 0)
 	{
 		Console::log("Unable to update preview...");
 	}
@@ -59,13 +59,13 @@ void Image::bind_image()
 	const unsigned char* img_data = h_image_.get_img_data();
 	const unsigned char* lr_img_data = h_image_.get_lr_img_data();
 
-	resize_image<float>(width, height, RENDER_WIDTH,
+	
+	resize_image_max<float>(width, height, RENDER_WIDTH,
 		preview_size_.x, preview_size_.y);
-
 
 	if (img_data)
 	{
-		texture_.init(width, height, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, img_data);
+		texture_.init(width, height, GL_RGB, GL_BGR, GL_UNSIGNED_BYTE, img_data);
 	}
 	else
 	{
@@ -73,7 +73,7 @@ void Image::bind_image()
 	}
 	if (lr_img_data)
 	{
-		texture_low_res_.init(lr_width, lr_height, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, lr_img_data);
+		texture_low_res_.init(lr_width, lr_height, GL_RGB, GL_BGR, GL_UNSIGNED_BYTE, lr_img_data);
 	}
 
 	framebuffer_.init_texture(static_cast<GLsizei>(preview_size_.x), static_cast<GLsizei>(preview_size_.y), GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
@@ -83,6 +83,8 @@ void Image::bind_image()
 
 	catalog::instance()->get_current_item()->hprev_width = lr_width;
 	catalog::instance()->get_current_item()->hprev_height = lr_height;
+
+	first_render_ = true;
 
 }
 
@@ -228,7 +230,17 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 
 	const bool low_b4 = vals_->show_low_res;
 
-	vals_->show_low_res |= scrolling_;
+	if (scrolling_) {
+		if (scrolling_time_ == 0)
+			scrolling_time_ = glfwGetTime();
+		if (glfwGetTime() - scrolling_time_ > .25) {
+			scrolling_ = false;
+			scrolling_time_ = 0;
+		}
+	}
+	
+	vals_->show_low_res |= scrolling_ | first_render_ | get_changed();
+	
 	if ((vals_->show_low_res) && !need_texture_change_)
 	{
 		need_texture_change_ = true;
@@ -379,7 +391,8 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 	glBindTexture(GL_TEXTURE_2D, 0); //unbind
 	*textureRender = "Main texture render time: " + std::to_string(glfwGetTime() - start);
 
-	scrolling_ = false;
+	// scrolling_ = false;
+	first_render_ = false;
 	vals_->show_low_res = low_b4;
 }
 

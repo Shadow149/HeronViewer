@@ -23,7 +23,9 @@ void Overlay::render()
 			ImGui::Text(stats_[i].c_str());
 		}
 #ifdef SHOW_FPS
-        if (ImPlot::BeginPlot("FPS")) {
+        if (ImPlot::BeginPlot("FPS", ImVec2(-1, 0), plot_flags_)) {
+			ImPlot::SetupAxes("x", "fps", axis_flags_, 0);
+			ImPlot::SetupAxesLimits(0, FPS_POINTS, 0, 100);
             ImPlot::PlotLine("Curve", fps_x_, fps_, FPS_POINTS);
             ImPlot::EndPlot();
         }

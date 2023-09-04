@@ -307,6 +307,24 @@ vec3 hsl2rgb(vec3 hsl){
 	}
 }
 
+vec3 rgb2hsv(vec3 c)
+{
+    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+vec3 hsv2rgb(vec3 c)
+{
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
 vec3 kelvinToRGB(float T) {
 	float x = 0;
 	float y = 0;
@@ -349,7 +367,7 @@ vec4 apply_offset(vec4 v) {
 }
 
 vec4 shift_hsl(vec4 v) {
-	vec3 hsv_ = rgb2hsl(v.xyz);
+	vec3 hsv_ = rgb2hsv(v.xyz);
 
 	// hue vs
 	hsv_.x = saturate_(hsv_.x + (SmoothCurveValue(hsv_.x, vec2(0), vec2(1), hue_hue) - 0.5) / 2); // scaling from -0.25 to 0.25
@@ -367,7 +385,7 @@ vec4 shift_hsl(vec4 v) {
 	hsv_.z = saturate_((SmoothCurveValue(hsv_.z, vec2(0), vec2(1), lum_lum))); // scaling from -1 to 1
 
 
-	return vec4(hsl2rgb(hsv_),1);
+	return vec4(hsv2rgb(hsv_),1);
 }
 
 
@@ -377,9 +395,9 @@ vec4 get_corrected_pixel(ivec2 coord) {
 		texColor = texelFetch(texture1_small, coord, 0);
 	else
 		texColor = texelFetch(texture1, coord, 0);
-    texColor.x = pow(texColor.x,2.5);
-    texColor.y = pow(texColor.y,2.5);
-    texColor.z = pow(texColor.z,2.5);
+    // texColor.x = pow(texColor.x,2.5);
+    // texColor.y = pow(texColor.y,2.5);
+    // texColor.z = pow(texColor.z,2.5);
 	return texColor;
 }
 
@@ -414,7 +432,7 @@ vec4 edit_channels(vec4 pix) {
 	float sat_after = hsv_after.y;
 	float sat_diff = sat_after - sat_before;
 	hsv_after.y = sat_before + (sat_diff * sat_ref);
-	return vec4(saturate_(lum),1);
+	return vec4(hsl2rgb(hsv_after), 1);
 }
 
 vec4 pixelTransform(vec4 pix, ivec2 coord, ivec2 tex_size) {

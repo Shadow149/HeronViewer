@@ -126,6 +126,9 @@ private:
 	bool need_texture_change_ = false;
 	bool scrolling_ = false;
 	bool unsaved_ = false;
+	bool first_render_ = true;
+	double scrolling_time_ = 0;
+
 
 	Shader shader_ = Shader("./shaders/texture.vert", "./shaders/texture.frag");
 	ComputeShader process_compute_shader_ = ComputeShader("./shaders/texture.comp");
