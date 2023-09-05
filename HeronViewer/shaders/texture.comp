@@ -45,6 +45,10 @@ uniform bool histogram_loaded;
 
 shared uint local_bins[256];
 
+uniform float dn_sigma;
+uniform float dn_ksigma;
+uniform float dn_thresh;
+
 uniform float yiq_y;
 uniform float yiq_z;
 uniform float xyz_y;
@@ -111,6 +115,68 @@ float rand( vec2 p )
     );
     return fract( cos( dot(p,K1) ) * 12345.6789 );
 }
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//  Copyright (c) 2018-2019 Michele Morrone
+//  All rights reserved.
+//
+//  https://michelemorrone.eu - https://BrutPitt.com
+//
+//  me@michelemorrone.eu - brutpitt@gmail.com
+//  twitter: @BrutPitt - github: BrutPitt
+//  
+//  https://github.com/BrutPitt/glslSmartDeNoise/
+//
+//  This software is distributed under the terms of the BSD 2-Clause license
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#define INV_SQRT_OF_2PI 0.39894228040143267793994605993439  // 1.0/SQRT_OF_2PI
+#define INV_PI 0.31830988618379067153776752674503
+
+//  smartDeNoise - parameters
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//  sampler2D tex     - sampler image / texture
+//  vec2 uv           - actual fragment coord
+//  float sigma  >  0 - sigma Standard Deviation
+//  float kSigma >= 0 - sigma coefficient 
+//      kSigma * sigma  -->  radius of the circular kernel
+//  float threshold   - edge sharpening threshold 
+
+vec4 smartDeNoise(sampler2D tex, ivec2 uv, float sigma, float kSigma, float threshold)
+{
+    float radius = round(kSigma*sigma);
+    float radQ = radius * radius;
+
+    float invSigmaQx2 = .5 / (sigma * sigma);      // 1.0 / (sigma^2 * 2.0)
+    float invSigmaQx2PI = INV_PI * invSigmaQx2;    // 1/(2 * PI * sigma^2)
+
+    float invThresholdSqx2 = .5 / (threshold * threshold);     // 1.0 / (sigma^2 * 2.0)
+    float invThresholdSqrt2PI = INV_SQRT_OF_2PI / threshold;   // 1.0 / (sqrt(2*PI) * sigma^2)
+
+    vec4 centrPx = texelFetch(tex,uv, 0); 
+
+    float zBuff = 0.0;
+    vec4 aBuff = vec4(0.0);
+    vec2 size = vec2(textureSize(tex, 0));
+
+    vec2 d;
+    for (d.x=-radius; d.x <= radius; d.x++) {
+        float pt = sqrt(radQ-d.x*d.x);       // pt = yRadius: have circular trend
+        for (d.y=-pt; d.y <= pt; d.y++) {
+            float blurFactor = exp( -dot(d , d) * invSigmaQx2 ) * invSigmaQx2PI;
+
+            vec4 walkPx =  texelFetch(tex,ivec2(uv+d/size), 0);
+            vec4 dC = walkPx-centrPx;
+            float deltaFactor = exp( -dot(dC, dC) * invThresholdSqx2) * invThresholdSqrt2PI * blurFactor;
+
+            zBuff += deltaFactor;
+            aBuff += deltaFactor*walkPx;
+        }
+    }
+    return aBuff/zBuff;
+}
+
 
 
 // [src] http://iquilezles.org/www/articles/minispline/minispline.htm
@@ -392,9 +458,9 @@ vec4 shift_hsl(vec4 v) {
 vec4 get_corrected_pixel(ivec2 coord) {
 	vec4 texColor = vec4(0);
 	if (low_res)
-		texColor = texelFetch(texture1_small, coord, 0);
+		texColor = smartDeNoise(texture1_small, coord, dn_sigma, dn_ksigma, dn_thresh);
 	else
-		texColor = texelFetch(texture1, coord, 0);
+		texColor = smartDeNoise(texture1, coord, dn_sigma, dn_ksigma, dn_thresh);
     // texColor.x = pow(texColor.x,2.5);
     // texColor.y = pow(texColor.y,2.5);
     // texColor.z = pow(texColor.z,2.5);

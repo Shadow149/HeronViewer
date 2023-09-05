@@ -1,4 +1,5 @@
 #include "image_entry.h"
+#include <filesystem>
 
 image_entry::image_entry(cat_item item) : 
 	data(item), 
@@ -31,4 +32,18 @@ bool image_entry::preview_updated() {
 
 bool image_entry::preview_needs_updating() const {
 	return data.hprev_needs_updating;
+}
+
+
+void image_entry::delete_preview()
+{
+	// TODO will segfault if done a second time
+	std::remove(data.hprev_location);
+	preview_outdated();
+}
+
+void image_entry::delete_config()
+{
+	std::remove(data.hconf_location);
+	preview_outdated();
 }

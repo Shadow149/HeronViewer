@@ -169,6 +169,16 @@ void Editor::render()
 
 	slider_changed_ |= slider_float_reset(vals_.sat, 0.0f, "Saturation", &vals_.sat, -1, 1);
 
+	ImGui::Separator();
+
+	ImGui::Text("Noise reduction");
+
+	slider_changed_ |= slider_float_reset(vals_.dn_sigma, 3.0f, "Standard Dev", &vals_.dn_sigma, 0, 10);
+	slider_changed_ |= slider_float_reset(vals_.dn_ksigma, 1.0f, "Sigma", &vals_.dn_ksigma, 0, 10);
+	slider_changed_ |= slider_float_reset(vals_.dn_thresh, 0.1f, "Edge thresh", &vals_.dn_thresh, 0, 1);
+
+	ImGui::Separator();
+
 	slider_changed_ |= slider_float_reset(vals_.blur, 1.0f, "Sharpen: Blur", &vals_.blur, 0, 5);
 	slider_changed_ |= slider_float_reset(vals_.sharp, 0.5f, "Sharpen: Sharp", &vals_.sharp, 0, 5);
 	if (vals_.sharp != vals_.p_sharp || vals_.blur != vals_.p_blur)
@@ -359,6 +369,10 @@ void Editor::reset()
 
 	vals_.noise_selected = false;
 	vals_.noise = 0;
+
+	vals_.dn_sigma = 3.0f;
+	vals_.dn_ksigma = 1.0f;
+	vals_.dn_thresh = 0.1f;
 
 	vals_.sharp = SHARP_DEFAULT;
 	vals_.p_sharp = SHARP_DEFAULT; // Prev sharp

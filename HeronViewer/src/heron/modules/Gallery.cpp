@@ -92,10 +92,19 @@ void Gallery::render_panel()
                 break;
             }
             else if (ImGui::MenuItem("Copy settings")) {
+                // TODO doesn't work if image loaded
                 catalog_->hconf_to_clipboard(catalog_->get_item(item.first));
             } 
             else if (ImGui::MenuItem("Paste settings")) {
                 catalog_->paste_hconf_clipboard(catalog_->get_item(item.first));
+            } else if (ImGui::MenuItem("Force reset settings")) {
+                // TODO doesn't update editor panel
+                catalog_->get_item(item.first)->delete_config();
+                catalog_->needs_updating();
+            }
+            else if (ImGui::MenuItem("Force reset preview")) {
+                catalog_->get_item(item.first)->delete_preview();
+                catalog_->needs_updating();
             }
             ImGui::EndPopup();
         }   

@@ -43,6 +43,10 @@ struct SliderValues
 	bool noise_selected;
 	float noise;
 
+	float dn_sigma;
+	float dn_ksigma;
+	float dn_thresh;
+
 	float sharp;
 	float p_sharp;
 	float blur;

@@ -232,6 +232,7 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 
 	const bool low_b4 = vals_->show_low_res;
 
+	// TODO THIS DOESN'T DO ANYTHING
 	if (scrolling_) {
 		if (scrolling_time_ == 0)
 			scrolling_time_ = glfwGetTime();
@@ -293,6 +294,10 @@ void Image::glrender(const bool* clip, const bool* b4, const bool* black_bckgrd)
 	process_compute_shader_.setFloat("tint", vals_->tint);
 	process_compute_shader_.setBool("clip", *clip);
 	process_compute_shader_.setBool("b4", *b4);
+
+	process_compute_shader_.setFloat("dn_sigma", vals_->dn_sigma);
+	process_compute_shader_.setFloat("dn_ksigma", vals_->dn_ksigma);
+	process_compute_shader_.setFloat("dn_thresh", vals_->dn_thresh);
 
 	process_compute_shader_.setFloat("yiq_y", vals_->yiq_y);
 	process_compute_shader_.setFloat("yiq_z", vals_->yiq_z);

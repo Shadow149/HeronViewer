@@ -11,6 +11,10 @@ public:
 	void preview_outdated();
 	bool preview_updated();
 	bool preview_needs_updating() const;
+
+	void delete_preview();
+	void delete_config();
+
 public:
 	cat_item data;
 private:
