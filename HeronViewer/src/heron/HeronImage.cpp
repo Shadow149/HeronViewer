@@ -4,7 +4,6 @@
 
 #include "cat_item.h"
 #include "Console.h"
-// #include "FreeImage.h"
 #include "Status.h"
 #include "stb_image_write.h"
 #include "stb_image.h"

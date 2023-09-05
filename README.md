@@ -18,11 +18,16 @@
 
 ## Contents
 
+- [Contents](#contents)
 - [About](#about)
 - [Features](#features)
 - [Usage](#usage)
+  - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Download](#download)
 - [Building from source](#building-from-source)
+  - [Requirements](#requirements)
+  - [Windows](#windows)
+  - [Linux](#linux)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
 
@@ -80,7 +85,7 @@ OpenGL 4+ - `apt-get install mesa-utils libglu1-mesa-dev freeglut3-dev mesa-comm
 
 GLFW 3 - `apt-get install libglew-dev libglfw3-dev libglm-dev`
 
-Freeimage - `apt-get install libfreeimage3 libfreeimage-dev`
+Libraw - see installation [docs](https://www.libraw.org/docs/Install-LibRaw-eng.html). The library must be installed locally (within `/usr/local/...`) for compilation to work.
 
 To build from root dir, run:
 ```bash

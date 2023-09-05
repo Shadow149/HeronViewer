@@ -10,6 +10,7 @@ struct cat_item
 	char hprev_location[255]; // preview image location (.hprev)
 	GLsizei hprev_width;
 	GLsizei hprev_height;
+	bool hprev_needs_updating;
 
 	char hconf_location[255]; // image config locatoin (.hconf)
 

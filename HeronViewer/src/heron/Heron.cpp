@@ -130,6 +130,7 @@ void Heron::unload_image() const
 	editor_->write_ini(); // TODO not threaded as a test
 	image_->unload();
 	editor_->reset();
+	catalog::instance()->unload_image();
 }
 
 void Heron::static_scroll_callback(GLFWwindow* window, const double xoffset, const double yoffset)

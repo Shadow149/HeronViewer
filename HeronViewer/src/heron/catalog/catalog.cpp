@@ -1,5 +1,6 @@
 #include "catalog.h"
 #include <limits>
+#include <filesystem>
 
 #include "Console.h"
 #include "serialise.h"
@@ -85,6 +86,18 @@ catalog::catalog()
 	read_catalog(); // TODO put this on a thread
 }
 
+void catalog::hconf_to_clipboard(const image_entry* item)
+{
+	hconf_loc_clipboard_ = item->data.hconf_location;
+}
+void catalog::paste_hconf_clipboard(image_entry* item)
+{
+	if (!hconf_loc_clipboard_) return;
+	std::filesystem::copy_file(hconf_loc_clipboard_, item->data.hconf_location, std::filesystem::copy_options::overwrite_existing);
+	item->preview_outdated();
+	updated_ = true;
+}
+
 std::size_t catalog::calc_item_hash(const cat_item item)
 {
 	return std::hash<std::string>{}(std::string(item.file_location));
@@ -97,12 +110,12 @@ std::size_t catalog::calc_item_hash(const image_entry item)
 
 bool catalog::add_image(const cat_item item)
 {
-	printf("Adding catalog item: %s\n", item.file_location);
-	loaded_image_ = calc_item_hash(item);
+	load_image(calc_item_hash(item));
 	if (catalog_map_.count(calc_item_hash(item))) {
 		Console::log("Item in catalog, no need to import...");
 		return false;
 	}
+	printf("Adding catalog item: %s\n", item.file_location);
 	updated_ = true;
 	catalog_map_.emplace(calc_item_hash(item), item);
 	return true;
@@ -115,6 +128,8 @@ bool catalog::remove_image(const std::size_t hash)
 		Console::log("Item not in catalog, cannot remove...");
 		return false;
 	}
+	std::remove(get_item(hash)->data.hconf_location);
+	std::remove(get_item(hash)->data.hprev_location);
 	updated_ = true;
 	catalog_map_.erase(hash);
     return true;
@@ -128,6 +143,8 @@ bool catalog::remove_image(image_entry item)
 		Console::log("Item not in catalog, cannot remove...");
 		return false;
 	}
+	std::remove(item.data.hconf_location);
+	std::remove(item.data.hprev_location);
 	updated_ = true;
 	catalog_map_.erase(item_key);
     return true;
@@ -152,9 +169,8 @@ std::map<std::size_t, image_entry> catalog::get()
 	return catalog_map_;
 }
 
-image_entry* catalog::get_current_item()
-{
-	auto pos = catalog_map_.find(loaded_image_);
+image_entry* catalog::get_item(const std::size_t key) {
+	auto pos = catalog_map_.find(key);
 	if (pos == catalog_map_.end()) {
     	printf("Cannot find catalog item...\n");
 		return nullptr;
@@ -163,15 +179,16 @@ image_entry* catalog::get_current_item()
 	}
 }
 
+image_entry* catalog::get_current_item()
+{
+	return get_item(loaded_image_);
+}
+
 cat_item* catalog::get_current_item_data()
 {
-	auto pos = catalog_map_.find(loaded_image_);
-	if (pos == catalog_map_.end()) {
-    	printf("Cannot find catalog item...\n");
-		return nullptr;
-	} else {
-		return &pos->second.data;
-	}
+	image_entry* item = get_item(loaded_image_);
+	if (!item) return nullptr;
+	return &item->data;
 }
 
 bool catalog::image_already_exists(const image_entry& item) const
@@ -180,9 +197,9 @@ bool catalog::image_already_exists(const image_entry& item) const
 }
 
 void catalog::unload_image() {
-	loaded_image_ = IMAGE_NOT_LOADED;
 	image_entry* current_item = get_current_item();
 	if (!current_item) return;
+	loaded_image_ = IMAGE_NOT_LOADED;
 	current_item->unload();
 }
 

@@ -46,7 +46,9 @@ void Image::unload()
 
 void Image::get_image()
 {
-	h_image_.load_image(*catalog::instance()->get_current_item_data());
+	cat_item* item = catalog::instance()->get_current_item_data();
+	if (!item) return;
+	h_image_.load_image(*item);
 	unsaved_ = true;
 }
 
@@ -83,7 +85,7 @@ void Image::bind_image()
 
 	catalog::instance()->get_current_item_data()->hprev_width = lr_width;
 	catalog::instance()->get_current_item_data()->hprev_height = lr_height;
-
+	if (catalog::instance()->get_current_item()->preview_updated()) catalog::instance()->needs_updating();
 	first_render_ = true;
 
 }

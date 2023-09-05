@@ -5,7 +5,7 @@ include(CTest)
 enable_testing()
 
 include_directories(include)
-include_directories(include/freeimage)
+# include_directories(include/freeimage)
 include_directories(include/glad)
 include_directories(include/glad/glad)
 include_directories(include/glad/KHR)
@@ -46,7 +46,7 @@ include_directories( ${OPENGL_INCLUDE_DIRS} )
 # export MESA_GL_VERSION_OVERRIDE=4.5
 target_link_libraries(Heron PRIVATE ${OPENGL_LIBRARIES})
 
-target_link_libraries(Heron PRIVATE "freeimage")
+# target_link_libraries(Heron PRIVATE "freeimage")
 
 target_link_libraries(Heron PRIVATE -lraw)
 

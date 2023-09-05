@@ -4,7 +4,6 @@
 #include "Overlay.h"
 #include "Status.h"
 #include "shader.h"
-#include "FreeImage.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

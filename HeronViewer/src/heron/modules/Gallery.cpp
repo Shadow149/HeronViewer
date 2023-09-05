@@ -53,7 +53,7 @@ void Gallery::render_panel()
     int n = 0;
     ImVec2 pos = ImGui::GetCurrentWindow()->DC.CursorPos;
     pos.y += ImGui::GetCurrentWindow()->DC.CurrLineTextBaseOffset - ImGui::GetStyle().FramePadding.y;
-    for (const auto& item : catalog_->get())
+    for (auto item : catalog_->get())
     {
         char buf[255];
         const image_entry img = item.second;
@@ -63,9 +63,10 @@ void Gallery::render_panel()
         auto prev_size = ImVec2(200, 200);
         resize_image(img.data.hprev_width, img.data.hprev_height, cell_size.x, prev_size.x, prev_size.y);
 
-        if (img.data.hprev_width < img.data.hprev_height) {
+        if (img.data.hprev_width < img.data.hprev_height || img.data.hprev_width <= cell_size.x) {
             image_x_offset = (cell_size.x - prev_size.x) / 2;
-        } else {
+        } 
+        if (img.data.hprev_width > img.data.hprev_height  || img.data.hprev_height <= cell_size.x) {
             image_y_offset = (cell_size.y - prev_size.y) / 2;
         }
 
@@ -90,8 +91,12 @@ void Gallery::render_panel()
                 ImGui::PopID();
                 break;
             }
-            else if (ImGui::MenuItem("Copy settings")) {} 
-            else if (ImGui::MenuItem("Past settings")) {}
+            else if (ImGui::MenuItem("Copy settings")) {
+                catalog_->hconf_to_clipboard(catalog_->get_item(item.first));
+            } 
+            else if (ImGui::MenuItem("Paste settings")) {
+                catalog_->paste_hconf_clipboard(catalog_->get_item(item.first));
+            }
             ImGui::EndPopup();
         }   
 
@@ -115,9 +120,18 @@ void Gallery::render_panel()
         ImGui::GetWindowDrawList()->AddImageRounded((ImTextureID)catalog_textures_[item.first], offset_pos, 
             ImVec2(offset_pos.x + prev_size.x, offset_pos.y + prev_size.y), ImVec2(0, 0), ImVec2(1, 1), ImGui::GetColorU32(ImVec4(1, 1, 1, 1)), 10);
         
+
         ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(offset_pos.x, offset_pos.y+10), 
             ImVec2(offset_pos.x + prev_size.x / 2, offset_pos.y+20+10), ImColor(0.0,0.0,0.0,0.5f), 10.0f, ImDrawCornerFlags_Right);
         ImGui::RenderTextClipped(ImVec2(offset_pos.x + 10, offset_pos.y+10), ImVec2(offset_pos.x + prev_size.x / 2, offset_pos.y+20+10), img.data.file_name, &img.data.file_name[(strlen(img.data.file_name))], NULL);
+
+        if (item.second.preview_needs_updating()) {
+            ImGui::GetWindowDrawList()->AddRectFilled(bb.Min, bb.Max, ImColor(0.0,0.0,0.0,0.5f), 10.0f);
+            ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(offset_pos.x, offset_pos.y+50), 
+                ImVec2(offset_pos.x + prev_size.x / 2, offset_pos.y+20+50), ImColor(0.0,0.0,0.0,0.5f), 10.0f, ImDrawCornerFlags_Right);
+            ImGui::RenderTextClipped(ImVec2(offset_pos.x + 10, offset_pos.y+50), ImVec2(offset_pos.x + prev_size.x / 2, offset_pos.y+20+50), "Preview needs updating", NULL, NULL);
+
+        }
 
         // char hash_buf[255];
         // sprintf(hash_buf, "%ld", item.first);
