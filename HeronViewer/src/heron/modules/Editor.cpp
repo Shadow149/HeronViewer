@@ -65,13 +65,6 @@ void Editor::init()
 
 void Editor::render()
 {
-	//if (img_->is_loaded() && !config_set_)
-	//{
-	//	config_set_ = true;
-	//	set_from_config_file();
-	//}
-
-
 	ImGui::Begin(name.c_str());
 	update_mouse_in_window();
 
@@ -93,7 +86,7 @@ void Editor::render()
 	ImGui::SameLine();
 	if (ImGui::Button("Export"))
 	{
-		ExportDialog::instance()->set_file_name(std::string(catalog::instance()->get_current_item()->file_name));
+		ExportDialog::instance()->set_file_name(std::string(catalog::instance()->get_current_item_data()->file_name));
 		ExportDialog::instance()->toggle_show();
 	}
 
@@ -266,18 +259,18 @@ void Editor::render()
 
 void Editor::write_ini()
 {
+	if (!catalog::instance()->is_image_loaded()) return;
 	ini_writing_ = true;
 
-
-	if (s_write(vals_, catalog::instance()->get_current_item()->hconf_location, sizeof(SliderValues)) < 0)
+	if (s_write(vals_, catalog::instance()->get_current_item_data()->hconf_location, sizeof(SliderValues)) < 0)
 	{
-		Console::log("Failed to write .hconf file to %s", catalog::instance()->get_current_item()->hconf_location);
+		Console::log("Failed to write .hconf file to %s", catalog::instance()->get_current_item_data()->hconf_location);
 		ini_writing_ = false;
 		return;
 	}
 
 	Status::set_status("Saved!");
-	Console::log("Written to .hconf file %s", catalog::instance()->get_current_item()->hconf_location);
+	Console::log("Written to .hconf file %s", catalog::instance()->get_current_item_data()->hconf_location);
 
 	ini_writing_ = false;
 }
@@ -288,9 +281,9 @@ void Editor::read_ini()
 
 	SliderValues n_vals{};
 
-	if (s_read<SliderValues>(n_vals, catalog::instance()->get_current_item()->hconf_location) < 0)
+	if (s_read<SliderValues>(n_vals, catalog::instance()->get_current_item_data()->hconf_location) < 0)
 	{
-		Console::log("Failed to read .hconf file at %s", catalog::instance()->get_current_item()->hconf_location);
+		Console::log("Failed to read .hconf file at %s", catalog::instance()->get_current_item_data()->hconf_location);
 		Status::set_status("Read settings unsuccessfully :(");
 		ini_reading_ = false;
 		return;
@@ -307,7 +300,7 @@ void Editor::read_ini()
 
 void Editor::update_config_file()
 {
-	if (!im_loaded_ || ini_reading_ || ini_writing_)
+	if (!catalog::instance()->is_image_loaded() || ini_reading_ || ini_writing_)
 		return;
 	ini_writer_ = std::thread(&Editor::write_ini, this);
 }

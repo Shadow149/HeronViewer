@@ -35,7 +35,7 @@ public:
 	void save_image() const;
 	bool write_image_caches() const;
 	void set_image_path(const std::string& s);
-	void load_item(cat_item item) const;
+	void load_item(const cat_item item) const;
 
 private:
 	void process_input(GLFWwindow* window);

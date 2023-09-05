@@ -21,7 +21,7 @@ void Image::save_preview()
 	comp_texture_small_.get_data_via_pbo(&pbo, export_data);
 	Console::log("Preview export time: %f", glfwGetTime() - start);
 
-	if (s_prev_write(export_data, catalog::instance()->get_current_item()->hprev_location, h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat)) < 0)
+	if (s_prev_write(export_data, catalog::instance()->get_current_item_data()->hprev_location, h_image_.get_lr_width() * h_image_.get_lr_height() * 3 * sizeof(GLfloat)) < 0)
 	{
 		Console::log("Unable to update preview...");
 	}
@@ -30,7 +30,7 @@ void Image::save_preview()
 
 void Image::unload()
 {
-
+	if (!is_loaded()) return;
 	if (unsaved_)
 		save_preview();
 
@@ -46,7 +46,7 @@ void Image::unload()
 
 void Image::get_image()
 {
-	h_image_.load_image(*catalog::instance()->get_current_item());
+	h_image_.load_image(*catalog::instance()->get_current_item_data());
 	unsaved_ = true;
 }
 
@@ -81,8 +81,8 @@ void Image::bind_image()
 	comp_texture_.init(width, height, GL_RGBA32F, GL_RGBA, GL_FLOAT, nullptr);
 	comp_texture_small_.init(lr_width, lr_height, GL_RGBA32F, GL_RGBA, GL_FLOAT, nullptr);
 
-	catalog::instance()->get_current_item()->hprev_width = lr_width;
-	catalog::instance()->get_current_item()->hprev_height = lr_height;
+	catalog::instance()->get_current_item_data()->hprev_width = lr_width;
+	catalog::instance()->get_current_item_data()->hprev_height = lr_height;
 
 	first_render_ = true;
 

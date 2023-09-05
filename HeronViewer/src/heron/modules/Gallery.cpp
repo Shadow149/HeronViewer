@@ -28,7 +28,7 @@ void Gallery::init_panel()
     for (const auto& item : catalog_->get())
     {
         GLuint id;
-        if (!load_texture_from_preview(item.second, &id)) continue;
+        if (!load_texture_from_preview(item.second.data, &id)) continue;
         catalog_textures_[item.first] = id;
     }
 }
@@ -56,14 +56,14 @@ void Gallery::render_panel()
     for (const auto& item : catalog_->get())
     {
         char buf[255];
-        const cat_item c_item = item.second;
+        const image_entry img = item.second;
         float image_x_offset = 0;
         float image_y_offset = 0;
 
         auto prev_size = ImVec2(200, 200);
-        resize_image(c_item.hprev_width, c_item.hprev_height, cell_size.x, prev_size.x, prev_size.y);
+        resize_image(img.data.hprev_width, img.data.hprev_height, cell_size.x, prev_size.x, prev_size.y);
 
-        if (c_item.hprev_width < c_item.hprev_height) {
+        if (img.data.hprev_width < img.data.hprev_height) {
             image_x_offset = (cell_size.x - prev_size.x) / 2;
         } else {
             image_y_offset = (cell_size.y - prev_size.y) / 2;
@@ -74,24 +74,42 @@ void Gallery::render_panel()
         ImU8 drop_shadow_op = 50;
         float drop_shadow_size = 25.0f;
 
-        ImGui::PushID(n);
         ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y));
         ImVec2 offset_pos = ImVec2(pos.x + image_x_offset, pos.y + image_y_offset);
-        
+        ImRect bb(offset_pos, ImVec2(offset_pos.x + prev_size.x, offset_pos.y + prev_size.y));
+        ImGui::ItemSize(bb);
+        if (!ImGui::ItemAdd(bb, NULL))
+            continue;
+            
+        ImGui::PushID(n);
+        if (ImGui::BeginPopupContextItem(buf)){
+            if (ImGui::MenuItem("Remove")) {
+                catalog_->remove_image(item.first);
+                catalog_textures_.erase(item.first);
+                ImGui::EndPopup();
+                ImGui::PopID();
+                break;
+            }
+            else if (ImGui::MenuItem("Copy settings")) {} 
+            else if (ImGui::MenuItem("Past settings")) {}
+            ImGui::EndPopup();
+        }   
+
         bool hovered, held;
         bool pressed = ImGui::ButtonBehavior(ImRect(offset_pos, ImVec2(offset_pos.x + prev_size.x, offset_pos.y + prev_size.y)), 
                 ImGui::GetCurrentWindow()->GetID(buf), &hovered, &held, ImGuiButtonFlags_MouseButtonLeft);
         if (hovered && ImGui::IsMouseClicked(0)){
             // selected_item_ = n;
-            h_window_->load_item(c_item);
+            h_window_->load_item(img.data);
 		}
 
         if (hovered) {
             drop_shadow_op = 100;
             drop_shadow_size = 75.0f;
+            
         }
+        
 
-        ImGui::ItemSize(ImRect(offset_pos, ImVec2(offset_pos.x + prev_size.x, offset_pos.y + prev_size.y)));
         RenderDropShadow((ImTextureID)shadow_img_, offset_pos, prev_size, drop_shadow_size, drop_shadow_op);
 
         ImGui::GetWindowDrawList()->AddImageRounded((ImTextureID)catalog_textures_[item.first], offset_pos, 
@@ -99,7 +117,7 @@ void Gallery::render_panel()
         
         ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(offset_pos.x, offset_pos.y+10), 
             ImVec2(offset_pos.x + prev_size.x / 2, offset_pos.y+20+10), ImColor(0.0,0.0,0.0,0.5f), 10.0f, ImDrawCornerFlags_Right);
-        ImGui::RenderTextClipped(ImVec2(offset_pos.x + 10, offset_pos.y+10), ImVec2(offset_pos.x + prev_size.x / 2, offset_pos.y+20+10), c_item.file_name, &c_item.file_name[(strlen(c_item.file_name))], NULL);
+        ImGui::RenderTextClipped(ImVec2(offset_pos.x + 10, offset_pos.y+10), ImVec2(offset_pos.x + prev_size.x / 2, offset_pos.y+20+10), img.data.file_name, &img.data.file_name[(strlen(img.data.file_name))], NULL);
 
         // char hash_buf[255];
         // sprintf(hash_buf, "%ld", item.first);
@@ -119,6 +137,8 @@ void Gallery::render_panel()
             pos.x = cell_padding_;
             pos.y += cell_size.y + cell_padding_;
         }
+
+        
     }
 
 }

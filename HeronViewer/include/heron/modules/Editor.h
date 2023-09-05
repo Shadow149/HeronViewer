@@ -63,11 +63,6 @@ public:
 		config_set_ = false;
 	}
 
-	void loaded(const bool l)
-	{
-		im_loaded_ = l;
-	}
-
 	void update_config_file();
 	void undo();
 	void write_ini();
@@ -99,6 +94,5 @@ private:
 
 	bool ini_writing_ = false;
 	bool ini_reading_ = false;
-	bool im_loaded_ = false;
 	bool config_set_ = false;
 };

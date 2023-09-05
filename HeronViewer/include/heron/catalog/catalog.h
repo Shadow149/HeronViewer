@@ -1,28 +1,39 @@
 #pragma once
 #include <map>
 
-#include "cat_item.h"
+#include "image_entry.h"
 
+#define IMAGE_NOT_LOADED -1
 
 class catalog
 {
 public:
 	static catalog* instance();
-	bool add_image(cat_item item);
+	std::map<std::size_t, image_entry> get();
+
+	bool add_image(const cat_item item);
+	bool remove_image(const std::size_t hash);
+	bool remove_image(const image_entry item);
+	static std::size_t calc_item_hash(const cat_item item);
+	static std::size_t calc_item_hash(const image_entry item);
+
 	int write_catalog() const;
-	std::map<std::size_t, cat_item> get();
-	cat_item* get_current_item();
-	bool image_already_loaded(const cat_item& item) const;
-	static std::size_t calc_item_hash(cat_item item);
+
+	image_entry* get_current_item();
+	cat_item* get_current_item_data();
+	bool image_already_exists(const image_entry& item) const;
+	bool is_image_loaded() const { return loaded_image_ != IMAGE_NOT_LOADED; }
+	void unload_image();
+	void load_image(const std::size_t hash);
 
 private:
 	catalog();
 	int read_catalog();
 private:
 	static catalog* instance_;
-	std::map<std::size_t, cat_item> catalog_map_;
-	std::size_t current_item_key_;
+	std::map<std::size_t, image_entry> catalog_map_;
 	bool updated_ = false;
+	std::size_t loaded_image_ = -1;
 
 	const char* CATALOG_LOCATION = "HeronCatalog/HeronCatalog.hcatalog";
 };

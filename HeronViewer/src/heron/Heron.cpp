@@ -97,16 +97,11 @@ void Heron::load_item(const cat_item item) const
 	editor_panel_->focus = true;
 
 	ImGui::SetWindowFocus(editor_panel_->name.c_str());
-	if (!catalog::instance()->image_already_loaded(item)) {
-		// TODO move image loaded status to somewhere else...
-		if (image_->is_loaded())
-			unload_image();
+	if (!catalog::instance()->image_already_exists(item)) {
+		unload_image();
 		catalog::instance()->add_image(item);
 
 		image_->get_image();
-		//editor_->update_file(); // TODO probably not needed
-
-		editor_->loaded(true); // TODO is this needed??
 		editor_->set_from_config_file();
 	}
 
@@ -130,11 +125,11 @@ void Heron::load_image(const std::string& file_path, const std::string& file_nam
 
 void Heron::unload_image() const
 {
-	//editor_->update_config_file();
+	if (!catalog::instance()->is_image_loaded())
+		return;
 	editor_->write_ini(); // TODO not threaded as a test
 	image_->unload();
 	editor_->reset();
-	editor_->loaded(false);
 }
 
 void Heron::static_scroll_callback(GLFWwindow* window, const double xoffset, const double yoffset)

@@ -662,38 +662,38 @@ int CurveEditor(const char* label, const ImVec2& size, const int maxpoints, ImVe
     // ImGui::RenderTextClipped(ImVec2(bb.Min.x, bb.Min.y + style.FramePadding.y), bb.Max, str, NULL, NULL, ImVec2(0.5f, 0.5f));
 
     // buttons; @todo: mirror, smooth, tessellate
-    // if (ImGui::BeginPopupContextItem(label))
-    // {
-    //     if (ImGui::Selectable("Reset"))
-    //     {
-    //         points[0] = rangeMin;
-    //         points[1] = rangeMax;
-    //         points[2].x = CurveTerminator;
-    //     }
-    //     if (ImGui::Selectable("Flip"))
-    //     {
-    //         for (i = 0; i < pointCount; ++i)
-    //         {
-    //             const float yVal = 1.0f - ImRemap(points[i].y, rangeMin.y, rangeMax.y, 0, 1);
-    //             points[i].y = ImRemap(yVal, 0, 1, rangeMin.y, rangeMax.y);
-    //         }
-    //     }
-    //     if (ImGui::Selectable("Mirror"))
-    //     {
-    //         for (int i = 0, j = pointCount - 1; i < j; i++, j--)
-    //         {
-    //             ImSwap(points[i], points[j]);
-    //         }
-    //         for (i = 0; i < pointCount; ++i)
-    //         {
-    //             const float xVal = 1.0f - ImRemap(points[i].x, rangeMin.x, rangeMax.x, 0, 1);
-    //             points[i].x = ImRemap(xVal, 0, 1, rangeMin.x, rangeMax.x);
-    //         }
-    //     }
+    if (ImGui::BeginPopupContextItem(label))
+    {
+        if (ImGui::Selectable("Reset"))
+        {
+            points[0] = rangeMin;
+            points[1] = rangeMax;
+            points[2].x = CurveTerminator;
+        }
+        if (ImGui::Selectable("Flip"))
+        {
+            for (i = 0; i < pointCount; ++i)
+            {
+                const float yVal = 1.0f - ImRemap(points[i].y, rangeMin.y, rangeMax.y, 0, 1);
+                points[i].y = ImRemap(yVal, 0, 1, rangeMin.y, rangeMax.y);
+            }
+        }
+        if (ImGui::Selectable("Mirror"))
+        {
+            for (int i = 0, j = pointCount - 1; i < j; i++, j--)
+            {
+                ImSwap(points[i], points[j]);
+            }
+            for (i = 0; i < pointCount; ++i)
+            {
+                const float xVal = 1.0f - ImRemap(points[i].x, rangeMin.x, rangeMax.x, 0, 1);
+                points[i].x = ImRemap(xVal, 0, 1, rangeMin.x, rangeMax.x);
+            }
+        }
     
 
-    //     ImGui::EndPopup();
-    // }
+        ImGui::EndPopup();
+    }
 
     ImGui::PopID();
 
